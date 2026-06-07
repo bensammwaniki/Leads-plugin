@@ -276,7 +276,6 @@ function mc_leads_engine_boot() {
     if (is_admin()) {
         require_once MC_LEADS_ENGINE_PATH . 'admin/admin-menu.php';
         require_once MC_LEADS_ENGINE_PATH . 'admin/admin-app.php';
-        require_once MC_LEADS_ENGINE_PATH . 'admin/admin-surveys.php';
         require_once MC_LEADS_ENGINE_PATH . 'admin/admin-leads.php';
         require_once MC_LEADS_ENGINE_PATH . 'admin/admin-analytics.php';
         require_once MC_LEADS_ENGINE_PATH . 'admin/admin-settings.php';

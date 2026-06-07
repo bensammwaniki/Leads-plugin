@@ -1736,6 +1736,11 @@ select.field-input,
 }
 
 /* ── Option Builder in Question Settings ──────────────────── */
+[data-option-builder].rule-grid {
+  display: block !important;
+  width: 100% !important;
+}
+
 [data-option-builder] .options-list {
   display: grid !important;
   grid-template-columns: repeat(auto-fit, minmax(max(280px, 48%), 1fr)) !important;
