@@ -1,9 +1,13 @@
 <?php
 /*
 Plugin Name: MC Leads Engine
+Plugin URI: https://memoriescreative.com/
 Description: Modular survey, pricing, lead capture, CF7 integration, analytics, and shortcode engine.
 Version: 1.1.0
-Author: OpenAI
+Author: Bensam Mwaniki
+Author URI: https://memoriescreative.com/
+Requires at least: 5.8
+Requires PHP: 7.4
 */
 
 if (!defined('ABSPATH')) {

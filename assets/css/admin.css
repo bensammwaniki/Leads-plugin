@@ -2502,6 +2502,7 @@ select.field-input,
 .mc-analytics-filter-form input[type="number"] {
   height: 30px !important;
   min-height: 30px !important;
+  min-width: 10rem;
   font-size: 11px !important;
   padding: 4px 8px !important;
   border: 1px solid var(--mc-border) !important;
