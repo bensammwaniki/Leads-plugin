@@ -2291,7 +2291,7 @@ select.field-input,
 .survey-detail-panel textarea.field-input {
   width: 100% !important;
   max-width: 100% !important;
-  min-height: 250px !important;
+  min-height: 120px !important;
   padding: 12px 14px !important;
   font-size: 13px !important;
   line-height: 1.5 !important;
