@@ -16,7 +16,7 @@
   border: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
-  padding: 24px !important;
+  padding: 20px !important;
   color: #1f2937 !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -31,7 +31,7 @@
 }
 
 .mc-leads-engine-description {
-  margin: 0 0 24px 0 !important;
+  margin: 0 0 16px 0 !important;
   color: #4b5563 !important;
   font-size: 14px !important;
   line-height: 1.5 !important;
@@ -39,7 +39,7 @@
 
 /* Progress Tracker */
 .mc-leads-engine-meta {
-  margin-bottom: 24px !important;
+  margin-bottom: 16px !important;
 }
 
 .mc-progress-track {
@@ -98,11 +98,10 @@
 
 /* Question Section */
 .mc-question {
-  margin: 0 0 24px 0 !important;
-  padding: 20px !important;
+  margin: 0 0 16px 0 !important;
+  padding: 16px !important;
   border-radius: 8px !important;
   background: #f8fafc !important;
-  /* Original light blue-gray background */
 }
 
 .mc-question-label {
@@ -123,7 +122,7 @@
   display: block !important;
   font-size: 13.5px !important;
   color: #4b5563 !important;
-  margin-bottom: 16px !important;
+  margin-bottom: 12px !important;
 }
 
 /* Input Fields */
@@ -196,10 +195,10 @@
 .mc-option {
   display: flex !important;
   align-items: center !important;
-  gap: 14px !important;
+  gap: 12px !important;
   border: 0px solid #e2e8f0 !important;
   border-radius: 8px !important;
-  padding: 14px 18px !important;
+  padding: 12px 14px !important;
   background: #ffffff !important;
   cursor: pointer !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -458,12 +457,63 @@
 /* Responsive Rules */
 @media (max-width: 640px) {
   .mc-leads-engine-card {
-    padding: 20px !important;
+    padding: 12px 8px !important;
+  }
+
+  .mc-leads-engine-description {
+    margin-bottom: 12px !important;
+    font-size: 13px !important;
+  }
+
+  .mc-leads-engine-meta {
+    margin-bottom: 12px !important;
+  }
+
+  .mc-question {
+    padding: 12px 10px !important;
+    margin-bottom: 12px !important;
+    border-radius: 6px !important;
+  }
+
+  .mc-question-title {
+    font-size: 14.5px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .mc-question-desc {
+    font-size: 12.5px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .mc-option {
+    padding: 10px 10px !important;
+    gap: 8px !important;
+    border-radius: 6px !important;
+  }
+
+  .mc-option-title {
+    font-size: 11px !important;
+  }
+
+  .mc-option-desc {
+    font-size: 12px !important;
+  }
+
+  .mc-option input[type="radio"],
+  .mc-option input[type="checkbox"] {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .mc-option input[type="radio"]:checked::after {
+    width: 8px !important;
+    height: 8px !important;
   }
 
   .mc-leads-engine-nav {
     flex-direction: column !important;
-    gap: 10px !important;
+    gap: 8px !important;
+    margin-top: 16px !important;
   }
 
   .mc-leads-engine button,
@@ -471,10 +521,23 @@
   .mc-leads-engine .button-primary,
   .mc-leads-engine .mc-submit-survey {
     width: 100% !important;
+    height: 38px !important;
+    font-size: 13px !important;
+    padding: 8px 16px !important;
   }
 
   .mc-option-list.mc-option-grid-2 {
     grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .mc-leads-engine-final {
+    padding: 16px 8px !important;
+  }
+
+  .mc-final-summary {
+    padding: 10px !important;
+    margin-bottom: 10px !important;
   }
 }
 
