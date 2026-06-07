@@ -1699,8 +1699,8 @@ select.field-input,
 
 /* ── Option Builder in Question Settings ──────────────────── */
 [data-option-builder] .options-list {
-  display: flex !important;
-  flex-direction: column !important;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(max(280px, 48%), 1fr)) !important;
   gap: 12px !important;
   margin-bottom: 12px !important;
   width: 100% !important;
@@ -1715,7 +1715,7 @@ select.field-input,
   border: 1px solid var(--mc-border) !important;
   border-radius: var(--mc-radius) !important;
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03) !important;
-  margin: 0 0 10px 0 !important;
+  margin: 0 !important;
 }
 
 [data-option-builder] .rule-card[data-option-row] .rule-info {
