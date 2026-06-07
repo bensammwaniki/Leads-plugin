@@ -1685,6 +1685,11 @@ select.field-input,
   margin-top: 4px !important;
 }
 
+[data-option-builder] .rule-card[data-option-row] .description-field-wrap {
+  grid-column: span 2 !important;
+  margin-top: 4px !important;
+}
+
 [data-option-builder] .field-input,
 [data-option-builder] input[type="text"],
 [data-option-builder] input[type="number"] {

@@ -60,8 +60,8 @@ if ($question_type === 'cf7' || strpos($question_title, '[contact-form-7') !== f
                 <?php foreach ($options as $option) : 
                     $opt_label = $option['label'];
                     $opt_title = $opt_label;
-                    $opt_desc = '';
-                    if (strpos($opt_label, '||') !== false) {
+                    $opt_desc = $option['description'] ?? '';
+                    if (empty($opt_desc) && strpos($opt_label, '||') !== false) {
                         $parts = explode('||', $opt_label, 2);
                         $opt_title = trim($parts[0]);
                         $opt_desc = trim($parts[1]);
@@ -85,8 +85,8 @@ if ($question_type === 'cf7' || strpos($question_title, '[contact-form-7') !== f
                 <?php foreach ($options as $option) : 
                     $opt_label = $option['label'];
                     $opt_title = $opt_label;
-                    $opt_desc = '';
-                    if (strpos($opt_label, '||') !== false) {
+                    $opt_desc = $option['description'] ?? '';
+                    if (empty($opt_desc) && strpos($opt_label, '||') !== false) {
                         $parts = explode('||', $opt_label, 2);
                         $opt_title = trim($parts[0]);
                         $opt_desc = trim($parts[1]);

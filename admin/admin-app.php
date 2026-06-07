@@ -670,6 +670,10 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                                                              <label class="option-field-label"><?php esc_html_e('Value', 'mc-leads-engine'); ?></label>
                                                                              <input class="field-input" type="text" name="options[<?php echo esc_attr($i); ?>][value]" placeholder="<?php esc_attr_e('Value', 'mc-leads-engine'); ?>" value="<?php echo esc_attr($opt['value'] ?? ''); ?>">
                                                                          </div>
+                                                                         <div class="option-field-wrap description-field-wrap">
+                                                                             <label class="option-field-label"><?php esc_html_e('Description', 'mc-leads-engine'); ?></label>
+                                                                             <input class="field-input" type="text" name="options[<?php echo esc_attr($i); ?>][description]" placeholder="<?php esc_attr_e('Description (optional)', 'mc-leads-engine'); ?>" value="<?php echo esc_attr($opt['description'] ?? ''); ?>">
+                                                                         </div>
                                                                          <div class="rule-field-grid">
                                                                              <div class="option-field-wrap">
                                                                                  <label class="option-field-label"><?php esc_html_e('Price', 'mc-leads-engine'); ?></label>
@@ -702,6 +706,10 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                                                      <div class="option-field-wrap">
                                                                          <label class="option-field-label"><?php esc_html_e('Value', 'mc-leads-engine'); ?></label>
                                                                          <input class="field-input" type="text" name="options[__INDEX__][value]" placeholder="<?php esc_attr_e('Value', 'mc-leads-engine'); ?>" value="">
+                                                                     </div>
+                                                                     <div class="option-field-wrap description-field-wrap">
+                                                                         <label class="option-field-label"><?php esc_html_e('Description', 'mc-leads-engine'); ?></label>
+                                                                         <input class="field-input" type="text" name="options[__INDEX__][description]" placeholder="<?php esc_attr_e('Description (optional)', 'mc-leads-engine'); ?>" value="">
                                                                      </div>
                                                                      <div class="rule-field-grid">
                                                                          <div class="option-field-wrap">

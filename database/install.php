@@ -48,6 +48,7 @@ function mc_leads_engine_install() {
         question_id bigint(20) unsigned NOT NULL,
         label varchar(255) NOT NULL,
         value varchar(255) NOT NULL,
+        description text NULL,
         price_impact decimal(12,2) NOT NULL DEFAULT 0,
         score_impact int(11) NOT NULL DEFAULT 0,
         order_index int(11) NOT NULL DEFAULT 0,

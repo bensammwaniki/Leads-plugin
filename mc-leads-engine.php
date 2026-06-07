@@ -3,7 +3,7 @@
 Plugin Name: MC Leads Engine
 Plugin URI: https://memoriescreative.com/
 Description: Modular survey, pricing, lead capture, CF7 integration, analytics, and shortcode engine.
-Version: 1.1.0
+Version: 1.2.0
 Author: Bensam Mwaniki
 Author URI: https://memoriescreative.com/
 Requires at least: 5.8
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('MC_LEADS_ENGINE_VERSION', '1.1.0');
+define('MC_LEADS_ENGINE_VERSION', '1.2.0');
 define('MC_LEADS_ENGINE_FILE', __FILE__);
 define('MC_LEADS_ENGINE_PATH', plugin_dir_path(__FILE__));
 define('MC_LEADS_ENGINE_URL', plugin_dir_url(__FILE__));
