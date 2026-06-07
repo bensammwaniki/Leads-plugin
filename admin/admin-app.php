@@ -540,7 +540,6 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                             <div class="section-item<?php echo absint($section['id']) === $selected_section_id ? ' active' : ''; ?>" data-section-id="<?php echo absint($section['id']); ?>">
                                                 <div class="section-left">
                                                     <a class="section-link" href="<?php echo esc_url(mc_leads_engine_admin_selected_url('builder', $selected_survey_id, $section['id'], 0)); ?>">
-                                                        <span class="dashicons dashicons-portfolio"></span>
                                                         <span class="section-title-text"><?php echo esc_html($section['title']); ?></span>
                                                     </a>
                                                     <form method="post" action="<?php echo esc_url(admin_url('admin.php')); ?>" class="section-title-form">
@@ -556,7 +555,6 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                                 </div>
                                                 <div class="section-meta">
                                                     <button type="button" class="section-edit-trigger" aria-label="<?php esc_attr_e('Edit section title', 'mc-leads-engine'); ?>"><span class="dashicons dashicons-edit"></span></button>
-                                                    <span class="section-count"><?php echo esc_html(count($section['questions'] ?? array())); ?></span>
                                                     <form method="post" action="<?php echo esc_url(admin_url('admin.php')); ?>" class="section-delete-form">
                                                         <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
                                                         <input type="hidden" name="page" value="mc-leads-engine">
