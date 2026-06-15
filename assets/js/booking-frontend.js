@@ -88,14 +88,23 @@ function initBookingWizard(container) {
     });
   });
 
-  prevBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
+  const backBtnRound = container.querySelector('.mc-back-btn-round');
+  if (backBtnRound) {
+    backBtnRound.addEventListener('click', () => {
       changeStep(state.currentStep - 1);
     });
-  });
+  }
 
   function changeStep(step) {
     state.currentStep = Math.min(Math.max(step, 1), 4);
+    
+    if (backBtnRound) {
+      if (state.currentStep > 1) {
+        backBtnRound.style.display = 'flex';
+      } else {
+        backBtnRound.style.display = 'none';
+      }
+    }
     
     // Toggle Step visibility
     steps.forEach(s => {

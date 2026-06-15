@@ -5,9 +5,28 @@ if (!defined('ABSPATH')) {
 }
 
 $cf7_shortcode = '[contact-form-7 id="' . absint($cf7_id) . '"]';
+
+if (!function_exists('mc_booking_get_svg_icon')) {
+    function mc_booking_get_svg_icon($filename) {
+        $path = MC_LEADS_ENGINE_PATH . 'assets/svgs/' . $filename . '.svg';
+        if (file_exists($path)) {
+            $content = file_get_contents($path);
+            // Remove XML declaration, DOCTYPE, and comments
+            $content = preg_replace('/<\?xml.*?\?>/is', '', $content);
+            $content = preg_replace('/<!DOCTYPE.*?>/is', '', $content);
+            $content = preg_replace('/<!--.*?-->/is', '', $content);
+            return trim($content);
+        }
+        return '';
+    }
+}
 ?>
 <div class="mc-booking-engine" data-cf7-id="<?php echo esc_attr($cf7_id); ?>" data-session-id="<?php echo esc_attr($session_id); ?>">
-    <div class="mc-booking-card">
+    <div class="mc-booking-card" style="position: relative;">
+        <!-- Back Button -->
+        <button type="button" class="mc-back-btn-round" aria-label="<?php esc_attr_e('Back', 'mc-leads-engine'); ?>" style="display: none;">
+            <span class="dashicons dashicons-arrow-left-alt2"></span>
+        </button>
         <!-- Progress Bar -->
         <div class="mc-booking-progress">
             <div class="mc-progress-bar">
@@ -29,25 +48,33 @@ $cf7_shortcode = '[contact-form-7 id="' . absint($cf7_id) . '"]';
                 
                 <div class="mc-type-grid">
                     <div class="mc-type-card" data-value="online">
-                        <div class="card-icon"><span class="dashicons dashicons-video-alt3"></span></div>
+                        <div class="card-icon">
+                            <?php echo mc_booking_get_svg_icon('online-meet'); ?>
+                        </div>
                         <h4><?php esc_html_e('Online Call', 'mc-leads-engine'); ?></h4>
                         <p><?php esc_html_e('Video meeting using Google Meet or Zoom.', 'mc-leads-engine'); ?></p>
                     </div>
                     
                     <div class="mc-type-card" data-value="coffee">
-                        <div class="card-icon"><span class="dashicons dashicons-coffee"></span></div>
+                        <div class="card-icon">
+                            <?php echo mc_booking_get_svg_icon('coffee-cafe'); ?>
+                        </div>
                         <h4><?php esc_html_e('Coffee Meeting', 'mc-leads-engine'); ?></h4>
                         <p><?php esc_html_e('Meet in person at a curated café/hub.', 'mc-leads-engine'); ?></p>
                     </div>
 
                     <div class="mc-type-card" data-value="office">
-                        <div class="card-icon"><span class="dashicons dashicons-admin-home"></span></div>
+                        <div class="card-icon">
+                            <?php echo mc_booking_get_svg_icon('our-office'); ?>
+                        </div>
                         <h4><?php esc_html_e('Office Visit', 'mc-leads-engine'); ?></h4>
                         <p><?php esc_html_e('We visit you at your office or workplace.', 'mc-leads-engine'); ?></p>
                     </div>
 
                     <div class="mc-type-card" data-value="host">
-                        <div class="card-icon"><span class="dashicons dashicons-location"></span></div>
+                        <div class="card-icon">
+                            <?php echo mc_booking_get_svg_icon('our-studio'); ?>
+                        </div>
                         <h4><?php esc_html_e('Our Studio', 'mc-leads-engine'); ?></h4>
                         <p><?php esc_html_e('Visit us at our primary host studio space.', 'mc-leads-engine'); ?></p>
                     </div>
@@ -100,7 +127,6 @@ $cf7_shortcode = '[contact-form-7 id="' . absint($cf7_id) . '"]';
                 </div>
 
                 <div class="mc-step-nav">
-                    <button type="button" class="btn secondary mc-prev-btn"><?php esc_html_e('Back', 'mc-leads-engine'); ?></button>
                     <button type="button" class="btn primary mc-next-btn"><?php esc_html_e('Continue', 'mc-leads-engine'); ?></button>
                 </div>
             </div>
@@ -134,7 +160,6 @@ $cf7_shortcode = '[contact-form-7 id="' . absint($cf7_id) . '"]';
                 </div>
 
                 <div class="mc-step-nav">
-                    <button type="button" class="btn secondary mc-prev-btn"><?php esc_html_e('Back', 'mc-leads-engine'); ?></button>
                     <button type="button" class="btn primary mc-next-btn" disabled><?php esc_html_e('Continue', 'mc-leads-engine'); ?></button>
                 </div>
             </div>
@@ -163,9 +188,7 @@ $cf7_shortcode = '[contact-form-7 id="' . absint($cf7_id) . '"]';
                     <?php endif; ?>
                 </div>
 
-                <div class="mc-step-nav">
-                    <button type="button" class="btn secondary mc-prev-btn"><?php esc_html_e('Back', 'mc-leads-engine'); ?></button>
-                </div>
+                <!-- Back button is positioned at the top-left of the card -->
             </div>
         </div>
     </div>

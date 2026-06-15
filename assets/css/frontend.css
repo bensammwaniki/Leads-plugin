@@ -54,8 +54,8 @@
 .mc-progress-fill {
   display: block !important;
   height: 10px !important;
-  background: linear-gradient(90deg, #2563eb, #22c55e) !important;
-  /* Original blue-green gradient */
+  background: linear-gradient(90deg, #F15D61, #332223) !important;
+  /* Official brand gradient */
   border-radius: 999px !important;
   transition: width 0.3s ease-in-out !important;
 }
@@ -172,8 +172,8 @@
 .mc-leads-engine input[type="date"]:focus,
 .mc-leads-engine select:focus,
 .mc-leads-engine textarea:focus {
-  border-color: #2563eb !important;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+  border-color: #F15D61 !important;
+  box-shadow: 0 0 0 3px rgba(241, 93, 97, 0.15) !important;
   outline: none !important;
 }
 
@@ -196,7 +196,7 @@
   display: flex !important;
   align-items: center !important;
   gap: 12px !important;
-  border: 0px solid #e2e8f0 !important;
+  border: 1px solid #e2e8f0 !important;
   border-radius: 8px !important;
   padding: 12px 14px !important;
   background: #ffffff !important;
@@ -210,8 +210,8 @@
 /* Active State (Blue Border and soft background tint) */
 .mc-option-checked,
 .mc-option:has(:checked) {
-  border-color: #2563eb !important;
-  background: #f0f7ff !important;
+  border-color: #F15D61 !important;
+  background: #fff0f0 !important;
   box-shadow: none !important;
 }
 
@@ -275,12 +275,11 @@
   position: relative !important;
 }
 
-/* Checked custom indicator border colors (Original Blue) */
 .mc-option-checked input[type="radio"],
 .mc-option:has(:checked) input[type="radio"],
 .mc-option-checked input[type="checkbox"],
 .mc-option:has(:checked) input[type="checkbox"] {
-  border-color: #2563eb !important;
+  border-color: #F15D61 !important;
 }
 
 /* Radio Checked Inner Dot */
@@ -290,8 +289,8 @@
   width: 10px !important;
   height: 10px !important;
   border-radius: 50% !important;
-  background-color: #2563eb !important;
-  /* Brand Blue dot */
+  background-color: #F15D61 !important;
+  /* Brand Red dot */
 }
 
 /* Checkbox specific roundness and checkmark */
@@ -301,7 +300,7 @@
 
 .mc-option-checked input[type="checkbox"],
 .mc-option:has(:checked) input[type="checkbox"] {
-  background-color: #2563eb !important;
+  background-color: #F15D61 !important;
 }
 
 .mc-option input[type="checkbox"]:checked::after {
@@ -354,12 +353,11 @@
   color: #1e293b !important;
 }
 
-/* Original blue/indigo gradient for primary submit buttons */
 .mc-leads-engine button.button-primary,
 .mc-leads-engine .button.button-primary,
 .mc-leads-engine button[type="submit"],
 .mc-leads-engine .mc-submit-survey {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  background: linear-gradient(135deg, #F15D61, #332223) !important;
   border-color: transparent !important;
   color: #ffffff !important;
   box-shadow: none !important;
@@ -369,7 +367,7 @@
 .mc-leads-engine .button.button-primary:hover,
 .mc-leads-engine button[type="submit"]:hover,
 .mc-leads-engine .mc-submit-survey:hover {
-  background: linear-gradient(135deg, #1d4ed8, #1e40af) !important;
+  background: linear-gradient(135deg, #d1494d, #332223) !important;
   transform: translateY(-1px) !important;
   box-shadow: none !important;
 }
@@ -387,19 +385,19 @@
 .mc-final-summary {
   padding: 16px !important;
   border-radius: 12px !important;
-  background: #eff6ff !important;
-  /* Original light blue background */
-  border: 1px solid #bfdbfe !important;
+  background: #fff0f0 !important;
+  /* Brand Red light background */
+  border: 1px solid #fca5a5 !important;
   margin-bottom: 16px !important;
 }
 
 .mc-final-summary p {
   margin: 0 0 8px 0 !important;
-  color: #1e3a8a !important;
+  color: #801c1f !important;
 }
 
 .mc-final-summary p strong {
-  color: #1e3a8a !important;
+  color: #801c1f !important;
 }
 
 .mc-final-summary p:last-child {
@@ -420,7 +418,7 @@
 }
 
 .mc-restart-link:hover {
-  color: #2563eb !important;
+  color: #F15D61 !important;
 }
 
 /* Thank You Screen */
