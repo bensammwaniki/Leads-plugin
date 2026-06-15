@@ -14,9 +14,24 @@ function initBookingWizard(container) {
 
   const cf7Id = container.dataset.cf7Id;
   const sessionId = container.dataset.sessionId;
-  const ajaxUrl = window.MCLeadsBooking?.ajaxUrl || '';
+  let ajaxUrl = window.MCLeadsBooking?.ajaxUrl || '';
   const nonce = window.MCLeadsBooking?.nonce || '';
   const gmapsKey = window.MCLeadsBooking?.gmapsKey || '';
+
+  // Resolve hostname mismatch when testing on mobile devices in local network
+  if (ajaxUrl && ajaxUrl.startsWith('http')) {
+    try {
+      const urlObj = new URL(ajaxUrl);
+      if (urlObj.hostname !== window.location.hostname) {
+        urlObj.hostname = window.location.hostname;
+        urlObj.port = window.location.port;
+        urlObj.protocol = window.location.protocol;
+        ajaxUrl = urlObj.toString();
+      }
+    } catch (e) {
+      console.error('Error resolving AJAX URL hostname:', e);
+    }
+  }
 
   // Booking State
   const state = {

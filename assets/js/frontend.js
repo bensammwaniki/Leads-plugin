@@ -13,8 +13,23 @@ function initSurvey(container) {
   const mode = container.dataset.mode || 'standard';
   const surveyId = parseInt(container.dataset.surveyId || '0', 10);
   const sessionId = container.dataset.sessionId || '';
-  const ajaxUrl = (window.MCLeadsEngine && window.MCLeadsEngine.ajaxUrl) || window.ajaxurl || '';
+  let ajaxUrl = (window.MCLeadsEngine && window.MCLeadsEngine.ajaxUrl) || window.ajaxurl || '';
   const nonce = (window.MCLeadsEngine && window.MCLeadsEngine.nonce) || '';
+
+  // Resolve hostname mismatch when testing on mobile devices in local network
+  if (ajaxUrl && ajaxUrl.startsWith('http')) {
+    try {
+      const urlObj = new URL(ajaxUrl);
+      if (urlObj.hostname !== window.location.hostname) {
+        urlObj.hostname = window.location.hostname;
+        urlObj.port = window.location.port;
+        urlObj.protocol = window.location.protocol;
+        ajaxUrl = urlObj.toString();
+      }
+    } catch (e) {
+      console.error('Error resolving AJAX URL hostname:', e);
+    }
+  }
   const progressFill = container.querySelector('.mc-progress-fill');
   const progressStep = container.querySelector('.mc-progress-step');
   const priceDisplay = container.querySelector('.mc-live-price');

@@ -97,10 +97,14 @@ function mc_leads_engine_render_leads_page() {
                 </thead>
                 <tbody>
                 <?php foreach ($leads as $row) : ?>
-                    <?php $survey_row = mc_leads_engine_survey_repository()->get_survey($row['survey_id']); ?>
+                    <?php 
+                    global $wpdb;
+                    $survey_row = mc_leads_engine_survey_repository()->get_survey($row['survey_id']);
+                    $is_booking = (bool) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM " . mc_leads_engine_table('bookings') . " WHERE lead_id = %d", $row['id']));
+                    ?>
                     <tr>
                         <td><a href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-leads', 'lead_id' => $row['id'], 'survey_id' => $survey_id, 'min_score' => $min_score), admin_url('admin.php'))); ?>"><?php echo esc_html($row['id']); ?></a></td>
-                        <td><?php echo esc_html($survey_row['title'] ?? $row['survey_id']); ?></td>
+                        <td><?php echo $is_booking ? esc_html__('Bookings', 'mc-leads-engine') : esc_html($survey_row['title'] ?? $row['survey_id']); ?></td>
                         <td><?php echo esc_html($row['session_id']); ?></td>
                         <td><?php echo esc_html(number_format_i18n((float) $row['total_price'], 2)); ?></td>
                         <td><?php echo esc_html($row['lead_score']); ?></td>

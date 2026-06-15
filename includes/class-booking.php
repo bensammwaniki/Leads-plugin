@@ -45,6 +45,21 @@ class MC_Leads_Engine_Booking {
         $session = mc_leads_engine_session();
         $session->maybe_start_session();
 
+        // Handle thank you success screen
+        if (isset($_GET['mc_leads_submitted']) && (int) $_GET['mc_leads_submitted'] === 1) {
+            $lead_id = $_GET['lead_id'] ?? 0;
+            if ($lead_id === 'active') {
+                $lead_id = absint($session->get_data()['lead_id'] ?? 0);
+            } else {
+                $lead_id = absint($lead_id);
+            }
+            $session->clear_session();
+            return mc_leads_engine_render_template('thank-you.php', array(
+                'survey_id' => 0,
+                'lead_id'   => $lead_id,
+            ));
+        }
+
         wp_localize_script(
             'mc-leads-engine-booking',
             'MCLeadsBooking',
@@ -123,21 +138,27 @@ class MC_Leads_Engine_Booking {
         $interval = $duration + $buffer;
 
         $slots = array();
-        $current = strtotime("$date $start_time");
-        $end = strtotime("$date $end_time");
+        $timezone = wp_timezone();
+        try {
+            $current_dt = new DateTime("$date $start_time", $timezone);
+            $end_dt = new DateTime("$date $end_time", $timezone);
+        } catch (Exception $e) {
+            $current_dt = new DateTime("$date $start_time");
+            $end_dt = new DateTime("$date $end_time");
+        }
 
         // Do not display past times for today
-        $now = current_time('timestamp');
+        $now = function_exists('current_datetime') ? current_datetime() : new DateTimeImmutable('now', $timezone);
 
-        while ($current + ($duration * 60) <= $end) {
-            if ($current >= $now) {
+        while ($current_dt->getTimestamp() + ($duration * 60) <= $end_dt->getTimestamp()) {
+            if ($current_dt >= $now) {
                 $slots[] = array(
-                    'time' => date('H:i', $current),
-                    'timestamp' => $current,
+                    'time'      => $current_dt->format('H:i'),
+                    'timestamp' => $current_dt->getTimestamp(),
                     'available' => true
                 );
             }
-            $current += $interval * 60;
+            $current_dt->modify("+$interval minutes");
         }
 
         // Fetch Google Calendar busy slots if connected
