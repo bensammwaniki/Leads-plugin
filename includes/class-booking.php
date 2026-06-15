@@ -29,15 +29,19 @@ class MC_Leads_Engine_Booking {
             'cf7' => 0,
         ), $atts, 'mc_booking');
 
+        $settings = mc_leads_engine_get_settings();
         $cf7_id = absint($atts['cf7']);
         if (!$cf7_id) {
-            return '<div class="mc-leads-engine-notice">' . esc_html__('Booking CF7 form ID is required.', 'mc-leads-engine') . '</div>';
+            $cf7_id = absint($settings['booking_default_cf7'] ?? 0);
+        }
+
+        if (!$cf7_id) {
+            return '<div class="mc-leads-engine-notice">' . esc_html__('Booking CF7 form ID is required. Please specify it in the shortcode attributes or configure a default form in Settings.', 'mc-leads-engine') . '</div>';
         }
 
         wp_enqueue_style('mc-leads-engine-booking');
         wp_enqueue_script('mc-leads-engine-booking');
 
-        $settings = mc_leads_engine_get_settings();
         $session = mc_leads_engine_session();
         $session->maybe_start_session();
 

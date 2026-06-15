@@ -91,6 +91,7 @@ function mc_leads_engine_get_settings() {
         'booking_days'               => array('1', '2', '3', '4', '5'), // Mon-Fri
         'booking_duration'           => 30,
         'booking_buffer'             => 15,
+        'booking_default_cf7'        => 0,
         'booking_score_online'       => 10,
         'booking_score_coffee'       => 20,
         'booking_score_office'       => 30,

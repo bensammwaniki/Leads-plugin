@@ -50,6 +50,7 @@ function mc_leads_engine_handle_settings_save() {
         'booking_days'               => isset($_POST['booking_days']) && is_array($_POST['booking_days']) ? array_map('sanitize_key', $_POST['booking_days']) : ($current_settings['booking_days'] ?? array('1', '2', '3', '4', '5')),
         'booking_duration'           => isset($_POST['booking_duration']) ? (int) $_POST['booking_duration'] : (int) ($current_settings['booking_duration'] ?? 30),
         'booking_buffer'             => isset($_POST['booking_buffer']) ? (int) $_POST['booking_buffer'] : (int) ($current_settings['booking_buffer'] ?? 15),
+        'booking_default_cf7'        => isset($_POST['booking_default_cf7']) ? (int) $_POST['booking_default_cf7'] : (int) ($current_settings['booking_default_cf7'] ?? 0),
         'booking_score_online'       => isset($_POST['booking_score_online']) ? (int) $_POST['booking_score_online'] : (int) ($current_settings['booking_score_online'] ?? 10),
         'booking_score_coffee'       => isset($_POST['booking_score_coffee']) ? (int) $_POST['booking_score_coffee'] : (int) ($current_settings['booking_score_coffee'] ?? 20),
         'booking_score_office'       => isset($_POST['booking_score_office']) ? (int) $_POST['booking_score_office'] : (int) ($current_settings['booking_score_office'] ?? 30),
@@ -322,6 +323,40 @@ function mc_leads_engine_render_settings_page() {
                                     <label class="field-label"><?php esc_html_e('Buffer Between Slots (minutes)', 'mc-leads-engine'); ?></label>
                                     <input class="field-input" type="number" name="booking_buffer" value="<?php echo esc_attr($settings['booking_buffer'] ?? 15); ?>">
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-top:20px;">
+                            <div class="card-title"><?php esc_html_e('Default Contact Form 7 Configuration', 'mc-leads-engine'); ?></div>
+                            <p class="field-desc-top"><?php esc_html_e('Select the default Contact Form 7 form used to capture client contact details in Step 4 of the [mc_booking] shortcode.', 'mc-leads-engine'); ?></p>
+                            <div class="settings-field">
+                                <label class="field-label"><?php esc_html_e('Default Booking CF7 Form', 'mc-leads-engine'); ?></label>
+                                <?php 
+                                $cf7_forms = array();
+                                if (post_type_exists('wpcf7_contact_form')) {
+                                    $cf7_posts = get_posts(array(
+                                        'post_type' => 'wpcf7_contact_form',
+                                        'numberposts' => -1,
+                                    ));
+                                    if (is_array($cf7_posts)) {
+                                        foreach ($cf7_posts as $post) {
+                                            $cf7_forms[$post->ID] = $post->post_title;
+                                        }
+                                    }
+                                }
+                                
+                                if (!empty($cf7_forms)) : 
+                                ?>
+                                    <select class="field-input" name="booking_default_cf7">
+                                        <option value="0"><?php esc_html_e('-- Select a form --', 'mc-leads-engine'); ?></option>
+                                        <?php foreach ($cf7_forms as $id => $title) : ?>
+                                            <option value="<?php echo esc_attr($id); ?>" <?php selected(($settings['booking_default_cf7'] ?? 0), $id); ?>><?php echo esc_html($title); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                <?php else : ?>
+                                    <input class="field-input" type="number" name="booking_default_cf7" value="<?php echo esc_attr($settings['booking_default_cf7'] ?? ''); ?>" placeholder="<?php esc_attr_e('Enter Contact Form 7 Form ID', 'mc-leads-engine'); ?>">
+                                    <span class="field-desc" style="color:#ef4444;"><?php esc_html_e('Contact Form 7 is either not active or you have no forms. Please input form ID manually.', 'mc-leads-engine'); ?></span>
+                                <?php endif; ?>
                             </div>
                         </div>
 
