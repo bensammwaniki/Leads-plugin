@@ -114,6 +114,22 @@ function mc_leads_engine_install() {
         KEY created_at (created_at)
     ) $charset_collate;";
 
+    $tables[] = "CREATE TABLE " . mc_leads_engine_table('bookings') . " (
+        id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+        lead_id bigint(20) unsigned NOT NULL,
+        meeting_type varchar(50) NOT NULL,
+        location_type varchar(50) NOT NULL,
+        location_name varchar(255) NULL,
+        location_address text NULL,
+        meeting_date date NOT NULL,
+        meeting_time time NOT NULL,
+        calendar_event_id varchar(255) NULL,
+        created_at datetime NOT NULL,
+        PRIMARY KEY  (id),
+        KEY lead_id (lead_id),
+        KEY meeting_date (meeting_date)
+    ) $charset_collate;";
+
     foreach ($tables as $sql) {
         dbDelta($sql);
     }

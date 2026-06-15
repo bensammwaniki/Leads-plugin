@@ -35,6 +35,25 @@ function mc_leads_engine_handle_settings_save() {
         'admin_whatsapp_phone'       => sanitize_text_field(wp_unslash($_POST['admin_whatsapp_phone'] ?? $current_settings['admin_whatsapp_phone'] ?? '')),
         'admin_whatsapp_body'        => sanitize_textarea_field(wp_unslash($_POST['admin_whatsapp_body'] ?? $current_settings['admin_whatsapp_body'] ?? '')),
         'user_whatsapp_body'         => sanitize_textarea_field(wp_unslash($_POST['user_whatsapp_body'] ?? $current_settings['user_whatsapp_body'] ?? '')),
+
+        // Booking Settings variables
+        'gcal_client_id'             => sanitize_text_field(wp_unslash($_POST['gcal_client_id'] ?? $current_settings['gcal_client_id'] ?? '')),
+        'gcal_client_secret'         => sanitize_text_field(wp_unslash($_POST['gcal_client_secret'] ?? $current_settings['gcal_client_secret'] ?? '')),
+        'gcal_calendar_id'           => sanitize_text_field(wp_unslash($_POST['gcal_calendar_id'] ?? $current_settings['gcal_calendar_id'] ?? 'primary')),
+        'gcal_access_token'          => sanitize_text_field(wp_unslash($_POST['gcal_access_token'] ?? $current_settings['gcal_access_token'] ?? '')),
+        'gcal_refresh_token'         => sanitize_text_field(wp_unslash($_POST['gcal_refresh_token'] ?? $current_settings['gcal_refresh_token'] ?? '')),
+        'gcal_token_expires'         => isset($_POST['gcal_token_expires']) ? (int) $_POST['gcal_token_expires'] : (int) ($current_settings['gcal_token_expires'] ?? 0),
+        'gmaps_api_key'              => sanitize_text_field(wp_unslash($_POST['gmaps_api_key'] ?? $current_settings['gmaps_api_key'] ?? '')),
+        'booking_predefined_locations'=> sanitize_textarea_field(wp_unslash($_POST['booking_predefined_locations'] ?? $current_settings['booking_predefined_locations'] ?? '')),
+        'booking_hours_start'        => sanitize_text_field(wp_unslash($_POST['booking_hours_start'] ?? $current_settings['booking_hours_start'] ?? '09:00')),
+        'booking_hours_end'          => sanitize_text_field(wp_unslash($_POST['booking_hours_end'] ?? $current_settings['booking_hours_end'] ?? '17:00')),
+        'booking_days'               => isset($_POST['booking_days']) && is_array($_POST['booking_days']) ? array_map('sanitize_key', $_POST['booking_days']) : ($current_settings['booking_days'] ?? array('1', '2', '3', '4', '5')),
+        'booking_duration'           => isset($_POST['booking_duration']) ? (int) $_POST['booking_duration'] : (int) ($current_settings['booking_duration'] ?? 30),
+        'booking_buffer'             => isset($_POST['booking_buffer']) ? (int) $_POST['booking_buffer'] : (int) ($current_settings['booking_buffer'] ?? 15),
+        'booking_score_online'       => isset($_POST['booking_score_online']) ? (int) $_POST['booking_score_online'] : (int) ($current_settings['booking_score_online'] ?? 10),
+        'booking_score_coffee'       => isset($_POST['booking_score_coffee']) ? (int) $_POST['booking_score_coffee'] : (int) ($current_settings['booking_score_coffee'] ?? 20),
+        'booking_score_office'       => isset($_POST['booking_score_office']) ? (int) $_POST['booking_score_office'] : (int) ($current_settings['booking_score_office'] ?? 30),
+        'booking_score_host'         => isset($_POST['booking_score_host']) ? (int) $_POST['booking_score_host'] : (int) ($current_settings['booking_score_host'] ?? 20),
     );
 
     update_option('mc_leads_engine_settings', $settings);
@@ -79,6 +98,9 @@ function mc_leads_engine_render_settings_page() {
                     </button>
                     <button type="button" class="settings-tab-btn" data-tab="whatsapp">
                         <span class="dashicons dashicons-whatsapp"></span> <?php esc_html_e('WhatsApp Notifications', 'mc-leads-engine'); ?>
+                    </button>
+                    <button type="button" class="settings-tab-btn" data-tab="booking">
+                        <span class="dashicons dashicons-calendar-alt"></span> <?php esc_html_e('Booking Settings', 'mc-leads-engine'); ?>
                     </button>
                     <button type="button" class="settings-tab-btn" data-tab="placeholders">
                         <span class="dashicons dashicons-editor-code"></span> <?php esc_html_e('Placeholder Guide', 'mc-leads-engine'); ?>
@@ -186,6 +208,145 @@ function mc_leads_engine_render_settings_page() {
                                 <label class="field-label"><?php esc_html_e('User Alert Message Template', 'mc-leads-engine'); ?></label>
                                 <textarea class="field-input" rows="6" name="user_whatsapp_body"><?php echo esc_textarea($settings['user_whatsapp_body']); ?></textarea>
                                 <span class="field-desc"><?php esc_html_e('Plain text notification sent directly to the client\'s phone number (discovered automatically from standard answers or CF7).', 'mc-leads-engine'); ?></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Booking Settings Tab -->
+                    <div class="settings-section-pane" data-pane="booking">
+                        <div class="card">
+                            <div class="card-title"><?php esc_html_e('Google Calendar Integration', 'mc-leads-engine'); ?></div>
+                            <p class="field-desc-top"><?php esc_html_e('Connect the booking system to your Google Calendar to sync availability in real time and prevent double booking.', 'mc-leads-engine'); ?></p>
+                            
+                            <?php if (!empty($_GET['gcal_auth_success'])) : ?>
+                                <div class="notice notice-success inline" style="margin-bottom:15px;"><p><?php esc_html_e('Successfully authorized with Google Calendar!', 'mc-leads-engine'); ?></p></div>
+                            <?php endif; ?>
+
+                            <div class="settings-row">
+                                <div class="settings-field">
+                                    <label class="field-label"><?php esc_html_e('Google Client ID', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="text" name="gcal_client_id" value="<?php echo esc_attr($settings['gcal_client_id'] ?? ''); ?>">
+                                </div>
+                                <div class="settings-field">
+                                    <label class="field-label"><?php esc_html_e('Google Client Secret', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="text" name="gcal_client_secret" value="<?php echo esc_attr($settings['gcal_client_secret'] ?? ''); ?>">
+                                </div>
+                            </div>
+                            <div class="settings-field">
+                                <label class="field-label"><?php esc_html_e('Google Calendar ID', 'mc-leads-engine'); ?></label>
+                                <input class="field-input" type="text" name="gcal_calendar_id" value="<?php echo esc_attr($settings['gcal_calendar_id'] ?? 'primary'); ?>">
+                                <span class="field-desc"><?php esc_html_e('Primary is default. Or use specific calendar resource ID.', 'mc-leads-engine'); ?></span>
+                            </div>
+
+                            <div class="settings-field" style="background:#f8fafc; border:1px solid #e2e8f0; padding:15px; border-radius:8px;">
+                                <label class="field-label" style="margin-bottom:5px;"><?php esc_html_e('Google Calendar Authorization Status', 'mc-leads-engine'); ?></label>
+                                <p style="margin:0 0 10px 0; font-weight:600; font-size:13px; color: <?php echo !empty($settings['gcal_access_token']) ? '#16a34a' : '#dc2626'; ?>;">
+                                    <?php 
+                                    if (!empty($settings['gcal_access_token'])) {
+                                        $expires_in = (int)($settings['gcal_token_expires'] ?? 0) - time();
+                                        if ($expires_in > 0) {
+                                            printf(esc_html__('Connected (Access Token Active - Expires in %d min)', 'mc-leads-engine'), round($expires_in / 60));
+                                        } else {
+                                            esc_html_e('Connected (Access Token Expired - Auto refresh active)', 'mc-leads-engine');
+                                        }
+                                    } else {
+                                        esc_html_e('Not Authorized / Connected', 'mc-leads-engine');
+                                    }
+                                    ?>
+                                </p>
+                                <?php
+                                if (!empty($settings['gcal_client_id']) && !empty($settings['gcal_client_secret'])) {
+                                    $auth_url = mc_leads_engine_booking()->get_gcal_client_auth_url();
+                                    printf('<a class="button button-primary" href="%s">%s</a>', esc_url($auth_url), esc_html__('Authorize Calendar Access', 'mc-leads-engine'));
+                                } else {
+                                    echo '<p class="description" style="color:#ef4444; margin:0;">' . esc_html__('Save Client ID & Secret above first, then click Save Settings to show Authorization button.', 'mc-leads-engine') . '</p>';
+                                }
+                                ?>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-top:20px;">
+                            <div class="card-title"><?php esc_html_e('Google Maps Integration & Predefined Locations', 'mc-leads-engine'); ?></div>
+                            <div class="settings-field">
+                                <label class="field-label"><?php esc_html_e('Google Maps API Key', 'mc-leads-engine'); ?></label>
+                                <input class="field-input" type="text" name="gmaps_api_key" value="<?php echo esc_attr($settings['gmaps_api_key'] ?? ''); ?>">
+                                <span class="field-desc"><?php esc_html_e('Used for address geocoding and autocomplete inside the office custom location details.', 'mc-leads-engine'); ?></span>
+                            </div>
+                            <div class="settings-field">
+                                <label class="field-label"><?php esc_html_e('Predefined Meeting Locations (Separated by |)', 'mc-leads-engine'); ?></label>
+                                <textarea class="field-input" rows="4" name="booking_predefined_locations"><?php echo esc_textarea($settings['booking_predefined_locations'] ?? ''); ?></textarea>
+                                <span class="field-desc"><?php esc_html_e('Suggested Cafes or Public meeting spaces, separated by the vertical bar (|). E.g. Java House, Westlands|Nairobi Garage, Kilimani', 'mc-leads-engine'); ?></span>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-top:20px;">
+                            <div class="card-title"><?php esc_html_e('Working Hours & Availability Rules', 'mc-leads-engine'); ?></div>
+                            <div class="settings-row">
+                                <div class="settings-field">
+                                    <label class="field-label"><?php esc_html_e('Daily Start Time', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="text" name="booking_hours_start" value="<?php echo esc_attr($settings['booking_hours_start'] ?? '09:00'); ?>" placeholder="e.g. 09:00">
+                                </div>
+                                <div class="settings-field">
+                                    <label class="field-label"><?php esc_html_e('Daily End Time', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="text" name="booking_hours_end" value="<?php echo esc_attr($settings['booking_hours_end'] ?? '17:00'); ?>" placeholder="e.g. 17:00">
+                                </div>
+                            </div>
+
+                            <div class="settings-field">
+                                <label class="field-label"><?php esc_html_e('Working Days', 'mc-leads-engine'); ?></label>
+                                <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:5px;">
+                                    <?php 
+                                    $saved_days = $settings['booking_days'] ?? array('1','2','3','4','5');
+                                    $days_list = array(
+                                        '1' => __('Mon', 'mc-leads-engine'),
+                                        '2' => __('Tue', 'mc-leads-engine'),
+                                        '3' => __('Wed', 'mc-leads-engine'),
+                                        '4' => __('Thu', 'mc-leads-engine'),
+                                        '5' => __('Fri', 'mc-leads-engine'),
+                                        '6' => __('Sat', 'mc-leads-engine'),
+                                        '7' => __('Sun', 'mc-leads-engine'),
+                                    );
+                                    foreach ($days_list as $num => $lbl) :
+                                    ?>
+                                        <label style="font-weight:normal;"><input type="checkbox" name="booking_days[]" value="<?php echo esc_attr($num); ?>" <?php checked(in_array((string)$num, $saved_days, true)); ?>> <?php echo esc_html($lbl); ?></label>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+
+                            <div class="settings-row">
+                                <div class="settings-field">
+                                    <label class="field-label"><?php esc_html_e('Slot Duration (minutes)', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="number" name="booking_duration" value="<?php echo esc_attr($settings['booking_duration'] ?? 30); ?>">
+                                </div>
+                                <div class="settings-field">
+                                    <label class="field-label"><?php esc_html_e('Buffer Between Slots (minutes)', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="number" name="booking_buffer" value="<?php echo esc_attr($settings['booking_buffer'] ?? 15); ?>">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-top:20px;">
+                            <div class="card-title"><?php esc_html_e('Lead Scoring Rules for Booking Selection', 'mc-leads-engine'); ?></div>
+                            <p class="field-desc-top"><?php esc_html_e('Configure score points to add to the lead quality when they select a specific booking type.', 'mc-leads-engine'); ?></p>
+                            <div class="settings-row">
+                                <div class="settings-field">
+                                    <label class="field-label"><?php esc_html_e('Online Video Call Score', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="number" name="booking_score_online" value="<?php echo esc_attr($settings['booking_score_online'] ?? 10); ?>">
+                                </div>
+                                <div class="settings-field">
+                                    <label class="field-label"><?php esc_html_e('Coffee Meeting Score', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="number" name="booking_score_coffee" value="<?php echo esc_attr($settings['booking_score_coffee'] ?? 20); ?>">
+                                </div>
+                            </div>
+                            <div class="settings-row">
+                                <div class="settings-field">
+                                    <label class="field-label"><?php esc_html_e('Office Visit Score', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="number" name="booking_score_office" value="<?php echo esc_attr($settings['booking_score_office'] ?? 30); ?>">
+                                </div>
+                                <div class="settings-field">
+                                    <label class="field-label"><?php esc_html_e('Predefined Host Location Score', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="number" name="booking_score_host" value="<?php echo esc_attr($settings['booking_score_host'] ?? 20); ?>">
+                                </div>
                             </div>
                         </div>
                     </div>

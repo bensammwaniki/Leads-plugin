@@ -27,6 +27,7 @@ require_once MC_LEADS_ENGINE_PATH . 'includes/class-question.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-pricing-engine.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-leads.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-cf7-integration.php';
+require_once MC_LEADS_ENGINE_PATH . 'includes/class-booking.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-shortcodes.php';
 
 function mc_leads_engine_table($suffix) {
@@ -75,6 +76,25 @@ function mc_leads_engine_get_settings() {
         'admin_whatsapp_phone'       => '',
         'admin_whatsapp_body'        => __("New Lead Submission #[lead_id] for \"[survey_title]\"\nPrice: KES [total_price]\nScore: [lead_score]\nClient: [your-name] ([email-address])", 'mc-leads-engine'),
         'user_whatsapp_body'         => __("Hello [your-name],\nThank you for completing the \"[survey_title]\" estimate.\n\nEstimate Details:\n- Estimate: KES [total_price]\n- Lead ID: #[lead_id]\n\nWe will get in touch with you shortly.", 'mc-leads-engine'),
+        
+        // Booking System settings
+        'gcal_client_id'             => '',
+        'gcal_client_secret'         => '',
+        'gcal_calendar_id'           => 'primary',
+        'gcal_access_token'          => '',
+        'gcal_refresh_token'         => '',
+        'gcal_token_expires'         => 0,
+        'gmaps_api_key'              => '',
+        'booking_predefined_locations'=> "Java House, Westlands|Nairobi Garage, Kilimani|Prestige Plaza, Ngong Road",
+        'booking_hours_start'        => '09:00',
+        'booking_hours_end'          => '17:00',
+        'booking_days'               => array('1', '2', '3', '4', '5'), // Mon-Fri
+        'booking_duration'           => 30,
+        'booking_buffer'             => 15,
+        'booking_score_online'       => 10,
+        'booking_score_coffee'       => 20,
+        'booking_score_office'       => 30,
+        'booking_score_host'         => 20,
     );
 
     $settings = get_option('mc_leads_engine_settings', array());
@@ -263,6 +283,16 @@ function mc_leads_engine_cf7_integration() {
     return $cf7;
 }
 
+function mc_leads_engine_booking() {
+    static $booking = null;
+
+    if (!$booking) {
+        $booking = new MC_Leads_Engine_Booking();
+    }
+
+    return $booking;
+}
+
 function mc_leads_engine_boot() {
     mc_leads_engine_session()->maybe_start_session();
 
@@ -277,11 +307,13 @@ function mc_leads_engine_boot() {
         require_once MC_LEADS_ENGINE_PATH . 'admin/admin-menu.php';
         require_once MC_LEADS_ENGINE_PATH . 'admin/admin-app.php';
         require_once MC_LEADS_ENGINE_PATH . 'admin/admin-leads.php';
+        require_once MC_LEADS_ENGINE_PATH . 'admin/admin-bookings.php';
         require_once MC_LEADS_ENGINE_PATH . 'admin/admin-analytics.php';
         require_once MC_LEADS_ENGINE_PATH . 'admin/admin-settings.php';
     }
 
     mc_leads_engine_cf7_integration();
+    mc_leads_engine_booking();
     new MC_Leads_Engine_Shortcodes();
 }
 add_action('plugins_loaded', 'mc_leads_engine_boot');

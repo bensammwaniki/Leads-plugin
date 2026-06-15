@@ -710,6 +710,34 @@ class MC_Leads_Engine_Leads {
             '[survey_title]' => $survey_title,
         );
 
+        // Fetch booking details if available
+        global $wpdb;
+        $booking = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM " . mc_leads_engine_table('bookings') . " WHERE lead_id = %d",
+                absint($lead_id)
+            ),
+            ARRAY_A
+        );
+
+        if ($booking) {
+            $type_labels = array(
+                'online' => __('Online Call', 'mc-leads-engine'),
+                'coffee' => __('Coffee Meeting', 'mc-leads-engine'),
+                'office' => __('Office Visit', 'mc-leads-engine'),
+                'host'   => __('Our Studio', 'mc-leads-engine'),
+            );
+            $replacements['[booking_type]'] = $type_labels[$booking['meeting_type']] ?? $booking['meeting_type'];
+            $replacements['[booking_date]'] = $booking['meeting_date'];
+            $replacements['[booking_time]'] = $booking['meeting_time'];
+            $replacements['[booking_location]'] = $booking['location_name'] . ($booking['location_address'] ? ' (' . $booking['location_address'] . ')' : '');
+        } else {
+            $replacements['[booking_type]'] = '';
+            $replacements['[booking_date]'] = '';
+            $replacements['[booking_time]'] = '';
+            $replacements['[booking_location]'] = '';
+        }
+
         // 1. Get standard answers joined with questions
         global $wpdb;
         $answers = $wpdb->get_results(

@@ -1,0 +1,456 @@
+:root {
+  --mc-booking-brand: #2563eb;
+  --mc-booking-brand-hover: #1d4ed8;
+  --mc-booking-bg: #ffffff;
+  --mc-booking-card-bg: #ffffff;
+  --mc-booking-text: #0f172a;
+  --mc-booking-text-muted: #64748b;
+  --mc-booking-border: #e2e8f0;
+  --mc-booking-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --mc-booking-radius: 12px;
+}
+
+/* Glassmorphism theme container */
+.mc-booking-engine {
+  max-width: 860px;
+  margin: 40px auto;
+  font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--mc-booking-text);
+  line-height: 1.5;
+}
+
+.mc-booking-card {
+  background: var(--mc-booking-card-bg);
+  border: 1px solid var(--mc-booking-border);
+  border-radius: var(--mc-booking-radius);
+  box-shadow: var(--mc-booking-shadow);
+  padding: 40px;
+}
+
+/* Progress indicator */
+.mc-booking-progress {
+  margin-bottom: 40px;
+}
+
+.mc-progress-bar {
+  background: var(--mc-booking-border);
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.mc-progress-fill {
+  background: linear-gradient(90deg, var(--mc-booking-brand), #3b82f6);
+  height: 100%;
+  display: block;
+  transition: width 0.4s ease;
+}
+
+.mc-progress-labels {
+  display: flex;
+  justify-content: space-between;
+}
+
+.mc-progress-labels .step-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mc-booking-text-muted);
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.mc-progress-labels .step-label.active {
+  color: var(--mc-booking-brand);
+}
+
+/* Steps */
+.mc-booking-step h3 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: var(--mc-booking-text);
+}
+
+.mc-booking-step .step-description {
+  color: var(--mc-booking-text-muted);
+  margin-bottom: 30px;
+  font-size: 15px;
+}
+
+/* Step 1: Type Grid */
+.mc-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.mc-type-card {
+  background: #f8fafc;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mc-type-card:hover {
+  background: #f1f5f9;
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.mc-type-card.selected {
+  background: #eff6ff;
+  border-color: var(--mc-booking-brand);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+}
+
+.mc-type-card .card-icon {
+  font-size: 32px;
+  color: var(--mc-booking-brand);
+  margin-bottom: 12px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mc-type-card h4 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+.mc-type-card p {
+  font-size: 12px;
+  color: var(--mc-booking-text-muted);
+  margin: 0;
+}
+
+/* Step 2: Location */
+.mc-info-banner {
+  background: #eff6ff;
+  border-left: 4px solid var(--mc-booking-brand);
+  padding: 20px;
+  border-radius: 0 8px 8px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.mc-info-banner .dashicons {
+  font-size: 24px;
+  color: var(--mc-booking-brand);
+  margin-top: 2px;
+}
+
+.mc-info-banner h4 {
+  margin: 0 0 5px 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.mc-info-banner p {
+  margin: 0;
+  font-size: 14px;
+  color: #1e3a8a;
+}
+
+.field-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.field-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--mc-booking-border);
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.3s;
+  background: #f8fafc;
+}
+
+.field-input:focus {
+  outline: none;
+  border-color: var(--mc-booking-brand);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.field-desc {
+  display: block;
+  font-size: 12px;
+  color: var(--mc-booking-text-muted);
+  margin-top: 6px;
+}
+
+/* Step 3: Date & Time Grid */
+.mc-datetime-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+@media(max-width: 768px) {
+  .mc-datetime-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mc-calendar-container {
+  border: 1px solid var(--mc-booking-border);
+  border-radius: 12px;
+  padding: 20px;
+  background: #f8fafc;
+}
+
+.mc-calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.mc-cal-month-year {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.mc-cal-nav {
+  background: none;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 5px 10px;
+  font-size: 16px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.mc-cal-nav:hover {
+  background: #e2e8f0;
+}
+
+.mc-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--mc-booking-text-muted);
+  margin-bottom: 10px;
+}
+
+.mc-calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.mc-cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mc-cal-day.empty {
+  cursor: default;
+}
+
+.mc-cal-day.disabled {
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.mc-cal-day.active {
+  background: #e2e8f0;
+}
+
+.mc-cal-day.selected {
+  background: var(--mc-booking-brand) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+.mc-cal-day:not(.empty):not(.disabled):not(.selected):hover {
+  background: #cbd5e1;
+}
+
+.mc-slots-container {
+  border: 1px solid var(--mc-booking-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.mc-slots-container h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.mc-slots-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  overflow-y: auto;
+  max-height: 280px;
+  flex-grow: 1;
+}
+
+.mc-time-slot {
+  background: #f8fafc;
+  border: 1px solid var(--mc-booking-border);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mc-time-slot.selected {
+  background: var(--mc-booking-brand);
+  color: #ffffff;
+  border-color: var(--mc-booking-brand);
+}
+
+.mc-time-slot:not(.selected):hover {
+  background: #e2e8f0;
+}
+
+.no-slots-msg {
+  color: var(--mc-booking-text-muted);
+  font-style: italic;
+  font-size: 13px;
+  text-align: center;
+  padding: 20px 0;
+  grid-column: 1 / -1;
+}
+
+/* Step 4: Summary Banner */
+.mc-booking-summary-banner {
+  background: #f8fafc;
+  border: 1px solid var(--mc-booking-border);
+  border-radius: 10px;
+  padding: 18px 24px;
+  display: flex;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.summary-item .dashicons {
+  color: var(--mc-booking-brand);
+}
+
+/* Nav Actions */
+.mc-step-nav {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+  justify-content: flex-end;
+}
+
+.mc-step-nav .btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.mc-step-nav .btn.primary {
+  background: var(--mc-booking-brand);
+  color: #ffffff;
+  border: none;
+}
+
+.mc-step-nav .btn.primary:hover:not(:disabled) {
+  background: var(--mc-booking-brand-hover);
+}
+
+.mc-step-nav .btn.secondary {
+  background: #ffffff;
+  color: var(--mc-booking-text);
+  border: 1px solid var(--mc-booking-border);
+}
+
+.mc-step-nav .btn.secondary:hover {
+  background: #f8fafc;
+}
+
+.mc-step-nav .btn:disabled {
+  background: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* CF7 Custom Overrides for standard integration UI */
+.mc-cf7-wrapper form {
+  display: grid;
+  gap: 15px;
+}
+
+.mc-cf7-wrapper form p {
+  margin: 0;
+}
+
+.mc-cf7-wrapper form label {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--mc-booking-text);
+}
+
+.mc-cf7-wrapper form input[type="text"],
+.mc-cf7-wrapper form input[type="email"],
+.mc-cf7-wrapper form input[type="tel"],
+.mc-cf7-wrapper form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--mc-booking-border);
+  border-radius: 8px;
+  font-size: 14px;
+  background: #f8fafc;
+}
+
+.mc-cf7-wrapper form input[type="submit"] {
+  background: var(--mc-booking-brand);
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+  padding: 14px 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+  justify-self: end;
+}
+
+.mc-cf7-wrapper form input[type="submit"]:hover {
+  background: var(--mc-booking-brand-hover);
+}

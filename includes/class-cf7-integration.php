@@ -122,6 +122,25 @@ class MC_Leads_Engine_CF7_Integration {
         $cf7_data['pricing'] = $pricing;
 
         $lead_id = mc_leads_engine_leads_repository()->create_lead($survey_id, $session_id, $answers, $pricing, $cf7_data);
+
+        // Capture booking details if present in WPCF7 submission
+        if (!empty($posted_data['mc_booking_type'])) {
+            $booking_data = array(
+                'meeting_type'     => sanitize_text_field($posted_data['mc_booking_type']),
+                'location_type'    => sanitize_text_field($posted_data['mc_booking_location_type'] ?? 'custom'),
+                'location_name'    => sanitize_text_field($posted_data['mc_booking_location_name'] ?? ''),
+                'location_address' => sanitize_text_field($posted_data['mc_booking_location_address'] ?? ''),
+                'meeting_date'     => sanitize_text_field($posted_data['mc_booking_date'] ?? ''),
+                'meeting_time'     => sanitize_text_field($posted_data['mc_booking_time'] ?? ''),
+                'client_name'      => mc_leads_engine_leads_repository()->find_client_name($lead_id),
+                'client_email'     => mc_leads_engine_leads_repository()->find_client_email($lead_id),
+                'client_phone'     => mc_leads_engine_leads_repository()->find_client_phone($lead_id),
+                'client_message'   => sanitize_textarea_field($posted_data['your-message'] ?? $posted_data['message'] ?? ''),
+            );
+            
+            mc_leads_engine_booking()->save_booking($lead_id, $booking_data);
+        }
+
         $session->set_lead_id($lead_id);
     }
 

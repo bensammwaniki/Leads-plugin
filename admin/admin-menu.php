@@ -77,6 +77,15 @@ function mc_leads_engine_register_admin_menu() {
 
     add_submenu_page(
         'mc-leads-engine',
+        __('Bookings', 'mc-leads-engine'),
+        __('Bookings', 'mc-leads-engine'),
+        'manage_options',
+        'mc-leads-engine-bookings',
+        'mc_leads_engine_render_bookings_page'
+    );
+
+    add_submenu_page(
+        'mc-leads-engine',
         __('Settings', 'mc-leads-engine'),
         __('Settings', 'mc-leads-engine'),
         'manage_options',
