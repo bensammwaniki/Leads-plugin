@@ -584,6 +584,112 @@
 
 /* Adjust card layout spacing for back button space */
 .mc-booking-progress {
+  padding-left: 0;
+  transition: padding-left 0.3s ease;
+}
+
+.mc-booking-engine.has-back-button .mc-booking-progress {
   padding-left: 50px;
 }
+
+/* Mobile responsiveness & spacing optimizations */
+@media (max-width: 768px) {
+  .mc-booking-engine {
+    margin: 20px 10px;
+  }
+
+  .mc-booking-card {
+    padding: 30px 20px;
+  }
+
+  .mc-booking-progress {
+    margin-bottom: 25px;
+  }
+
+  .mc-booking-step h3 {
+    font-size: 20px;
+  }
+
+  .mc-booking-step .step-description {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .mc-back-btn-round {
+    top: 25px;
+    left: 20px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .mc-booking-engine.has-back-button .mc-booking-progress {
+    padding-left: 42px;
+  }
+
+  .mc-datetime-grid {
+    gap: 20px;
+  }
+
+  .mc-calendar-container,
+  .mc-slots-container {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Progress Step Labels - show only active to prevent overlapping */
+  .mc-progress-labels .step-label {
+    display: none;
+  }
+  .mc-progress-labels .step-label.active {
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-size: 13px;
+  }
+
+  .mc-booking-summary-banner {
+    flex-direction: column;
+    gap: 12px;
+    padding: 15px;
+  }
+
+  .mc-step-nav {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .mc-step-nav .btn {
+    width: 100%;
+    text-align: center;
+    padding: 14px 20px; /* Larger tap targets for mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .mc-booking-card {
+    padding: 24px 15px;
+  }
+
+  .mc-back-btn-round {
+    top: 20px;
+    left: 15px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .mc-booking-engine.has-back-button .mc-booking-progress {
+    padding-left: 38px;
+  }
+
+  .mc-booking-step h3 {
+    font-size: 18px;
+  }
+
+  .mc-info-banner {
+    padding: 15px;
+    gap: 10px;
+  }
+}
+
 

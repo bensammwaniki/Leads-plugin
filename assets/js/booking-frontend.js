@@ -101,8 +101,10 @@ function initBookingWizard(container) {
     if (backBtnRound) {
       if (state.currentStep > 1) {
         backBtnRound.style.display = 'flex';
+        container.classList.add('has-back-button');
       } else {
         backBtnRound.style.display = 'none';
+        container.classList.remove('has-back-button');
       }
     }
     

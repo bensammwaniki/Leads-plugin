@@ -198,9 +198,14 @@
 
 .btn.primary,
 .button-primary {
-  background: linear-gradient(135deg, var(--mc-brand), #1d4ed8);
+  background: var(--mc-brand);
   border-color: transparent;
   color: #fff;
+}
+
+.btn.primary:hover,
+.button-primary:hover {
+  background: #1d4ed8;
 }
 
 .btn .dashicons,

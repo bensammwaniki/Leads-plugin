@@ -357,7 +357,7 @@
 .mc-leads-engine .button.button-primary,
 .mc-leads-engine button[type="submit"],
 .mc-leads-engine .mc-submit-survey {
-  background: linear-gradient(135deg, #F15D61, #332223) !important;
+  background: #F15D61 !important;
   border-color: transparent !important;
   color: #ffffff !important;
   box-shadow: none !important;
@@ -367,7 +367,7 @@
 .mc-leads-engine .button.button-primary:hover,
 .mc-leads-engine button[type="submit"]:hover,
 .mc-leads-engine .mc-submit-survey:hover {
-  background: linear-gradient(135deg, #d1494d, #332223) !important;
+  background: #d1494d !important;
   transform: translateY(-1px) !important;
   box-shadow: none !important;
 }
