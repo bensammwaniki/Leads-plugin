@@ -35,6 +35,14 @@ function mc_leads_engine_handle_settings_save() {
         'admin_whatsapp_phone'       => sanitize_text_field(wp_unslash($_POST['admin_whatsapp_phone'] ?? $current_settings['admin_whatsapp_phone'] ?? '')),
         'admin_whatsapp_body'        => sanitize_textarea_field(wp_unslash($_POST['admin_whatsapp_body'] ?? $current_settings['admin_whatsapp_body'] ?? '')),
         'user_whatsapp_body'         => sanitize_textarea_field(wp_unslash($_POST['user_whatsapp_body'] ?? $current_settings['user_whatsapp_body'] ?? '')),
+        
+        // Booking notification templates
+        'booking_user_email_subject' => sanitize_text_field(wp_unslash($_POST['booking_user_email_subject'] ?? $current_settings['booking_user_email_subject'] ?? '')),
+        'booking_user_email_body'    => wp_kses_post(wp_unslash($_POST['booking_user_email_body'] ?? $current_settings['booking_user_email_body'] ?? '')),
+        'booking_admin_email_subject'=> sanitize_text_field(wp_unslash($_POST['booking_admin_email_subject'] ?? $current_settings['booking_admin_email_subject'] ?? '')),
+        'booking_admin_email_body'   => wp_kses_post(wp_unslash($_POST['booking_admin_email_body'] ?? $current_settings['booking_admin_email_body'] ?? '')),
+        'booking_admin_whatsapp_body'=> sanitize_textarea_field(wp_unslash($_POST['booking_admin_whatsapp_body'] ?? $current_settings['booking_admin_whatsapp_body'] ?? '')),
+        'booking_user_whatsapp_body' => sanitize_textarea_field(wp_unslash($_POST['booking_user_whatsapp_body'] ?? $current_settings['booking_user_whatsapp_body'] ?? '')),
 
         // Booking Settings variables
         'gcal_client_id'             => sanitize_text_field(wp_unslash($_POST['gcal_client_id'] ?? $current_settings['gcal_client_id'] ?? '')),
@@ -142,6 +150,19 @@ function mc_leads_engine_render_settings_page() {
                                 <span class="field-desc"><?php esc_html_e('Enter raw HTML with inline CSS. Dynamic bracket variables like [your-name] will be replaced with form values.', 'mc-leads-engine'); ?></span>
                             </div>
                         </div>
+                        <div class="card" style="margin-top: 20px;">
+                            <div class="card-title"><?php esc_html_e('Booking User Email Notification Template', 'mc-leads-engine'); ?></div>
+                            <p class="field-desc-top"><?php esc_html_e('Configure the HTML email sent to clients who schedule a booking. Use inline CSS to style the markup.', 'mc-leads-engine'); ?></p>
+                            <div class="settings-field">
+                                <label class="field-label"><?php esc_html_e('Email Subject', 'mc-leads-engine'); ?></label>
+                                <input class="field-input" type="text" name="booking_user_email_subject" value="<?php echo esc_attr($settings['booking_user_email_subject'] ?? ''); ?>">
+                            </div>
+                            <div class="settings-field">
+                                <label class="field-label"><?php esc_html_e('HTML Body Template', 'mc-leads-engine'); ?></label>
+                                <textarea class="field-input code-font" rows="14" name="booking_user_email_body"><?php echo esc_textarea($settings['booking_user_email_body'] ?? ''); ?></textarea>
+                                <span class="field-desc"><?php esc_html_e('Enter raw HTML with inline CSS. Dynamic bracket variables like [booking_type], [booking_date], [booking_time], [booking_location] will be replaced.', 'mc-leads-engine'); ?></span>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- Admin Email Tab -->
@@ -157,6 +178,19 @@ function mc_leads_engine_render_settings_page() {
                                 <label class="field-label"><?php esc_html_e('HTML Body Template', 'mc-leads-engine'); ?></label>
                                 <textarea class="field-input code-font" rows="14" name="admin_email_body"><?php echo esc_textarea($settings['admin_email_body']); ?></textarea>
                                 <span class="field-desc"><?php esc_html_e('Sent to your Notification Email address. Use [all_answers] to print a structured log of all survey inputs.', 'mc-leads-engine'); ?></span>
+                            </div>
+                        </div>
+                        <div class="card" style="margin-top: 20px;">
+                            <div class="card-title"><?php esc_html_e('Booking Admin Email Notification Template', 'mc-leads-engine'); ?></div>
+                            <p class="field-desc-top"><?php esc_html_e('Configure the HTML notification email sent to the site admin when a booking is scheduled.', 'mc-leads-engine'); ?></p>
+                            <div class="settings-field">
+                                <label class="field-label"><?php esc_html_e('Email Subject', 'mc-leads-engine'); ?></label>
+                                <input class="field-input" type="text" name="booking_admin_email_subject" value="<?php echo esc_attr($settings['booking_admin_email_subject'] ?? ''); ?>">
+                            </div>
+                            <div class="settings-field">
+                                <label class="field-label"><?php esc_html_e('HTML Body Template', 'mc-leads-engine'); ?></label>
+                                <textarea class="field-input code-font" rows="14" name="booking_admin_email_body"><?php echo esc_textarea($settings['booking_admin_email_body'] ?? ''); ?></textarea>
+                                <span class="field-desc"><?php esc_html_e('Sent to your Notification Email address.', 'mc-leads-engine'); ?></span>
                             </div>
                         </div>
                     </div>
@@ -198,17 +232,27 @@ function mc_leads_engine_render_settings_page() {
                                 <span class="field-desc"><?php esc_html_e('The administrator phone number in international format.', 'mc-leads-engine'); ?></span>
                             </div>
                             <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Admin Alert Message Template', 'mc-leads-engine'); ?></label>
+                                <label class="field-label"><?php esc_html_e('Leads Admin Alert Message Template', 'mc-leads-engine'); ?></label>
                                 <textarea class="field-input" rows="6" name="admin_whatsapp_body"><?php echo esc_textarea($settings['admin_whatsapp_body']); ?></textarea>
-                                <span class="field-desc"><?php esc_html_e('Plain text alert sent to the admin phone number.', 'mc-leads-engine'); ?></span>
+                                <span class="field-desc"><?php esc_html_e('Plain text alert sent to the admin phone number for leads.', 'mc-leads-engine'); ?></span>
+                            </div>
+                            <div class="settings-field">
+                                <label class="field-label"><?php esc_html_e('Booking Admin Alert Message Template', 'mc-leads-engine'); ?></label>
+                                <textarea class="field-input" rows="6" name="booking_admin_whatsapp_body"><?php echo esc_textarea($settings['booking_admin_whatsapp_body'] ?? ''); ?></textarea>
+                                <span class="field-desc"><?php esc_html_e('Plain text alert sent to the admin phone number for bookings.', 'mc-leads-engine'); ?></span>
                             </div>
 
                             <h3 style="margin-top: 25px; border-bottom: 1px solid var(--mc-border); padding-bottom: 5px; color: var(--mc-text);"><?php esc_html_e('User Alert Settings', 'mc-leads-engine'); ?></h3>
 
                             <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('User Alert Message Template', 'mc-leads-engine'); ?></label>
+                                <label class="field-label"><?php esc_html_e('Leads User Alert Message Template', 'mc-leads-engine'); ?></label>
                                 <textarea class="field-input" rows="6" name="user_whatsapp_body"><?php echo esc_textarea($settings['user_whatsapp_body']); ?></textarea>
-                                <span class="field-desc"><?php esc_html_e('Plain text notification sent directly to the client\'s phone number (discovered automatically from standard answers or CF7).', 'mc-leads-engine'); ?></span>
+                                <span class="field-desc"><?php esc_html_e('Plain text notification sent directly to the client\'s phone number for leads.', 'mc-leads-engine'); ?></span>
+                            </div>
+                            <div class="settings-field">
+                                <label class="field-label"><?php esc_html_e('Booking User Alert Message Template', 'mc-leads-engine'); ?></label>
+                                <textarea class="field-input" rows="6" name="booking_user_whatsapp_body"><?php echo esc_textarea($settings['booking_user_whatsapp_body'] ?? ''); ?></textarea>
+                                <span class="field-desc"><?php esc_html_e('Plain text notification sent directly to the client\'s phone number for bookings.', 'mc-leads-engine'); ?></span>
                             </div>
                         </div>
                     </div>

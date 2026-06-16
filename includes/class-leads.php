@@ -454,11 +454,21 @@ class MC_Leads_Engine_Leads {
         $settings = mc_leads_engine_get_settings();
         $headers = array('Content-Type: text/html; charset=UTF-8');
 
+        // Check if there is an associated booking to determine if this is a booking lead
+        global $wpdb;
+        $is_booking = (bool) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM " . mc_leads_engine_table('bookings') . " WHERE lead_id = %d",
+            absint($lead_id)
+        ));
+
         // 1. User Email notification
         $client_email = $this->find_client_email($lead_id);
         if (!empty($client_email) && is_email($client_email)) {
-            $user_subject = $this->parse_message_placeholders($settings['user_email_subject'] ?? '', $lead_id, false);
-            $user_body = $this->parse_message_placeholders($settings['user_email_body'] ?? '', $lead_id, true);
+            $subject_key = $is_booking ? 'booking_user_email_subject' : 'user_email_subject';
+            $body_key = $is_booking ? 'booking_user_email_body' : 'user_email_body';
+
+            $user_subject = $this->parse_message_placeholders($settings[$subject_key] ?? '', $lead_id, false);
+            $user_body = $this->parse_message_placeholders($settings[$body_key] ?? '', $lead_id, true);
             
             if (!empty($user_subject) && !empty($user_body)) {
                 wp_mail($client_email, $user_subject, $user_body, $headers);
@@ -468,8 +478,11 @@ class MC_Leads_Engine_Leads {
         // 2. Admin Email notification
         $admin_recipient = !empty($settings['notification_email']) ? $settings['notification_email'] : get_option('admin_email');
         if (is_email($admin_recipient)) {
-            $admin_subject = $this->parse_message_placeholders($settings['admin_email_subject'] ?? '', $lead_id, false);
-            $admin_body = $this->parse_message_placeholders($settings['admin_email_body'] ?? '', $lead_id, true);
+            $subject_key = $is_booking ? 'booking_admin_email_subject' : 'admin_email_subject';
+            $body_key = $is_booking ? 'booking_admin_email_body' : 'admin_email_body';
+
+            $admin_subject = $this->parse_message_placeholders($settings[$subject_key] ?? '', $lead_id, false);
+            $admin_body = $this->parse_message_placeholders($settings[$body_key] ?? '', $lead_id, true);
             
             if (!empty($admin_subject) && !empty($admin_body)) {
                 wp_mail($admin_recipient, $admin_subject, $admin_body, $headers);
@@ -478,7 +491,8 @@ class MC_Leads_Engine_Leads {
 
         // 3. Admin WhatsApp notification
         $admin_phone = $settings['admin_whatsapp_phone'] ?? '';
-        $whatsapp_body = $this->parse_message_placeholders($settings['admin_whatsapp_body'] ?? '', $lead_id, false);
+        $whatsapp_body_key = $is_booking ? 'booking_admin_whatsapp_body' : 'admin_whatsapp_body';
+        $whatsapp_body = $this->parse_message_placeholders($settings[$whatsapp_body_key] ?? '', $lead_id, false);
         
         if (!empty($admin_phone) && !empty($whatsapp_body)) {
             $this->send_whatsapp_notification($admin_phone, $whatsapp_body);
@@ -486,7 +500,8 @@ class MC_Leads_Engine_Leads {
 
         // 4. User WhatsApp notification
         $client_phone = $this->find_client_phone($lead_id);
-        $user_whatsapp_body = $this->parse_message_placeholders($settings['user_whatsapp_body'] ?? '', $lead_id, false);
+        $user_whatsapp_body_key = $is_booking ? 'booking_user_whatsapp_body' : 'user_whatsapp_body';
+        $user_whatsapp_body = $this->parse_message_placeholders($settings[$user_whatsapp_body_key] ?? '', $lead_id, false);
         
         if (!empty($client_phone) && !empty($user_whatsapp_body)) {
             $this->send_whatsapp_notification($client_phone, $user_whatsapp_body);
