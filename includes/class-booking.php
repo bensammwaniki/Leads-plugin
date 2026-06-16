@@ -9,19 +9,137 @@ class MC_Leads_Engine_Booking {
         add_shortcode('mc_booking', array($this, 'render_booking_shortcode'));
         add_action('wp_enqueue_scripts', array($this, 'register_assets'));
         
-        // AJAX Endpoints
+        // REST API endpoint — used by the frontend instead of admin-ajax.php.
+        // REST requests go to /wp-json/ (frontend URL) which LiteSpeed never
+        // blocks for unauthenticated users, unlike /wp-admin/admin-ajax.php.
+        add_action('rest_api_init', array($this, 'register_rest_routes'));
+
+        // Legacy AJAX endpoints kept as fallback (may be blocked on some hosts).
         add_action('wp_ajax_mc_leads_booking_slots', array($this, 'ajax_get_slots'));
         add_action('wp_ajax_nopriv_mc_leads_booking_slots', array($this, 'ajax_get_slots'));
         add_action('wp_ajax_mc_leads_booking_predefined', array($this, 'ajax_get_predefined'));
         add_action('wp_ajax_nopriv_mc_leads_booking_predefined', array($this, 'ajax_get_predefined'));
 
+        // Tell LiteSpeed Cache plugin to never cache our booking AJAX actions.
+        add_action('init', array($this, 'litespeed_no_cache_for_booking_ajax'));
+
         // Admin OAuth Hook
         add_action('admin_init', array($this, 'handle_gcal_oauth_callback'));
+    }
+
+    /**
+     * Register WordPress REST API routes for the booking wizard.
+     * These bypass LiteSpeed's wp-admin blocking entirely.
+     */
+    public function register_rest_routes() {
+        register_rest_route('mc-leads/v1', '/slots', array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'rest_get_slots'),
+            'permission_callback' => '__return_true', // Public read-only endpoint
+        ));
+
+        register_rest_route('mc-leads/v1', '/predefined-locations', array(
+            'methods'             => 'GET',
+            'callback'            => array($this, 'rest_get_predefined'),
+            'permission_callback' => '__return_true',
+        ));
+    }
+
+    /**
+     * REST API callback: return available time slots for a given date.
+     *
+     * @param WP_REST_Request $request
+     * @return WP_REST_Response|WP_Error
+     */
+    public function rest_get_slots( $request ) {
+        $date = sanitize_text_field($request->get_param('date'));
+        if (empty($date) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            return new WP_Error(
+                'invalid_date',
+                __('Invalid date format.', 'mc-leads-engine'),
+                array('status' => 400)
+            );
+        }
+
+        try {
+            $slots = $this->get_available_slots_for_date($date);
+            return rest_ensure_response(array('slots' => $slots));
+        } catch (Throwable $e) {
+            return new WP_Error(
+                'slots_error',
+                $e->getMessage(),
+                array('status' => 500)
+            );
+        }
+    }
+
+    /**
+     * REST API callback: return predefined meeting locations.
+     *
+     * @param WP_REST_Request $request
+     * @return WP_REST_Response
+     */
+    public function rest_get_predefined( $request ) {
+        $settings = mc_leads_engine_get_settings();
+        $predefined_raw = $settings['booking_predefined_locations'] ?? '';
+        $predefined = array();
+        if (!empty($predefined_raw)) {
+            foreach (explode('|', $predefined_raw) as $part) {
+                $trimmed = trim($part);
+                if ($trimmed !== '') {
+                    $predefined[] = $trimmed;
+                }
+            }
+        }
+        return rest_ensure_response(array('locations' => $predefined));
+    }
+
+    /**
+     * Tell the LiteSpeed Cache WordPress plugin to skip caching for our
+     * booking AJAX endpoints.  Hostinger runs LiteSpeed at the server level
+     * AND via the WordPress plugin — both need to be told to back off.
+     */
+    public function litespeed_no_cache_for_booking_ajax() {
+        $action = sanitize_key($_REQUEST['action'] ?? '');
+        if (in_array($action, array('mc_leads_booking_slots', 'mc_leads_booking_predefined'), true)) {
+            // LiteSpeed Cache plugin hook
+            do_action('litespeed_control_set_nocache', 'mc_booking_ajax');
+            // Generic no-cache for any other cache plugin
+            if (!defined('DONOTCACHEPAGE')) {
+                define('DONOTCACHEPAGE', true);
+            }
+            if (!defined('DONOTCACHEDB')) {
+                define('DONOTCACHEDB', true);
+            }
+        }
     }
 
     public function register_assets() {
         wp_register_style('mc-leads-engine-booking', MC_LEADS_ENGINE_URL . 'assets/css/booking-frontend.css', array(), MC_LEADS_ENGINE_VERSION);
         wp_register_script('mc-leads-engine-booking', MC_LEADS_ENGINE_URL . 'assets/js/booking-frontend.js', array(), MC_LEADS_ENGINE_VERSION, true);
+    }
+
+    /**
+     * Enqueue Google Maps JS API with Places library.
+     * Called from render_booking_shortcode when a Maps API key is configured.
+     * The 'callback=MCLeadsBookingMapsReady' parameter lets the JS know when
+     * Maps has fully loaded so autocomplete can be attached to the input.
+     */
+    private function enqueue_google_maps( $api_key ) {
+        if (empty($api_key) || wp_script_is('google-maps-places', 'enqueued')) {
+            return;
+        }
+
+        $src = add_query_arg(array(
+            'key'       => $api_key,
+            'libraries' => 'places',
+            'loading'   => 'async',
+            'callback'  => 'MCLeadsBookingMapsReady',
+        ), 'https://maps.googleapis.com/maps/api/js');
+
+        // Register without a version (null) so WordPress doesn't append ?ver= which
+        // can confuse the Maps API loader.
+        wp_enqueue_script('google-maps-places', $src, array(), null, true);
     }
 
     public function render_booking_shortcode($atts) {
@@ -41,6 +159,12 @@ class MC_Leads_Engine_Booking {
 
         wp_enqueue_style('mc-leads-engine-booking');
         wp_enqueue_script('mc-leads-engine-booking');
+
+        // Load Google Maps Places API if a key is configured.
+        $gmaps_key = $settings['gmaps_api_key'] ?? '';
+        if (!empty($gmaps_key)) {
+            $this->enqueue_google_maps($gmaps_key);
+        }
 
         $session = mc_leads_engine_session();
         $session->maybe_start_session();
@@ -65,7 +189,9 @@ class MC_Leads_Engine_Booking {
             'MCLeadsBooking',
             array(
                 'ajaxUrl'   => admin_url('admin-ajax.php'),
+                'restUrl'   => rest_url('mc-leads/v1/'),   // Used by frontend — bypasses LiteSpeed wp-admin blocking
                 'nonce'     => wp_create_nonce('mc_leads_engine_booking_nonce'),
+                'restNonce' => wp_create_nonce('wp_rest'),  // REST API nonce for authenticated calls
                 'cf7Id'     => $cf7_id,
                 'sessionId' => $session->get_session_id(),
                 'gmapsKey'  => $settings['gmaps_api_key'] ?? '',
@@ -93,19 +219,36 @@ class MC_Leads_Engine_Booking {
     }
 
     public function ajax_get_slots() {
-        check_ajax_referer('mc_leads_engine_booking_nonce', 'nonce');
+        // Force no-cache at every possible layer:
+        // 1. nocache_headers() sends standard Cache-Control / Pragma headers
+        // 2. X-LiteSpeed-Cache-Control tells LiteSpeed server NOT to cache/serve from cache
+        // 3. X-LiteSpeed-Vary resets any vary-key LiteSpeed stored
+        // Without these, Hostinger's LiteSpeed serves a cached HTML page to browsers
+        // that lack a WordPress session cookie (Firefox, Safari, Edge, incognito),
+        // causing JSON.parse() to fail and showing "Error loading slots".
+        nocache_headers();
+        header('X-LiteSpeed-Cache-Control: no-cache, no-store');
+        header('X-LiteSpeed-Vary: ');
+        header('X-Robots-Tag: noindex');
 
         $date = sanitize_text_field($_POST['date'] ?? '');
         if (empty($date) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
             wp_send_json_error(array('message' => __('Invalid date format.', 'mc-leads-engine')));
         }
 
-        $slots = $this->get_available_slots_for_date($date);
-        wp_send_json_success(array('slots' => $slots));
+        try {
+            $slots = $this->get_available_slots_for_date($date);
+            wp_send_json_success(array('slots' => $slots));
+        } catch (Exception $e) {
+            wp_send_json_error(array('message' => $e->getMessage()));
+        }
     }
 
     public function ajax_get_predefined() {
-        check_ajax_referer('mc_leads_engine_booking_nonce', 'nonce');
+        // Force no-cache at every possible layer (see ajax_get_slots for explanation).
+        nocache_headers();
+        header('X-LiteSpeed-Cache-Control: no-cache, no-store');
+        header('X-LiteSpeed-Vary: ');
         $settings = mc_leads_engine_get_settings();
         $predefined_raw = $settings['booking_predefined_locations'] ?? '';
         $predefined = array();

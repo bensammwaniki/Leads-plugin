@@ -15,7 +15,9 @@ function initBookingWizard(container) {
   const cf7Id = container.dataset.cf7Id;
   const sessionId = container.dataset.sessionId;
   let ajaxUrl = window.MCLeadsBooking?.ajaxUrl || '';
+  let restUrl = window.MCLeadsBooking?.restUrl || '';
   const nonce = window.MCLeadsBooking?.nonce || '';
+  const restNonce = window.MCLeadsBooking?.restNonce || '';
   const gmapsKey = window.MCLeadsBooking?.gmapsKey || '';
 
   // Resolve hostname mismatch when testing on mobile devices in local network
@@ -30,6 +32,19 @@ function initBookingWizard(container) {
       }
     } catch (e) {
       console.error('Error resolving AJAX URL hostname:', e);
+    }
+  }
+  if (restUrl && restUrl.startsWith('http')) {
+    try {
+      const urlObj = new URL(restUrl);
+      if (urlObj.hostname !== window.location.hostname) {
+        urlObj.hostname = window.location.hostname;
+        urlObj.port = window.location.port;
+        urlObj.protocol = window.location.protocol;
+        restUrl = urlObj.toString();
+      }
+    } catch (e) {
+      console.error('Error resolving REST URL hostname:', e);
     }
   }
 
@@ -159,6 +174,51 @@ function initBookingWizard(container) {
   const predefinedSelect = container.querySelector('.mc-predefined-select');
   const customAddressInput = container.querySelector('.mc-custom-address');
 
+  // Track whether Places autocomplete has been attached to the input
+  let autocompleteAttached = false;
+
+  /**
+   * Attach Google Maps Places Autocomplete to the custom address input.
+   * Called either immediately (if Maps is already loaded) or from the
+   * MCLeadsBookingMapsReady global callback when the async script finishes.
+   */
+  function attachPlacesAutocomplete() {
+    if (autocompleteAttached || !customAddressInput) return;
+    if (typeof google === 'undefined' || !google.maps || !google.maps.places) return;
+
+    autocompleteAttached = true;
+
+    const step2Next = container.querySelector('.mc-booking-step[data-step="2"] .mc-next-btn');
+
+    const autocomplete = new google.maps.places.Autocomplete(customAddressInput, {
+      // Request both address and establishment results so business names work too
+      types: [],
+    });
+
+    // Bias results towards Kenya (adjust if your clients are elsewhere)
+    autocomplete.setComponentRestrictions({ country: 'ke' });
+
+    autocomplete.addListener('place_changed', () => {
+      const place = autocomplete.getPlace();
+      const addr = place.formatted_address || customAddressInput.value;
+      if (addr) {
+        state.locationAddress = addr;
+        state.locationName = place.name || 'Client Office';
+        state.locationType = 'custom';
+        if (step2Next) {
+          step2Next.disabled = false;
+          step2Next.removeAttribute('disabled');
+        }
+      }
+    });
+  }
+
+  // Global callback invoked by the Maps async loader when ready.
+  // Must be a window-level function because the Maps script calls it by name.
+  window.MCLeadsBookingMapsReady = function () {
+    attachPlacesAutocomplete();
+  };
+
   function initStep2() {
     // Show correct pane
     locPanes.forEach(pane => {
@@ -174,22 +234,14 @@ function initBookingWizard(container) {
       step2Next.setAttribute('disabled', 'true');
     }
 
-    // Load Maps Autocomplete if Maps Key exists and element is active
-    if (state.meetingType === 'office' && gmapsKey && typeof google !== 'undefined') {
-      const autocomplete = new google.maps.places.Autocomplete(customAddressInput, {
-        types: ['address'],
-        componentRestrictions: { country: 'KE' }
-      });
-      autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace();
-        if (place.formatted_address) {
-          state.locationAddress = place.formatted_address;
-          state.locationName = place.name || 'Client Office';
-          state.locationType = 'custom';
-          step2Next.disabled = false;
-          step2Next.removeAttribute('disabled');
-        }
-      });
+    // For office type, try to attach autocomplete immediately.
+    // If Maps hasn't loaded yet it will be attached by MCLeadsBookingMapsReady.
+    if (state.meetingType === 'office' && gmapsKey) {
+      attachPlacesAutocomplete();
+      // Focus the input so the user can start typing right away
+      if (customAddressInput) {
+        customAddressInput.focus();
+      }
     }
   }
 
@@ -356,24 +408,56 @@ function initBookingWizard(container) {
     if (!slotsGrid) return;
     slotsGrid.innerHTML = '<p class="no-slots-msg">Loading slots...</p>';
 
-    const payload = new URLSearchParams();
-    payload.set('action', 'mc_leads_booking_slots');
-    payload.set('nonce', nonce);
-    payload.set('date', dateStr);
+    // Use the REST API endpoint instead of admin-ajax.php.
+    // admin-ajax.php lives under /wp-admin/ which Hostinger's LiteSpeed security
+    // layer intercepts for unauthenticated (non-Chrome) browsers and returns an
+    // HTML redirect page — breaking JSON parsing and showing "Error loading slots".
+    // /wp-json/ is a public frontend URL that LiteSpeed never blocks.
+    const endpoint = (restUrl || ajaxUrl)
+      .replace(/\/$/, '') + (restUrl ? '/slots' : '') +
+      '?_t=' + Date.now();
 
-    fetch(ajaxUrl, {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      },
-      body: payload.toString()
-    })
-      .then(res => res.json())
+    const isRest = !!restUrl;
+
+    const fetchOptions = isRest
+      ? {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-WP-Nonce': restNonce,
+            'Cache-Control': 'no-cache',
+          },
+          body: JSON.stringify({ date: dateStr }),
+        }
+      : {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'Cache-Control': 'no-cache',
+          },
+          body: new URLSearchParams({ action: 'mc_leads_booking_slots', nonce, date: dateStr }).toString(),
+        };
+
+    fetch(endpoint, fetchOptions)
+      .then(res => {
+        const ct = res.headers.get('content-type') || '';
+        if (!ct.includes('json')) {
+          throw new Error('Non-JSON response (likely a cached page). Status: ' + res.status);
+        }
+        return res.json();
+      })
       .then(res => {
         slotsGrid.innerHTML = '';
-        if (res.success && res.data && res.data.slots && res.data.slots.length > 0) {
-          res.data.slots.forEach(slot => {
+
+        // REST API returns { slots: [...] } directly.
+        // admin-ajax returns { success: true, data: { slots: [...] } }.
+        const slots = isRest
+          ? (res.slots || [])
+          : (res.success && res.data ? res.data.slots || [] : []);
+
+        if (slots.length > 0) {
+          slots.forEach(slot => {
             const slotEl = document.createElement('div');
             slotEl.className = 'mc-time-slot';
             slotEl.textContent = slot.time;
@@ -386,7 +470,6 @@ function initBookingWizard(container) {
               slotEl.classList.add('selected');
               state.selectedTime = slot.time;
 
-              // Enable Step 3 next button
               const step3Next = container.querySelector('.mc-booking-step[data-step="3"] .mc-next-btn');
               if (step3Next) {
                 step3Next.disabled = false;
@@ -397,10 +480,14 @@ function initBookingWizard(container) {
             slotsGrid.appendChild(slotEl);
           });
         } else {
-          slotsGrid.innerHTML = '<p class="no-slots-msg">No slots available for this day.</p>';
+          const msg = (!isRest && !res.success && res.data?.message)
+            ? res.data.message
+            : (res.message || 'No slots available for this day.');
+          slotsGrid.innerHTML = '<p class="no-slots-msg">' + msg + '</p>';
         }
       })
-      .catch(() => {
+      .catch(err => {
+        console.error('MC Booking slots error:', err);
         slotsGrid.innerHTML = '<p class="no-slots-msg">Error loading slots. Please try again.</p>';
       });
   }
