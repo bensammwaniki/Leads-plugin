@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) {
 }
 
 class MC_Leads_Engine_Leads {
-    public function create_lead($survey_id, $session_id, $answers, $pricing, $cf7_data = array()) {
+    public function create_lead($survey_id, $session_id, $answers, $pricing, $cf7_data = array(), $skip_notifications = false) {
         global $wpdb;
 
         $survey_id = absint($survey_id);
@@ -55,8 +55,13 @@ class MC_Leads_Engine_Leads {
             $this->record_lead_metrics($survey_id, $payload['total_price'], $payload['lead_score']);
         }
 
-        // Trigger email and WhatsApp notifications
-        $this->send_submission_notifications($lead_id);
+        // Only trigger notifications here for non-booking leads.
+        // Booking leads call send_submission_notifications() themselves AFTER
+        // save_booking() has written the booking row — otherwise is_booking is
+        // always false and the wrong (survey estimate) email gets sent.
+        if (!$skip_notifications) {
+            $this->send_submission_notifications($lead_id);
+        }
 
         return $lead_id;
     }

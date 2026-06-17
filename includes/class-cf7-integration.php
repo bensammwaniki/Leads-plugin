@@ -121,10 +121,21 @@ class MC_Leads_Engine_CF7_Integration {
         $cf7_data['survey_data'] = $answers;
         $cf7_data['pricing'] = $pricing;
 
-        $lead_id = mc_leads_engine_leads_repository()->create_lead($survey_id, $session_id, $answers, $pricing, $cf7_data);
+        // Detect booking submission early so we can delay notifications until
+        // after save_booking() has written the booking row to the database.
+        $is_booking_submission = !empty($posted_data['mc_booking_type']);
+
+        $lead_id = mc_leads_engine_leads_repository()->create_lead(
+            $survey_id,
+            $session_id,
+            $answers,
+            $pricing,
+            $cf7_data,
+            $is_booking_submission  // skip_notifications = true for bookings
+        );
 
         // Capture booking details if present in WPCF7 submission
-        if (!empty($posted_data['mc_booking_type'])) {
+        if ($is_booking_submission) {
             $booking_data = array(
                 'meeting_type'     => sanitize_text_field($posted_data['mc_booking_type']),
                 'location_type'    => sanitize_text_field($posted_data['mc_booking_location_type'] ?? 'custom'),
@@ -137,8 +148,12 @@ class MC_Leads_Engine_CF7_Integration {
                 'client_phone'     => mc_leads_engine_leads_repository()->find_client_phone($lead_id),
                 'client_message'   => sanitize_textarea_field($posted_data['your-message'] ?? $posted_data['message'] ?? ''),
             );
-            
+
             mc_leads_engine_booking()->save_booking($lead_id, $booking_data);
+
+            // Now that the booking row exists, fire notifications with the correct
+            // booking templates (is_booking check inside will now return true).
+            mc_leads_engine_leads_repository()->send_submission_notifications($lead_id);
         }
 
         $session->set_lead_id($lead_id);
