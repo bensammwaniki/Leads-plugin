@@ -159,6 +159,11 @@ function initBookingWizard(container) {
       } else {
         lbl.classList.remove('active');
       }
+      if (sNum === state.currentStep) {
+        lbl.classList.add('current');
+      } else {
+        lbl.classList.remove('current');
+      }
     });
 
     // Trigger step-specific logic

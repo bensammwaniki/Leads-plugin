@@ -628,6 +628,26 @@
     margin-bottom: 25px;
   }
 
+  /* Show only the currently active step label as a simplified text line */
+  .mc-progress-labels .step-label {
+    display: none;
+  }
+
+  .mc-progress-labels .step-label.current {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--mc-booking-brand);
+  }
+
+  .mc-progress-labels .step-label.current::before {
+    content: "Step " attr(data-step) " of 4: ";
+    color: var(--mc-booking-text-muted);
+    font-weight: 500;
+  }
+
   .mc-booking-step h3 {
     font-size: 17px;
   }
@@ -659,17 +679,6 @@
 }
 
 @media (max-width: 600px) {
-  /* Progress Step Labels - show only active to prevent overlapping */
-  .mc-progress-labels .step-label {
-    display: none;
-  }
-  .mc-progress-labels .step-label.active {
-    display: block;
-    width: 100%;
-    text-align: center;
-    font-size: 13px;
-  }
-
   .mc-booking-summary-banner {
     flex-direction: column;
     gap: 12px;

@@ -51,8 +51,13 @@ function mc_leads_engine_render_analytics_page() {
     $metrics = mc_leads_engine_leads_repository()->get_dashboard_metrics();
     $analytics = $metrics['analytics'];
     $survey_id = absint($_GET['survey_id'] ?? 0);
-    $orderby = sanitize_text_field($_GET['orderby'] ?? 'created_at');
-    $order = sanitize_text_field($_GET['order'] ?? 'DESC');
+    $orderby = sanitize_key($_GET['orderby'] ?? 'created_at');
+    $order = strtoupper($_GET['order'] ?? 'DESC') === 'ASC' ? 'ASC' : 'DESC';
+
+    $allowed_orderby = array('id', 'created_at', 'lead_score', 'total_price');
+    if (!in_array($orderby, $allowed_orderby, true)) {
+        $orderby = 'created_at';
+    }
 
     // Handle CSV Export
     if (!empty($_GET['export_analytics'])) {
@@ -245,17 +250,63 @@ function mc_leads_engine_render_analytics_page() {
                 </a>
             </form>
 
+            <?php
+            $sort_id_url = add_query_arg(array(
+                'orderby' => 'id',
+                'order'   => ($orderby === 'id' && $order === 'DESC') ? 'ASC' : 'DESC',
+            ));
+            $sort_date_url = add_query_arg(array(
+                'orderby' => 'created_at',
+                'order'   => ($orderby === 'created_at' && $order === 'DESC') ? 'ASC' : 'DESC',
+            ));
+            $sort_price_url = add_query_arg(array(
+                'orderby' => 'total_price',
+                'order'   => ($orderby === 'total_price' && $order === 'DESC') ? 'ASC' : 'DESC',
+            ));
+            $sort_score_url = add_query_arg(array(
+                'orderby' => 'lead_score',
+                'order'   => ($orderby === 'lead_score' && $order === 'DESC') ? 'ASC' : 'DESC',
+            ));
+            ?>
             <div style="overflow-x: auto;">
                 <table class="widefat striped mc-analytics-leads-table">
                     <thead>
                         <tr>
-                            <th><?php esc_html_e('Lead ID', 'mc-leads-engine'); ?></th>
-                            <th><?php esc_html_e('Date', 'mc-leads-engine'); ?></th>
+                            <th>
+                                <a href="<?php echo esc_url($sort_id_url); ?>" style="text-decoration:none;">
+                                    <?php esc_html_e('Lead ID', 'mc-leads-engine'); ?>
+                                    <?php if ($orderby === 'id') : ?>
+                                        <span class="dashicons dashicons-arrow-<?php echo $order === 'ASC' ? 'up' : 'down'; ?>-alt2" style="font-size:16px; width:16px; height:16px; vertical-align:middle;"></span>
+                                    <?php endif; ?>
+                                </a>
+                            </th>
+                            <th>
+                                <a href="<?php echo esc_url($sort_date_url); ?>" style="text-decoration:none;">
+                                    <?php esc_html_e('Date', 'mc-leads-engine'); ?>
+                                    <?php if ($orderby === 'created_at') : ?>
+                                        <span class="dashicons dashicons-arrow-<?php echo $order === 'ASC' ? 'up' : 'down'; ?>-alt2" style="font-size:16px; width:16px; height:16px; vertical-align:middle;"></span>
+                                    <?php endif; ?>
+                                </a>
+                            </th>
                             <th><?php esc_html_e('Survey', 'mc-leads-engine'); ?></th>
                             <th><?php esc_html_e('Client Details', 'mc-leads-engine'); ?></th>
                             <th><?php esc_html_e('Submitted Answers', 'mc-leads-engine'); ?></th>
-                            <th><?php esc_html_e('Price', 'mc-leads-engine'); ?></th>
-                            <th><?php esc_html_e('Score', 'mc-leads-engine'); ?></th>
+                            <th>
+                                <a href="<?php echo esc_url($sort_price_url); ?>" style="text-decoration:none;">
+                                    <?php esc_html_e('Price', 'mc-leads-engine'); ?>
+                                    <?php if ($orderby === 'total_price') : ?>
+                                        <span class="dashicons dashicons-arrow-<?php echo $order === 'ASC' ? 'up' : 'down'; ?>-alt2" style="font-size:16px; width:16px; height:16px; vertical-align:middle;"></span>
+                                    <?php endif; ?>
+                                </a>
+                            </th>
+                            <th>
+                                <a href="<?php echo esc_url($sort_score_url); ?>" style="text-decoration:none;">
+                                    <?php esc_html_e('Score', 'mc-leads-engine'); ?>
+                                    <?php if ($orderby === 'lead_score') : ?>
+                                        <span class="dashicons dashicons-arrow-<?php echo $order === 'ASC' ? 'up' : 'down'; ?>-alt2" style="font-size:16px; width:16px; height:16px; vertical-align:middle;"></span>
+                                    <?php endif; ?>
+                                </a>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
