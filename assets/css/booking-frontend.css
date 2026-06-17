@@ -592,9 +592,10 @@
 }
 
 .mc-back-btn-round svg {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   stroke: var(--mc-booking-brand);
+  stroke-width: 2.5;
   transition: transform 0.2s ease;
   flex-shrink: 0;
 }

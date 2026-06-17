@@ -251,41 +251,14 @@ function initBookingWizard(container) {
     }
   }
 
-  // Predefined Location Select Event
-  if (predefinedSelect) {
-    predefinedSelect.addEventListener('change', () => {
-      const val = predefinedSelect.value;
-      const step2Next = container.querySelector('.mc-booking-step[data-step="2"] .mc-next-btn');
-      if (val) {
-        // Dropdown selected — clear the custom text input so they don't conflict
-        if (customAddressInput) customAddressInput.value = '';
-        state.locationName = val;
-        state.locationAddress = val;
-        state.locationType = 'predefined';
-        step2Next.disabled = false;
-        step2Next.removeAttribute('disabled');
-      } else {
-        // Dropdown cleared — only lock Continue if custom field is also empty
-        const customVal = customAddressInput ? customAddressInput.value.trim() : '';
-        if (!customVal || customVal.length <= 3) {
-          state.locationName = '';
-          state.locationAddress = '';
-          state.locationType = '';
-          step2Next.disabled = true;
-          step2Next.setAttribute('disabled', 'true');
-        }
-      }
-    });
-  }
-
-  // Custom Address text input event (used by both the office pane and the coffee pane)
+  // Single location input event — handles both coffee and office panes.
+  // For coffee: datalist provides predefined suggestions; Google Maps autocomplete
+  // provides additional search. Both feed into the same field.
   if (customAddressInput) {
     customAddressInput.addEventListener('input', () => {
-      const val = customAddressInput.value;
+      const val = customAddressInput.value.trim();
       const step2Next = container.querySelector('.mc-booking-step[data-step="2"] .mc-next-btn');
-      if (val.trim().length > 3) {
-        // Custom field has content — clear the dropdown so they don't conflict
-        if (predefinedSelect && state.meetingType === 'coffee') predefinedSelect.value = '';
+      if (val.length > 3) {
         const label = state.meetingType === 'coffee' ? 'Coffee Spot' : 'Client Office';
         state.locationName = label;
         state.locationAddress = val;
@@ -293,15 +266,11 @@ function initBookingWizard(container) {
         step2Next.disabled = false;
         step2Next.removeAttribute('disabled');
       } else {
-        // Custom field is empty — only lock if dropdown is also empty (for coffee)
-        const predefinedVal = predefinedSelect ? predefinedSelect.value : '';
-        if (!predefinedVal) {
-          state.locationName = '';
-          state.locationAddress = '';
-          state.locationType = '';
-          step2Next.disabled = true;
-          step2Next.setAttribute('disabled', 'true');
-        }
+        state.locationName = '';
+        state.locationAddress = '';
+        state.locationType = '';
+        step2Next.disabled = true;
+        step2Next.setAttribute('disabled', 'true');
       }
     });
   }
@@ -310,16 +279,8 @@ function initBookingWizard(container) {
     if (state.meetingType === 'online' || state.meetingType === 'host') {
       return true;
     }
-    if (state.meetingType === 'coffee') {
-      // Either the dropdown OR the custom text field must have a value
-      const hasPredefined = predefinedSelect && predefinedSelect.value !== '';
-      const hasCustom = customAddressInput && customAddressInput.value.trim().length > 3;
-      return hasPredefined || hasCustom;
-    }
-    if (state.meetingType === 'office') {
-      return customAddressInput && customAddressInput.value.trim().length > 3;
-    }
-    return true;
+    // Both coffee and office now use the single customAddressInput field
+    return customAddressInput && customAddressInput.value.trim().length > 3;
   }
 
   // 4. Step 3 Logic (Calendar and time slots)

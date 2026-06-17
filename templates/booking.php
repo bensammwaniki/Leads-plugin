@@ -99,21 +99,20 @@ if (!function_exists('mc_booking_get_svg_icon')) {
 
                 <!-- Coffee Predefined -->
                 <div class="mc-loc-pane" data-type="coffee" hidden>
-                    <label class="field-label"><?php esc_html_e('Choose Predefined Coffee Spot / Business Hub', 'mc-leads-engine'); ?></label>
-                    <select class="field-input mc-predefined-select">
-                        <option value=""><?php esc_html_e('-- Select location --', 'mc-leads-engine'); ?></option>
+                    <label class="field-label"><?php esc_html_e('Coffee Spot / Meeting Venue', 'mc-leads-engine'); ?></label>
+                    <input
+                        type="text"
+                        class="field-input mc-custom-address"
+                        list="mc-predefined-locations-<?php echo esc_attr($cf7_id); ?>"
+                        placeholder="<?php esc_attr_e('e.g. Java House, Westlands — or type to search', 'mc-leads-engine'); ?>"
+                        autocomplete="off"
+                    >
+                    <datalist id="mc-predefined-locations-<?php echo esc_attr($cf7_id); ?>">
                         <?php foreach ($predefined as $loc) : ?>
-                            <option value="<?php echo esc_attr($loc); ?>"><?php echo esc_html($loc); ?></option>
+                            <option value="<?php echo esc_attr($loc); ?>"></option>
                         <?php endforeach; ?>
-                    </select>
-
-                    <div class="mc-loc-divider">
-                        <span><?php esc_html_e('or type your preferred location', 'mc-leads-engine'); ?></span>
-                    </div>
-
-                    <label class="field-label"><?php esc_html_e('Your Preferred Spot', 'mc-leads-engine'); ?></label>
-                    <input type="text" class="field-input mc-custom-address" placeholder="<?php esc_attr_e('e.g. Java House, Westlands', 'mc-leads-engine'); ?>">
-                    <span class="field-desc"><?php esc_html_e('Start typing to search for a café, restaurant, or business hub.', 'mc-leads-engine'); ?></span>
+                    </datalist>
+                    <span class="field-desc"><?php esc_html_e('Select a suggested spot or start typing to search for any café, restaurant, or business hub.', 'mc-leads-engine'); ?></span>
                 </div>
 
                 <!-- Custom Address (Office) -->
