@@ -5,8 +5,11 @@ if (!defined('ABSPATH')) {
 }
 
 class MC_Leads_Engine_CF7_Integration {
+    private $last_created_lead_id = 0;
+
     public function __construct() {
         add_action('wpcf7_before_send_mail', array($this, 'capture_submission'));
+        add_filter('wpcf7_ajax_json_echo', array($this, 'add_lead_id_to_ajax_response'), 10, 2);
     }
 
     public function get_integration_by_survey($survey_id) {
@@ -157,6 +160,14 @@ class MC_Leads_Engine_CF7_Integration {
         }
 
         $session->set_lead_id($lead_id);
+        $this->last_created_lead_id = $lead_id;
+    }
+
+    public function add_lead_id_to_ajax_response($response, $result) {
+        if ($this->last_created_lead_id) {
+            $response['mc_lead_id'] = $this->last_created_lead_id;
+        }
+        return $response;
     }
 
     protected function sanitize_cf7_payload($posted_data) {

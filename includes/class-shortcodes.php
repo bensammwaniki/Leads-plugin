@@ -60,13 +60,6 @@ class MC_Leads_Engine_Shortcodes {
         $session = mc_leads_engine_session();
         $session->maybe_start_session();
 
-        // Handle survey restart request
-        if (isset($_GET['mc_leads_restart']) && (int) $_GET['mc_leads_restart'] === 1) {
-            $session->clear_session();
-            wp_safe_redirect(remove_query_arg('mc_leads_restart'));
-            exit;
-        }
-
         // Handle thank you success screen
         if (isset($_GET['mc_leads_submitted']) && (int) $_GET['mc_leads_submitted'] === 1) {
             $session->clear_session();

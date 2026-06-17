@@ -518,8 +518,10 @@ function initBookingWizard(container) {
   document.addEventListener('wpcf7mailsent', (event) => {
     // Check if the submitted form matches the booking wizard's form
     if (String(event.detail.contactFormId) === String(cf7Id)) {
-      // Redirect or show thank you page containing lead session details
-      const thankYouUrl = window.location.origin + window.location.pathname + `?mc_leads_submitted=1&lead_id=active`;
+      const responseLeadId = event.detail.apiResponse?.mc_lead_id;
+      const leadId = responseLeadId ? responseLeadId : 'active';
+      // Redirect or show thank you page containing lead details
+      const thankYouUrl = window.location.origin + window.location.pathname + `?mc_leads_submitted=1&lead_id=${leadId}`;
       window.location.href = thankYouUrl;
     }
   }, false);

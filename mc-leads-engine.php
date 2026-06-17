@@ -351,4 +351,26 @@ function mc_leads_engine_boot() {
 }
 add_action('plugins_loaded', 'mc_leads_engine_boot');
 
+function mc_leads_engine_handle_session_actions() {
+    if (is_admin()) {
+        return;
+    }
+
+    $session = mc_leads_engine_session();
+
+    if (isset($_GET['mc_leads_restart']) && (int) $_GET['mc_leads_restart'] === 1) {
+        $session->clear_session();
+        wp_safe_redirect(remove_query_arg('mc_leads_restart'));
+        exit;
+    }
+
+    if (isset($_GET['mc_new_booking']) && (int) $_GET['mc_new_booking'] === 1) {
+        $session->clear_session();
+        wp_safe_redirect(remove_query_arg('mc_new_booking'));
+        exit;
+    }
+}
+add_action('template_redirect', 'mc_leads_engine_handle_session_actions');
+
 register_activation_hook(__FILE__, 'mc_leads_engine_install');
+

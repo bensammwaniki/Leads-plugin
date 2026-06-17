@@ -43,7 +43,15 @@ $new_estimate_url = remove_query_arg(array('mc_leads_submitted', 'lead_id'));
         <?php endif; ?>
         
         <p class="mc-thank-you-action">
-            <a href="<?php echo esc_url($new_estimate_url); ?>" class="button button-primary mc-submit-survey"><?php echo $booking ? esc_html__('Book Another Meeting', 'mc-leads-engine') : esc_html__('New Estimate', 'mc-leads-engine'); ?></a>
+            <?php
+            if ($booking) {
+                $book_again_url = add_query_arg('mc_new_booking', '1', $new_estimate_url);
+                echo '<a href="' . esc_url($book_again_url) . '" class="button button-primary mc-submit-survey">' . esc_html__('Book Another Meeting', 'mc-leads-engine') . '</a>';
+            } else {
+                $new_estimate_restart_url = add_query_arg('mc_leads_restart', '1', $new_estimate_url);
+                echo '<a href="' . esc_url($new_estimate_restart_url) . '" class="button button-primary mc-submit-survey">' . esc_html__('New Estimate', 'mc-leads-engine') . '</a>';
+            }
+            ?>
         </p>
     </div>
 </div>
