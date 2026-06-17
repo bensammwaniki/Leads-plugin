@@ -172,44 +172,46 @@ function initBookingWizard(container) {
   // 3. Step 2 Logic (Location Selection)
   const locPanes = Array.from(container.querySelectorAll('.mc-loc-pane'));
   const predefinedSelect = container.querySelector('.mc-predefined-select');
-  const customAddressInput = container.querySelector('.mc-custom-address');
+  const customAddressInputs = Array.from(container.querySelectorAll('.mc-custom-address'));
 
-  // Track whether Places autocomplete has been attached to the input
+  // Track whether Places autocomplete has been attached to the inputs
   let autocompleteAttached = false;
 
   /**
-   * Attach Google Maps Places Autocomplete to the custom address input.
+   * Attach Google Maps Places Autocomplete to the custom address inputs.
    * Called either immediately (if Maps is already loaded) or from the
    * MCLeadsBookingMapsReady global callback when the async script finishes.
    */
   function attachPlacesAutocomplete() {
-    if (autocompleteAttached || !customAddressInput) return;
+    if (autocompleteAttached || customAddressInputs.length === 0) return;
     if (typeof google === 'undefined' || !google.maps || !google.maps.places) return;
 
     autocompleteAttached = true;
 
     const step2Next = container.querySelector('.mc-booking-step[data-step="2"] .mc-next-btn');
 
-    const autocomplete = new google.maps.places.Autocomplete(customAddressInput, {
-      // Request both address and establishment results so business names work too
-      types: [],
-    });
+    customAddressInputs.forEach(input => {
+      const autocomplete = new google.maps.places.Autocomplete(input, {
+        // Request both address and establishment results so business names work too
+        types: [],
+      });
 
-    // Bias results towards Kenya (adjust if your clients are elsewhere)
-    autocomplete.setComponentRestrictions({ country: 'ke' });
+      // Bias results towards Kenya (adjust if your clients are elsewhere)
+      autocomplete.setComponentRestrictions({ country: 'ke' });
 
-    autocomplete.addListener('place_changed', () => {
-      const place = autocomplete.getPlace();
-      const addr = place.formatted_address || customAddressInput.value;
-      if (addr) {
-        state.locationAddress = addr;
-        state.locationName = place.name || 'Client Office';
-        state.locationType = 'custom';
-        if (step2Next) {
-          step2Next.disabled = false;
-          step2Next.removeAttribute('disabled');
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        const addr = place.formatted_address || input.value;
+        if (addr) {
+          state.locationAddress = addr;
+          state.locationName = place.name || (state.meetingType === 'coffee' ? 'Coffee Spot' : 'Client Office');
+          state.locationType = 'custom';
+          if (step2Next) {
+            step2Next.disabled = false;
+            step2Next.removeAttribute('disabled');
+          }
         }
-      }
+      });
     });
   }
 
@@ -239,8 +241,9 @@ function initBookingWizard(container) {
     if (state.meetingType === 'office' && gmapsKey) {
       attachPlacesAutocomplete();
       // Focus the input so the user can start typing right away
-      if (customAddressInput) {
-        customAddressInput.focus();
+      const officeInput = container.querySelector('.mc-loc-pane[data-type="office"] .mc-custom-address');
+      if (officeInput) {
+        officeInput.focus();
       }
     }
 
@@ -248,15 +251,19 @@ function initBookingWizard(container) {
     // Attach Places autocomplete to the custom input so suggestions appear on keyup.
     if (state.meetingType === 'coffee' && gmapsKey) {
       attachPlacesAutocomplete();
+      const coffeeInput = container.querySelector('.mc-loc-pane[data-type="coffee"] .mc-custom-address');
+      if (coffeeInput) {
+        coffeeInput.focus();
+      }
     }
   }
 
   // Single location input event — handles both coffee and office panes.
   // For coffee: datalist provides predefined suggestions; Google Maps autocomplete
   // provides additional search. Both feed into the same field.
-  if (customAddressInput) {
-    customAddressInput.addEventListener('input', () => {
-      const val = customAddressInput.value.trim();
+  customAddressInputs.forEach(input => {
+    input.addEventListener('input', () => {
+      const val = input.value.trim();
       const step2Next = container.querySelector('.mc-booking-step[data-step="2"] .mc-next-btn');
       if (val.length > 3) {
         const label = state.meetingType === 'coffee' ? 'Coffee Spot' : 'Client Office';
@@ -273,14 +280,14 @@ function initBookingWizard(container) {
         step2Next.setAttribute('disabled', 'true');
       }
     });
-  }
+  });
 
   function validateStep2() {
     if (state.meetingType === 'online' || state.meetingType === 'host') {
       return true;
     }
-    // Both coffee and office now use the single customAddressInput field
-    return customAddressInput && customAddressInput.value.trim().length > 3;
+    const activeInput = container.querySelector(`.mc-loc-pane[data-type="${state.meetingType}"] .mc-custom-address`);
+    return activeInput && activeInput.value.trim().length > 3;
   }
 
   // 4. Step 3 Logic (Calendar and time slots)

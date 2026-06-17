@@ -113,7 +113,11 @@ class MC_Leads_Engine_CF7_Integration {
         $session_data = $session->get_data();
         $survey_id = !empty($session_data['active_survey_id']) ? absint($session_data['active_survey_id']) : absint($integration['survey_id'] ?? 0);
 
-        if (!$survey_id) {
+        // Detect booking submission early so we can delay notifications until
+        // after save_booking() has written the booking row to the database.
+        $is_booking_submission = !empty($posted_data['mc_booking_type']);
+
+        if (!$survey_id && !$is_booking_submission) {
             return;
         }
 
@@ -123,10 +127,6 @@ class MC_Leads_Engine_CF7_Integration {
         $cf7_data['cf7_form_id'] = $cf7_form_id;
         $cf7_data['survey_data'] = $answers;
         $cf7_data['pricing'] = $pricing;
-
-        // Detect booking submission early so we can delay notifications until
-        // after save_booking() has written the booking row to the database.
-        $is_booking_submission = !empty($posted_data['mc_booking_type']);
 
         $lead_id = mc_leads_engine_leads_repository()->create_lead(
             $survey_id,
