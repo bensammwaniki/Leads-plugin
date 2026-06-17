@@ -13,6 +13,15 @@ function mc_leads_engine_render_bookings_page() {
 
     $filter_type = sanitize_key($_GET['meeting_type'] ?? 'all');
     $filter_status = sanitize_key($_GET['status'] ?? 'all');
+    $orderby = sanitize_key($_GET['orderby'] ?? 'date');
+    $order = strtoupper($_GET['order'] ?? 'DESC') === 'ASC' ? 'ASC' : 'DESC';
+
+    if ($orderby === 'id') {
+        $order_sql = "b.id {$order}";
+    } else {
+        $orderby = 'date';
+        $order_sql = "b.meeting_date {$order}, b.meeting_time {$order}";
+    }
 
     // Retrieve metrics
     $bookings_table = mc_leads_engine_table('bookings');
@@ -47,7 +56,7 @@ function mc_leads_engine_render_bookings_page() {
             FROM {$bookings_table} b
             LEFT JOIN {$leads_table} l ON b.lead_id = l.id
             WHERE {$where_sql}
-            ORDER BY b.meeting_date DESC, b.meeting_time DESC
+            ORDER BY {$order_sql}
             LIMIT 200";
 
     if (!empty($params)) {
@@ -88,8 +97,20 @@ function mc_leads_engine_render_bookings_page() {
         <div class="mc-panel">
             <h2><?php esc_html_e('Scheduled Meetings', 'mc-leads-engine'); ?></h2>
 
+            <?php
+            $sort_id_url = add_query_arg(array(
+                'orderby' => 'id',
+                'order'   => ($orderby === 'id' && $order === 'DESC') ? 'ASC' : 'DESC',
+            ));
+            $sort_date_url = add_query_arg(array(
+                'orderby' => 'date',
+                'order'   => ($orderby === 'date' && $order === 'DESC') ? 'ASC' : 'DESC',
+            ));
+            ?>
             <form method="get" class="mc-analytics-filter-form" style="margin-bottom: 20px;">
                 <input type="hidden" name="page" value="mc-leads-engine-bookings">
+                <input type="hidden" name="orderby" value="<?php echo esc_attr($orderby); ?>">
+                <input type="hidden" name="order" value="<?php echo esc_attr($order); ?>">
 
                 <label>
                     <?php esc_html_e('Meeting Format:', 'mc-leads-engine'); ?>
@@ -118,8 +139,22 @@ function mc_leads_engine_render_bookings_page() {
                 <table class="widefat striped mc-analytics-leads-table">
                     <thead>
                         <tr>
-                            <th><?php esc_html_e('ID', 'mc-leads-engine'); ?></th>
-                            <th><?php esc_html_e('Date & Time', 'mc-leads-engine'); ?></th>
+                            <th>
+                                <a href="<?php echo esc_url($sort_id_url); ?>" style="text-decoration:none;">
+                                    <?php esc_html_e('ID', 'mc-leads-engine'); ?>
+                                    <?php if ($orderby === 'id') : ?>
+                                        <span class="dashicons dashicons-arrow-<?php echo $order === 'ASC' ? 'up' : 'down'; ?>-alt2" style="font-size:16px; width:16px; height:16px; vertical-align:middle;"></span>
+                                    <?php endif; ?>
+                                </a>
+                            </th>
+                            <th>
+                                <a href="<?php echo esc_url($sort_date_url); ?>" style="text-decoration:none;">
+                                    <?php esc_html_e('Date & Time', 'mc-leads-engine'); ?>
+                                    <?php if ($orderby === 'date') : ?>
+                                        <span class="dashicons dashicons-arrow-<?php echo $order === 'ASC' ? 'up' : 'down'; ?>-alt2" style="font-size:16px; width:16px; height:16px; vertical-align:middle;"></span>
+                                    <?php endif; ?>
+                                </a>
+                            </th>
                             <th><?php esc_html_e('Meeting Type', 'mc-leads-engine'); ?></th>
                             <th><?php esc_html_e('Location details', 'mc-leads-engine'); ?></th>
                             <th><?php esc_html_e('Client Contact', 'mc-leads-engine'); ?></th>
