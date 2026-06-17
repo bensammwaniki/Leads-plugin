@@ -66,8 +66,8 @@
 
 /* Steps */
 .mc-booking-step h3 {
-  font-size: 21px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 600;
   margin-top: 0;
   margin-bottom: 8px;
   color: var(--mc-booking-text);
@@ -591,15 +591,15 @@
   box-shadow: 0 4px 14px rgba(241, 93, 97, 0.2);
 }
 
-.mc-back-btn-round .dashicons {
-  font-size: 20px;
+.mc-back-btn-round svg {
   width: 20px;
   height: 20px;
-  line-height: 20px;
+  stroke: var(--mc-booking-brand);
   transition: transform 0.2s ease;
+  flex-shrink: 0;
 }
 
-.mc-back-btn-round:hover .dashicons {
+.mc-back-btn-round:hover svg {
   transform: translateX(-2px);
 }
 

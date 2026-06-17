@@ -25,7 +25,7 @@ if (!function_exists('mc_booking_get_svg_icon')) {
     <div class="mc-booking-card" style="position: relative;">
         <!-- Back Button -->
         <button type="button" class="mc-back-btn-round" aria-label="<?php esc_attr_e('Back', 'mc-leads-engine'); ?>" style="display: none;">
-            <span class="dashicons dashicons-arrow-left-alt2"></span>
+            <?php echo mc_booking_get_svg_icon('arrow-left'); ?>
         </button>
         <!-- Progress Bar -->
         <div class="mc-booking-progress">
