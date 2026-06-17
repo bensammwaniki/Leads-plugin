@@ -106,6 +106,14 @@ if (!function_exists('mc_booking_get_svg_icon')) {
                             <option value="<?php echo esc_attr($loc); ?>"><?php echo esc_html($loc); ?></option>
                         <?php endforeach; ?>
                     </select>
+
+                    <div class="mc-loc-divider">
+                        <span><?php esc_html_e('or type your preferred location', 'mc-leads-engine'); ?></span>
+                    </div>
+
+                    <label class="field-label"><?php esc_html_e('Your Preferred Spot', 'mc-leads-engine'); ?></label>
+                    <input type="text" class="field-input mc-custom-address" placeholder="<?php esc_attr_e('e.g. Java House, Westlands', 'mc-leads-engine'); ?>">
+                    <span class="field-desc"><?php esc_html_e('Start typing to search for a café, restaurant, or business hub.', 'mc-leads-engine'); ?></span>
                 </div>
 
                 <!-- Custom Address (Office) -->

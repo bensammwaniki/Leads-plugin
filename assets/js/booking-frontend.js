@@ -243,6 +243,12 @@ function initBookingWizard(container) {
         customAddressInput.focus();
       }
     }
+
+    // For coffee type: the pane now has BOTH a select and a custom text input.
+    // Attach Places autocomplete to the custom input so suggestions appear on keyup.
+    if (state.meetingType === 'coffee' && gmapsKey) {
+      attachPlacesAutocomplete();
+    }
   }
 
   // Predefined Location Select Event
@@ -251,38 +257,51 @@ function initBookingWizard(container) {
       const val = predefinedSelect.value;
       const step2Next = container.querySelector('.mc-booking-step[data-step="2"] .mc-next-btn');
       if (val) {
+        // Dropdown selected — clear the custom text input so they don't conflict
+        if (customAddressInput) customAddressInput.value = '';
         state.locationName = val;
         state.locationAddress = val;
         state.locationType = 'predefined';
         step2Next.disabled = false;
         step2Next.removeAttribute('disabled');
       } else {
-        state.locationName = '';
-        state.locationAddress = '';
-        state.locationType = '';
-        step2Next.disabled = true;
-        step2Next.setAttribute('disabled', 'true');
+        // Dropdown cleared — only lock Continue if custom field is also empty
+        const customVal = customAddressInput ? customAddressInput.value.trim() : '';
+        if (!customVal || customVal.length <= 3) {
+          state.locationName = '';
+          state.locationAddress = '';
+          state.locationType = '';
+          step2Next.disabled = true;
+          step2Next.setAttribute('disabled', 'true');
+        }
       }
     });
   }
 
-  // Custom Address text input event
+  // Custom Address text input event (used by both the office pane and the coffee pane)
   if (customAddressInput) {
     customAddressInput.addEventListener('input', () => {
       const val = customAddressInput.value;
       const step2Next = container.querySelector('.mc-booking-step[data-step="2"] .mc-next-btn');
-      if (val.trim().length > 5) {
-        state.locationName = 'Client Office';
+      if (val.trim().length > 3) {
+        // Custom field has content — clear the dropdown so they don't conflict
+        if (predefinedSelect && state.meetingType === 'coffee') predefinedSelect.value = '';
+        const label = state.meetingType === 'coffee' ? 'Coffee Spot' : 'Client Office';
+        state.locationName = label;
         state.locationAddress = val;
         state.locationType = 'custom';
         step2Next.disabled = false;
         step2Next.removeAttribute('disabled');
       } else {
-        state.locationName = '';
-        state.locationAddress = '';
-        state.locationType = '';
-        step2Next.disabled = true;
-        step2Next.setAttribute('disabled', 'true');
+        // Custom field is empty — only lock if dropdown is also empty (for coffee)
+        const predefinedVal = predefinedSelect ? predefinedSelect.value : '';
+        if (!predefinedVal) {
+          state.locationName = '';
+          state.locationAddress = '';
+          state.locationType = '';
+          step2Next.disabled = true;
+          step2Next.setAttribute('disabled', 'true');
+        }
       }
     });
   }
@@ -291,11 +310,14 @@ function initBookingWizard(container) {
     if (state.meetingType === 'online' || state.meetingType === 'host') {
       return true;
     }
-    if (state.meetingType === 'coffee' && predefinedSelect.value === '') {
-      return false;
+    if (state.meetingType === 'coffee') {
+      // Either the dropdown OR the custom text field must have a value
+      const hasPredefined = predefinedSelect && predefinedSelect.value !== '';
+      const hasCustom = customAddressInput && customAddressInput.value.trim().length > 3;
+      return hasPredefined || hasCustom;
     }
-    if (state.meetingType === 'office' && customAddressInput.value.trim().length <= 5) {
-      return false;
+    if (state.meetingType === 'office') {
+      return customAddressInput && customAddressInput.value.trim().length > 3;
     }
     return true;
   }
