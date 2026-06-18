@@ -80,7 +80,9 @@ class MC_Leads_Engine_XLSX_Writer {
      * @return string Escaped string.
      */
     private function escape_xml($str) {
-        return htmlspecialchars((string) $str, ENT_XML1 | ENT_COMPAT, 'UTF-8');
+        // Strip control characters that are invalid in XML (except tab, newline, carriage return)
+        $str = preg_replace('/[^\x09\x0A\x0D\x20-\x7E\xA0-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]/u', '', (string)$str);
+        return htmlspecialchars($str, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 
     /**
@@ -134,29 +136,30 @@ class MC_Leads_Engine_XLSX_Writer {
             '</workbook>';
 
         // Main style sheet setting Segoe UI, blue headers, zebra rows, borders, and score colors
+        // Note: Excel colors are AARRGGBB, requiring 8 hex characters.
         $styles_xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' . "\n" .
             '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' . "\n" .
             '  <fonts count="4">' . "\n" .
             '    <font><sz val="11"/><name val="Segoe UI"/><family val="2"/></font>' . "\n" .
-            '    <font><b/><sz val="11"/><color rgb="FFFFFF"/><name val="Segoe UI"/><family val="2"/></font>' . "\n" .
-            '    <font><b/><sz val="11"/><color rgb="15803D"/><name val="Segoe UI"/><family val="2"/></font>' . "\n" .
-            '    <font><b/><sz val="11"/><color rgb="B91C1C"/><name val="Segoe UI"/><family val="2"/></font>' . "\n" .
+            '    <font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Segoe UI"/><family val="2"/></font>' . "\n" .
+            '    <font><b/><sz val="11"/><color rgb="FF15803D"/><name val="Segoe UI"/><family val="2"/></font>' . "\n" .
+            '    <font><b/><sz val="11"/><color rgb="FFB91C1C"/><name val="Segoe UI"/><family val="2"/></font>' . "\n" .
             '  </fonts>' . "\n" .
             '  <fills count="6">' . "\n" .
             '    <fill><patternFill patternType="none"/></fill>' . "\n" .
             '    <fill><patternFill patternType="gray125"/></fill>' . "\n" .
-            '    <fill><patternFill patternType="solid"><fgColor rgb="1E3A8A"/><bgColor indexed="64"/></patternFill></fill>' . "\n" . // Dark Blue Headers
-            '    <fill><patternFill patternType="solid"><fgColor rgb="F8FAFC"/><bgColor indexed="64"/></patternFill></fill>' . "\n" . // Zebra alternating row
-            '    <fill><patternFill patternType="solid"><fgColor rgb="DCFCE7"/><bgColor indexed="64"/></patternFill></fill>' . "\n" . // High score green
-            '    <fill><patternFill patternType="solid"><fgColor rgb="FEE2E2"/><bgColor indexed="64"/></patternFill></fill>' . "\n" . // Low score red
+            '    <fill><patternFill patternType="solid"><fgColor rgb="FF1E3A8A"/><bgColor indexed="64"/></patternFill></fill>' . "\n" . // Dark Blue Headers
+            '    <fill><patternFill patternType="solid"><fgColor rgb="FFF8FAFC"/><bgColor indexed="64"/></patternFill></fill>' . "\n" . // Zebra alternating row
+            '    <fill><patternFill patternType="solid"><fgColor rgb="FFDCFCE7"/><bgColor indexed="64"/></patternFill></fill>' . "\n" . // High score green
+            '    <fill><patternFill patternType="solid"><fgColor rgb="FFFEE2E2"/><bgColor indexed="64"/></patternFill></fill>' . "\n" . // Low score red
             '  </fills>' . "\n" .
             '  <borders count="2">' . "\n" .
             '    <border><left/><right/><top/><bottom/></border>' . "\n" .
             '    <border>' . "\n" .
-            '      <left style="thin"><color rgb="D1D5DB"/></left>' . "\n" .
-            '      <right style="thin"><color rgb="D1D5DB"/></right>' . "\n" .
-            '      <top style="thin"><color rgb="D1D5DB"/></top>' . "\n" .
-            '      <bottom style="thin"><color rgb="D1D5DB"/></bottom>' . "\n" .
+            '      <left style="thin"><color rgb="FFD1D5DB"/></left>' . "\n" .
+            '      <right style="thin"><color rgb="FFD1D5DB"/></right>' . "\n" .
+            '      <top style="thin"><color rgb="FFD1D5DB"/></top>' . "\n" .
+            '      <bottom style="thin"><color rgb="FFD1D5DB"/></bottom>' . "\n" .
             '    </border>' . "\n" .
             '  </borders>' . "\n" .
             '  <cellStyleXfs count="1">' . "\n" .
@@ -292,6 +295,11 @@ class MC_Leads_Engine_XLSX_Writer {
         $zip->addFromString('xl/worksheets/sheet1.xml', $sheet1_xml);
 
         $zip->close();
+
+        // Clean any output buffers to prevent PHP notices/warnings or HTML markup from prepending/corrupting the file
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
 
         // Send headers and stream file
         nocache_headers();
