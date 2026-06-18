@@ -32,7 +32,6 @@
 
 .mc-admin-app {
   display: block;
-  max-width: 1380px;
   margin: 0 auto;
   min-height: auto;
   background: var(--mc-bg);
@@ -765,11 +764,28 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
+  align-items: start;
+}
+.survey-dashboard-grid .settings-field.toggle-field,
+.survey-dashboard-grid .settings-field.action-field {
+  align-self: end;
 }
 @media (max-width: 1100px) {
   .survey-dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .survey-dashboard-grid .settings-field.action-field {
+    grid-column: span 2;
+  }
+}
+@media (max-width: 782px) {
+  .survey-dashboard-grid {
     grid-template-columns: 1fr;
     gap: 8px;
+  }
+  .survey-dashboard-grid .settings-field.action-field {
+    grid-column: span 1;
   }
 }
 
