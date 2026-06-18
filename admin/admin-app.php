@@ -411,7 +411,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                             <input type="hidden" name="mc_panel" value="surveys">
                                             <input type="hidden" name="mc_leads_engine_action" value="delete_survey">
                                             <input type="hidden" name="survey_id" value="<?php echo esc_attr($selected_survey_id); ?>">
-                                            <button class="button button-link-delete" style="border:1px solid #ef4444; color:#ef4444; background:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:600; height:34px;" type="submit"><?php esc_html_e('Delete', 'mc-leads-engine'); ?></button>
+                                            <button class="button button-link-delete" style="border:1px solid #ef4444; color:#ef4444; background:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:600; height:34px; line-height:1;" type="submit"><?php esc_html_e('Delete', 'mc-leads-engine'); ?></button>
                                         </form>
                                     <?php endif; ?>
                                 </div>
@@ -419,56 +419,63 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
 
                             <?php if ($selected_survey_id === 0 || $selected_survey) : ?>
                                 <?php $survey_settings = mc_leads_engine_get_survey_settings($selected_survey_id); ?>
-                                <form method="post" class="survey-dashboard-grid">
+                                <form method="post" class="survey-dashboard-grid-2col">
                                     <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
                                     <input type="hidden" name="page" value="mc-leads-engine-surveys">
                                     <input type="hidden" name="mc_panel" value="surveys">
                                     <input type="hidden" name="mc_leads_engine_action" value="save_survey">
                                     <input type="hidden" name="survey_id" value="<?php echo esc_attr($selected_survey_id); ?>">
                                     
-                                    <div class="settings-field">
-                                        <label class="field-label"><?php esc_html_e('Title', 'mc-leads-engine'); ?></label>
-                                        <input class="field-input" type="text" name="title" value="<?php echo esc_attr($selected_survey['title'] ?? ''); ?>">
-                                    </div>
-                                    <div class="settings-field">
-                                        <label class="field-label"><?php esc_html_e('Status', 'mc-leads-engine'); ?></label>
-                                        <select class="field-input" name="status">
-                                            <option value="draft" <?php selected(($selected_survey['status'] ?? 'draft'), 'draft'); ?>><?php esc_html_e('Draft', 'mc-leads-engine'); ?></option>
-                                            <option value="published" <?php selected(($selected_survey['status'] ?? ''), 'published'); ?>><?php esc_html_e('Published', 'mc-leads-engine'); ?></option>
-                                        </select>
-                                    </div>
-                                    <div class="settings-field">
-                                        <label class="field-label"><?php esc_html_e('Description', 'mc-leads-engine'); ?></label>
-                                        <textarea class="field-input" rows="5" name="description" style="height: auto; min-height: 100px; resize: vertical;"><?php echo esc_textarea($selected_survey['description'] ?? ''); ?></textarea>
-                                    </div>
-
-                                    <div class="settings-field">
-                                        <label class="field-label"><?php esc_html_e('Final Step Title', 'mc-leads-engine'); ?></label>
-                                        <input class="field-input" type="text" name="final_step_title" value="<?php echo esc_attr($survey_settings['final_step_title'] ?? ''); ?>">
-                                    </div>
-                                    <div class="settings-field">
-                                        <label class="field-label"><?php esc_html_e('Final Step Button Text', 'mc-leads-engine'); ?></label>
-                                        <input class="field-input" type="text" name="final_button_text" value="<?php echo esc_attr($survey_settings['final_button_text']); ?>">
-                                    </div>
-                                    <div class="settings-field">
-                                        <label class="field-label"><?php esc_html_e('Final Step Message', 'mc-leads-engine'); ?></label>
-                                        <textarea class="field-input" rows="5" name="final_message" style="height: auto; min-height: 100px; resize: vertical;" placeholder="<?php esc_attr_e('e.g. Review your answers below.', 'mc-leads-engine'); ?>"><?php echo esc_textarea($survey_settings['final_message']); ?></textarea>
-                                    </div>
-
-                                    <div class="settings-field toggle-field">
-                                        <div class="toggle-row" style="margin-bottom:0; justify-content:space-between; width:100%; height:38px; box-sizing:border-box;">
-                                            <span class="toggle-label" style="font-size:12px;"><?php esc_html_e('Show Estimated Price', 'mc-leads-engine'); ?></span>
-                                            <input type="checkbox" class="toggle-checkbox" name="show_final_price" value="1" <?php checked(!empty($survey_settings['show_final_price'])); ?>>
+                                    <!-- Column 1: Title, Status, Final Step Titles, Toggles & Save Button -->
+                                    <div class="survey-dashboard-left-col">
+                                        <div class="settings-field">
+                                            <label class="field-label"><?php esc_html_e('Title', 'mc-leads-engine'); ?></label>
+                                            <input class="field-input" type="text" name="title" value="<?php echo esc_attr($selected_survey['title'] ?? ''); ?>">
+                                        </div>
+                                        <div class="settings-field">
+                                            <label class="field-label"><?php esc_html_e('Status', 'mc-leads-engine'); ?></label>
+                                            <select class="field-input" name="status">
+                                                <option value="draft" <?php selected(($selected_survey['status'] ?? 'draft'), 'draft'); ?>><?php esc_html_e('Draft', 'mc-leads-engine'); ?></option>
+                                                <option value="published" <?php selected(($selected_survey['status'] ?? ''), 'published'); ?>><?php esc_html_e('Published', 'mc-leads-engine'); ?></option>
+                                            </select>
+                                        </div>
+                                        <!-- Final Step Title and Button Text side-by-side -->
+                                        <div class="survey-double-fields-row">
+                                            <div class="settings-field" style="flex:1;">
+                                                <label class="field-label"><?php esc_html_e('Final Step Title', 'mc-leads-engine'); ?></label>
+                                                <input class="field-input" type="text" name="final_step_title" value="<?php echo esc_attr($survey_settings['final_step_title'] ?? ''); ?>">
+                                            </div>
+                                            <div class="settings-field" style="flex:1;">
+                                                <label class="field-label"><?php esc_html_e('Final Step Button Text', 'mc-leads-engine'); ?></label>
+                                                <input class="field-input" type="text" name="final_button_text" value="<?php echo esc_attr($survey_settings['final_button_text']); ?>">
+                                            </div>
+                                        </div>
+                                        <!-- Checkboxes side-by-side -->
+                                        <div class="survey-toggles-row">
+                                            <div class="toggle-row" style="margin-bottom:0; justify-content:space-between; flex:1; height:38px; box-sizing:border-box;">
+                                                <span class="toggle-label" style="font-size:12px;"><?php esc_html_e('Show Estimated Price', 'mc-leads-engine'); ?></span>
+                                                <input type="checkbox" class="toggle-checkbox" name="show_final_price" value="1" <?php checked(!empty($survey_settings['show_final_price'])); ?>>
+                                            </div>
+                                            <div class="toggle-row" style="margin-bottom:0; justify-content:space-between; flex:1; height:38px; box-sizing:border-box;">
+                                                <span class="toggle-label" style="font-size:12px;"><?php esc_html_e('Show Lead Score', 'mc-leads-engine'); ?></span>
+                                                <input type="checkbox" class="toggle-checkbox" name="show_final_score" value="1" <?php checked(!empty($survey_settings['show_final_score'])); ?>>
+                                            </div>
+                                        </div>
+                                        <div class="settings-field action-field">
+                                            <button class="btn primary" type="submit" style="width:100%; height:38px; justify-content:center;"><?php esc_html_e('Save Survey Settings', 'mc-leads-engine'); ?></button>
                                         </div>
                                     </div>
-                                    <div class="settings-field toggle-field">
-                                        <div class="toggle-row" style="margin-bottom:0; justify-content:space-between; width:100%; height:38px; box-sizing:border-box;">
-                                            <span class="toggle-label" style="font-size:12px;"><?php esc_html_e('Show Lead Score', 'mc-leads-engine'); ?></span>
-                                            <input type="checkbox" class="toggle-checkbox" name="show_final_score" value="1" <?php checked(!empty($survey_settings['show_final_score'])); ?>>
+
+                                    <!-- Column 2: Description & Final Step Message textareas -->
+                                    <div class="survey-dashboard-right-col">
+                                        <div class="settings-field">
+                                            <label class="field-label"><?php esc_html_e('Description', 'mc-leads-engine'); ?></label>
+                                            <textarea class="field-input" rows="5" name="description" style="height: auto; min-height: 120px; resize: vertical;"><?php echo esc_textarea($selected_survey['description'] ?? ''); ?></textarea>
                                         </div>
-                                    </div>
-                                    <div class="settings-field action-field">
-                                        <button class="btn primary" type="submit" style="width:100%; height:38px; justify-content:center;"><?php esc_html_e('Save Survey Settings', 'mc-leads-engine'); ?></button>
+                                        <div class="settings-field">
+                                            <label class="field-label"><?php esc_html_e('Final Step Message', 'mc-leads-engine'); ?></label>
+                                            <textarea class="field-input" rows="5" name="final_message" style="height: auto; min-height: 120px; resize: vertical;" placeholder="<?php esc_attr_e('e.g. Review your answers below.', 'mc-leads-engine'); ?>"><?php echo esc_textarea($survey_settings['final_message']); ?></textarea>
+                                        </div>
                                     </div>
                                 </form>
                             <?php endif; ?>
