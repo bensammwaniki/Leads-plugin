@@ -304,14 +304,45 @@ class MC_Leads_Engine_Booking {
             $current_dt->modify("+$interval minutes");
         }
 
+        // Fetch local database bookings for this date
+        global $wpdb;
+        $bookings_table = mc_leads_engine_table('bookings');
+        $local_bookings = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT meeting_time FROM {$bookings_table} WHERE meeting_date = %s",
+                $date
+            ),
+            ARRAY_A
+        );
+
+        $local_busy = array();
+        if (!empty($local_bookings)) {
+            foreach ($local_bookings as $booking) {
+                $time_str = $booking['meeting_time']; // E.g., "09:00:00"
+                try {
+                    $b_start_dt = new DateTime("$date $time_str", $timezone);
+                    $b_start = $b_start_dt->getTimestamp();
+                } catch (Exception $e) {
+                    $b_start = strtotime("$date $time_str");
+                }
+                $b_end = $b_start + ($duration * 60);
+                $local_busy[] = array(
+                    'start' => $b_start,
+                    'end'   => $b_end,
+                );
+            }
+        }
+
         // Fetch Google Calendar busy slots if connected
         $busy_slots = $this->fetch_gcal_busy_slots($date);
-        if (!empty($busy_slots)) {
+        $all_busy_slots = array_merge($busy_slots, $local_busy);
+
+        if (!empty($all_busy_slots)) {
             foreach ($slots as $key => $slot) {
                 $slot_start = $slot['timestamp'];
                 $slot_end = $slot['timestamp'] + ($duration * 60);
 
-                foreach ($busy_slots as $busy) {
+                foreach ($all_busy_slots as $busy) {
                     $busy_start = $busy['start'];
                     $busy_end = $busy['end'];
 
@@ -336,8 +367,16 @@ class MC_Leads_Engine_Booking {
         $settings = mc_leads_engine_get_settings();
         $calendar_id = urlencode($settings['gcal_calendar_id'] ?? 'primary');
 
-        $time_min = date('c', strtotime("$date 00:00:00"));
-        $time_max = date('c', strtotime("$date 23:59:59"));
+        $timezone = wp_timezone();
+        try {
+            $min_dt = new DateTime("$date 00:00:00", $timezone);
+            $max_dt = new DateTime("$date 23:59:59", $timezone);
+            $time_min = $min_dt->format('c');
+            $time_max = $max_dt->format('c');
+        } catch (Exception $e) {
+            $time_min = date('c', strtotime("$date 00:00:00"));
+            $time_max = date('c', strtotime("$date 23:59:59"));
+        }
 
         $url = "https://www.googleapis.com/calendar/v3/calendars/{$calendar_id}/events?timeMin=" . urlencode($time_min) . "&timeMax=" . urlencode($time_max) . "&singleEvents=true&orderBy=startTime";
 
@@ -359,6 +398,15 @@ class MC_Leads_Engine_Booking {
 
         $busy = array();
         foreach ($body['items'] as $item) {
+            // Skip cancelled events
+            if (isset($item['status']) && $item['status'] === 'cancelled') {
+                continue;
+            }
+            // Skip transparent (free) events
+            if (isset($item['transparency']) && $item['transparency'] === 'transparent') {
+                continue;
+            }
+
             if (!empty($item['start']['dateTime']) && !empty($item['end']['dateTime'])) {
                 $busy[] = array(
                     'start' => strtotime($item['start']['dateTime']),
@@ -366,10 +414,19 @@ class MC_Leads_Engine_Booking {
                 );
             } elseif (!empty($item['start']['date']) && !empty($item['end']['date'])) {
                 // All day event
-                $busy[] = array(
-                    'start' => strtotime($item['start']['date'] . ' 00:00:00'),
-                    'end'   => strtotime($item['end']['date'] . ' 23:59:59'),
-                );
+                try {
+                    $start_dt = new DateTime($item['start']['date'] . ' 00:00:00', $timezone);
+                    $end_dt = new DateTime($item['end']['date'] . ' 23:59:59', $timezone);
+                    $busy[] = array(
+                        'start' => $start_dt->getTimestamp(),
+                        'end'   => $end_dt->getTimestamp(),
+                    );
+                } catch (Exception $e) {
+                    $busy[] = array(
+                        'start' => strtotime($item['start']['date'] . ' 00:00:00'),
+                        'end'   => strtotime($item['end']['date'] . ' 23:59:59'),
+                    );
+                }
             }
         }
 
