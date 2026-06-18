@@ -59,7 +59,7 @@ function mc_leads_engine_render_analytics_page() {
         $orderby = 'created_at';
     }
 
-    // Handle CSV Export
+    // Handle Excel Export
     if (!empty($_GET['export_analytics'])) {
         check_admin_referer('mc_leads_engine_export_analytics');
         
@@ -80,13 +80,22 @@ function mc_leads_engine_render_analytics_page() {
             }
         }
 
-        nocache_headers();
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename=mc-leads-engine-analytics-export.csv');
+        $headers = array(
+            __('Lead ID', 'mc-leads-engine'),
+            __('Created Date', 'mc-leads-engine'),
+            __('Survey Title', 'mc-leads-engine'),
+            __('Client Name', 'mc-leads-engine'),
+            __('Client Email', 'mc-leads-engine'),
+            __('Client Phone', 'mc-leads-engine'),
+            __('Submitted Answers', 'mc-leads-engine'),
+            __('Estimated Price', 'mc-leads-engine'),
+            __('Lead Score', 'mc-leads-engine'),
+        );
 
-        $handle = fopen('php://output', 'w');
-        fputcsv($handle, array('Lead ID', 'Created Date', 'Survey Title', 'Client Name', 'Client Email', 'Client Phone', 'Submitted Answers', 'Estimated Price', 'Lead Score'));
+        $col_types = array('text', 'text', 'text', 'text', 'text', 'text', 'text', 'price', 'score');
+        $col_alignments = array('center', 'left', 'left', 'left', 'left', 'left', 'left', 'right', 'center');
 
+        $export_data = array();
         foreach ($leads as $row) {
             $survey_row = mc_leads_engine_survey_repository()->get_survey($row['survey_id']);
             $is_booking = (bool) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM " . mc_leads_engine_table('bookings') . " WHERE lead_id = %d", $row['id']));
@@ -137,7 +146,7 @@ function mc_leads_engine_render_analytics_page() {
 
             $answers_summary = implode("\n", $answers_summary_parts);
 
-            fputcsv($handle, array(
+            $export_data[] = array(
                 $row['id'],
                 $row['created_at'],
                 $survey_title,
@@ -145,13 +154,17 @@ function mc_leads_engine_render_analytics_page() {
                 $email,
                 $phone,
                 $answers_summary,
-                $row['total_price'],
-                $row['lead_score'],
-            ));
+                (float)$row['total_price'],
+                (int)$row['lead_score'],
+            );
         }
 
-        fclose($handle);
-        exit;
+        $writer = new MC_Leads_Engine_XLSX_Writer('Analytics');
+        $writer->set_headers($headers);
+        $writer->set_rows($export_data);
+        $writer->set_col_types($col_types);
+        $writer->set_col_alignments($col_alignments);
+        $writer->write_to_output('mc-leads-engine-analytics-export.xlsx');
     }
 
     $all_leads = mc_leads_engine_leads_repository()->get_leads(array(
@@ -246,7 +259,7 @@ function mc_leads_engine_render_analytics_page() {
                 ), admin_url('admin.php'));
                 ?>
                 <a class="button button-secondary" href="<?php echo esc_url($export_url); ?>">
-                    <?php esc_html_e('Export CSV', 'mc-leads-engine'); ?>
+                    <?php esc_html_e('Export to Excel', 'mc-leads-engine'); ?>
                 </a>
             </form>
 

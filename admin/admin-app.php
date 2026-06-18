@@ -838,7 +838,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                         <div class="card" style="margin-top:12px">
                             <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
                                 <span><?php esc_html_e('Recent Leads', 'mc-leads-engine'); ?></span>
-                                <a class="btn" href="<?php echo esc_url(admin_url('admin.php?page=mc-leads-engine-leads')); ?>" style="font-size:10px"><?php esc_html_e('Export CSV', 'mc-leads-engine'); ?></a>
+                                <a class="btn" href="<?php echo esc_url(admin_url('admin.php?page=mc-leads-engine-leads')); ?>" style="font-size:10px"><?php esc_html_e('Export to Excel', 'mc-leads-engine'); ?></a>
                             </div>
                             <div class="leads-grid">
                                 <?php foreach (array_slice($leads, 0, 20) as $lead) :

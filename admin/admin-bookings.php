@@ -23,13 +23,8 @@ function mc_leads_engine_render_bookings_page() {
         $order_sql = "b.meeting_date {$order}, b.meeting_time {$order}";
     }
 
-    // Retrieve metrics
     $bookings_table = mc_leads_engine_table('bookings');
-    $total_bookings = (int)$wpdb->get_var("SELECT COUNT(*) FROM {$bookings_table}");
-    $online_count   = (int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$bookings_table} WHERE meeting_type = %s", 'online'));
-    $coffee_count   = (int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$bookings_table} WHERE meeting_type = %s", 'coffee'));
-    $office_count   = (int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$bookings_table} WHERE meeting_type = %s", 'office'));
-    $host_count     = (int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$bookings_table} WHERE meeting_type = %s", 'host'));
+    $leads_table = mc_leads_engine_table('leads');
 
     // Build query conditions
     $where = array('1=1');
@@ -50,7 +45,86 @@ function mc_leads_engine_render_bookings_page() {
     }
 
     $where_sql = implode(' AND ', $where);
-    $leads_table = mc_leads_engine_table('leads');
+
+    // Handle Excel Bookings Export
+    if (!empty($_GET['export_bookings'])) {
+        check_admin_referer('mc_leads_engine_export_bookings');
+
+        $sql = "SELECT b.*, l.survey_id, l.answers_json, l.lead_score
+                FROM {$bookings_table} b
+                LEFT JOIN {$leads_table} l ON b.lead_id = l.id
+                WHERE {$where_sql}
+                ORDER BY {$order_sql}";
+
+        if (!empty($params)) {
+            $sql = $wpdb->prepare($sql, $params);
+        }
+
+        $bookings_rows = $wpdb->get_results($sql, ARRAY_A);
+
+        $headers = array(
+            __('Booking ID', 'mc-leads-engine'),
+            __('Date & Time', 'mc-leads-engine'),
+            __('Meeting Type', 'mc-leads-engine'),
+            __('Location Details', 'mc-leads-engine'),
+            __('Client Name', 'mc-leads-engine'),
+            __('Client Email', 'mc-leads-engine'),
+            __('Client Phone', 'mc-leads-engine'),
+            __('Lead Score', 'mc-leads-engine'),
+            __('Status', 'mc-leads-engine'),
+        );
+
+        $col_types = array('text', 'text', 'text', 'text', 'text', 'text', 'text', 'score', 'text');
+        $col_alignments = array('center', 'left', 'left', 'left', 'left', 'left', 'left', 'center', 'center');
+
+        $export_data = array();
+        foreach ($bookings_rows as $row) {
+            $lead_id = (int)$row['lead_id'];
+            $name = mc_leads_engine_leads_repository()->find_client_name($lead_id);
+            $email = mc_leads_engine_leads_repository()->find_client_email($lead_id);
+            $phone = mc_leads_engine_leads_repository()->find_client_phone($lead_id);
+
+            $type_labels = array(
+                'online' => __('Online Call', 'mc-leads-engine'),
+                'coffee' => __('Coffee Meeting', 'mc-leads-engine'),
+                'office' => __('Office Visit', 'mc-leads-engine'),
+                'host'   => __('Our Studio', 'mc-leads-engine'),
+            );
+            $type_lbl = $type_labels[$row['meeting_type']] ?? $row['meeting_type'];
+
+            $meeting_dt = strtotime($row['meeting_date'] . ' ' . $row['meeting_time']);
+            $is_past = $meeting_dt < current_time('timestamp');
+            $status_lbl = $is_past ? __('Past', 'mc-leads-engine') : __('Upcoming', 'mc-leads-engine');
+
+            $location_details = ($row['location_name'] ? $row['location_name'] . "\n" : '') . ($row['location_address'] ?: '');
+
+            $export_data[] = array(
+                $row['id'],
+                wp_date('F j, Y g:i A', $meeting_dt),
+                $type_lbl,
+                $location_details,
+                $name,
+                $email,
+                $phone,
+                $row['lead_score'] !== null ? (int)$row['lead_score'] : 0,
+                $status_lbl,
+            );
+        }
+
+        $writer = new MC_Leads_Engine_XLSX_Writer('Bookings');
+        $writer->set_headers($headers);
+        $writer->set_rows($export_data);
+        $writer->set_col_types($col_types);
+        $writer->set_col_alignments($col_alignments);
+        $writer->write_to_output('mc-leads-engine-bookings.xlsx');
+    }
+
+    // Retrieve metrics
+    $total_bookings = (int)$wpdb->get_var("SELECT COUNT(*) FROM {$bookings_table}");
+    $online_count   = (int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$bookings_table} WHERE meeting_type = %s", 'online'));
+    $coffee_count   = (int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$bookings_table} WHERE meeting_type = %s", 'coffee'));
+    $office_count   = (int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$bookings_table} WHERE meeting_type = %s", 'office'));
+    $host_count     = (int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$bookings_table} WHERE meeting_type = %s", 'host'));
 
     $sql = "SELECT b.*, l.survey_id, l.answers_json, l.lead_score
             FROM {$bookings_table} b
@@ -133,6 +207,20 @@ function mc_leads_engine_render_bookings_page() {
                 </label>
 
                 <button class="button button-primary" type="submit"><?php esc_html_e('Filter', 'mc-leads-engine'); ?></button>
+                <?php 
+                $export_url = add_query_arg(array(
+                    'page' => 'mc-leads-engine-bookings',
+                    'meeting_type' => $filter_type,
+                    'status' => $filter_status,
+                    'orderby' => $orderby,
+                    'order' => $order,
+                    'export_bookings' => 1,
+                    '_wpnonce' => wp_create_nonce('mc_leads_engine_export_bookings')
+                ), admin_url('admin.php'));
+                ?>
+                <a class="button button-secondary" href="<?php echo esc_url($export_url); ?>">
+                    <?php esc_html_e('Export to Excel', 'mc-leads-engine'); ?>
+                </a>
             </form>
 
             <div style="overflow-x: auto;">

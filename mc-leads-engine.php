@@ -25,6 +25,7 @@ require_once MC_LEADS_ENGINE_PATH . 'includes/class-survey.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-section.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-question.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-pricing-engine.php';
+require_once MC_LEADS_ENGINE_PATH . 'includes/class-xlsx-writer.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-leads.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-cf7-integration.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-booking.php';

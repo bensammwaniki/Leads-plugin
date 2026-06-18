@@ -30,26 +30,100 @@ function mc_leads_engine_render_leads_page() {
             'order' => $order,
         ));
 
-        nocache_headers();
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename=mc-leads-engine-leads.csv');
-
-        $handle = fopen('php://output', 'w');
-        fputcsv($handle, array('Lead ID', 'Survey ID', 'Session ID', 'Price', 'Score', 'Created', 'Answers JSON', 'CF7 JSON'));
-        foreach ($rows as $row) {
-            fputcsv($handle, array(
-                $row['id'],
-                $row['survey_id'],
-                $row['session_id'],
-                $row['total_price'],
-                $row['lead_score'],
-                $row['created_at'],
-                $row['answers_json'],
-                !empty($row['cf7']) ? wp_json_encode($row['cf7']) : '',
-            ));
+        global $wpdb;
+        $questions_rows = $wpdb->get_results("SELECT id, question_text FROM " . mc_leads_engine_table('survey_questions'), ARRAY_A);
+        $questions_map = array();
+        if (is_array($questions_rows)) {
+            foreach ($questions_rows as $q) {
+                $questions_map[(int)$q['id']] = $q['question_text'];
+            }
         }
-        fclose($handle);
-        exit;
+
+        $headers = array(
+            __('Lead ID', 'mc-leads-engine'),
+            __('Created Date', 'mc-leads-engine'),
+            __('Survey Title', 'mc-leads-engine'),
+            __('Client Name', 'mc-leads-engine'),
+            __('Client Email', 'mc-leads-engine'),
+            __('Client Phone', 'mc-leads-engine'),
+            __('Submitted Answers', 'mc-leads-engine'),
+            __('Estimated Price', 'mc-leads-engine'),
+            __('Lead Score', 'mc-leads-engine'),
+        );
+
+        $col_types = array('text', 'text', 'text', 'text', 'text', 'text', 'text', 'price', 'score');
+        $col_alignments = array('center', 'left', 'left', 'left', 'left', 'left', 'left', 'right', 'center');
+
+        $export_data = array();
+        foreach ($rows as $row) {
+            $survey_row = mc_leads_engine_survey_repository()->get_survey($row['survey_id']);
+            $is_booking = (bool) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM " . mc_leads_engine_table('bookings') . " WHERE lead_id = %d", $row['id']));
+            $survey_title = $is_booking ? __('Bookings', 'mc-leads-engine') : ($survey_row['title'] ?? $row['survey_id']);
+
+            $name = mc_leads_engine_leads_repository()->find_client_name($row['id']);
+            $email = mc_leads_engine_leads_repository()->find_client_email($row['id']);
+            $phone = mc_leads_engine_leads_repository()->find_client_phone($row['id']);
+
+            // Parse answers JSON
+            $answers = json_decode($row['answers_json'] ?? '[]', true);
+            $answers_summary_parts = array();
+            if (!$is_booking && is_array($answers)) {
+                foreach ($answers as $q_id => $val) {
+                    $q_text = $questions_map[(int)$q_id] ?? sprintf('Question #%d', $q_id);
+                    $val_str = is_array($val) ? implode(', ', $val) : (string)$val;
+                    if ($val_str !== '') {
+                        $answers_summary_parts[] = $q_text . ': ' . $val_str;
+                    }
+                }
+            }
+
+            // Parse CF7 non-contact fields
+            $cf7_rows = $row['cf7'] ?? array();
+            if (!empty($cf7_rows)) {
+                $cf7_data = json_decode($cf7_rows[0]['data_json'] ?? '{}', true);
+                if (is_array($cf7_data)) {
+                    foreach ($cf7_data as $key => $val) {
+                        if (!empty($val) && !in_array($key, array('cf7_form_id', 'mc_session_id', 'mc_survey_id', 'survey_data', 'pricing'), true)) {
+                            $is_booking_key = (strpos($key, 'mc_booking_') === 0 || $key === 'mc_leads_session_id');
+
+                            if ($is_booking) {
+                                if ($is_booking_key) {
+                                    $val_str = is_array($val) ? implode(', ', $val) : (string)$val;
+                                    $answers_summary_parts[] = $key . ': ' . $val_str;
+                                }
+                            } else {
+                                $lkey = strtolower($key);
+                                if (!$is_booking_key && strpos($lkey, 'name') === false && strpos($lkey, 'email') === false && strpos($lkey, 'phone') === false && strpos($lkey, 'tel') === false && strpos($lkey, 'whatsapp') === false) {
+                                    $val_str = is_array($val) ? implode(', ', $val) : (string)$val;
+                                    $answers_summary_parts[] = $key . ': ' . $val_str;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            $answers_summary = implode("\n", $answers_summary_parts);
+
+            $export_data[] = array(
+                $row['id'],
+                $row['created_at'],
+                $survey_title,
+                $name,
+                $email,
+                $phone,
+                $answers_summary,
+                (float)$row['total_price'],
+                (int)$row['lead_score'],
+            );
+        }
+
+        $writer = new MC_Leads_Engine_XLSX_Writer('Leads');
+        $writer->set_headers($headers);
+        $writer->set_rows($export_data);
+        $writer->set_col_types($col_types);
+        $writer->set_col_alignments($col_alignments);
+        $writer->write_to_output('mc-leads-engine-leads.xlsx');
     }
 
     $leads = mc_leads_engine_leads_repository()->get_leads(array(
@@ -100,7 +174,7 @@ function mc_leads_engine_render_leads_page() {
             <label><?php esc_html_e('Min Score', 'mc-leads-engine'); ?><input type="number" name="min_score" value="<?php echo esc_attr($min_score); ?>"></label>
             <button class="button" type="submit"><?php esc_html_e('Filter', 'mc-leads-engine'); ?></button>
             <?php wp_nonce_field('mc_leads_engine_export_leads'); ?>
-            <a class="button button-secondary" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-leads', 'survey_id' => $survey_id, 'min_score' => $min_score, 'orderby' => $orderby, 'order' => $order, 'export' => 1, '_wpnonce' => wp_create_nonce('mc_leads_engine_export_leads')), admin_url('admin.php'))); ?>"><?php esc_html_e('Export CSV', 'mc-leads-engine'); ?></a>
+            <a class="button button-secondary" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-leads', 'survey_id' => $survey_id, 'min_score' => $min_score, 'orderby' => $orderby, 'order' => $order, 'export' => 1, '_wpnonce' => wp_create_nonce('mc_leads_engine_export_leads')), admin_url('admin.php'))); ?>"><?php esc_html_e('Export to Excel', 'mc-leads-engine'); ?></a>
         </form>
 
         <?php if ($lead) : ?>
