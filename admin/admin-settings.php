@@ -74,6 +74,121 @@ function mc_leads_engine_handle_settings_save() {
 }
 add_action('admin_init', 'mc_leads_engine_handle_settings_save');
 
+function mc_leads_engine_handle_data_purge() {
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+
+    if (empty($_POST['mc_leads_engine_purge_submit'])) {
+        return;
+    }
+
+    check_admin_referer('mc_leads_engine_admin_action', 'mc_leads_engine_nonce');
+
+    $range = sanitize_key($_POST['purge_range'] ?? '');
+    if (!in_array($range, array('past_month', 'last_financial_year', 'all_time'), true)) {
+        return;
+    }
+
+    global $wpdb;
+
+    // Calculate start & end range
+    $now = current_time('timestamp');
+    $current_year = (int) wp_date('Y', $now);
+    $current_month = (int) wp_date('n', $now);
+
+    $start_date = null;
+    $end_date   = null;
+
+    if ($range === 'past_month') {
+        $end_date = wp_date('Y-m-d H:i:s', $now - (30 * DAY_IN_SECONDS));
+    } elseif ($range === 'last_financial_year') {
+        // Fiscal Year: April 1 to March 31
+        if ($current_month >= 4) {
+            $start_year = $current_year - 1;
+            $end_year = $current_year;
+        } else {
+            $start_year = $current_year - 2;
+            $end_year = $current_year - 1;
+        }
+        $start_date = "{$start_year}-04-01 00:00:00";
+        $end_date   = "{$end_year}-03-31 23:59:59";
+    }
+
+    // 1. Fetch lead IDs to delete
+    $leads_table = mc_leads_engine_table('leads');
+    $where = array('1=1');
+    $params = array();
+
+    if ($start_date !== null) {
+        $where[] = "created_at >= %s";
+        $params[] = $start_date;
+    }
+    if ($end_date !== null) {
+        $where[] = "created_at <= %s";
+        $params[] = $end_date;
+    }
+    $where_sql = implode(' AND ', $where);
+
+    $sql = "SELECT id FROM {$leads_table} WHERE {$where_sql}";
+    if (!empty($params)) {
+        $sql = $wpdb->prepare($sql, $params);
+    }
+    $lead_ids = $wpdb->get_col($sql);
+
+    // 2. Perform deletions
+    if (!empty($lead_ids)) {
+        $ids_placeholder = implode(',', array_map('intval', $lead_ids));
+
+        $wpdb->query("DELETE FROM " . mc_leads_engine_table('lead_answers') . " WHERE lead_id IN ({$ids_placeholder})");
+        $wpdb->query("DELETE FROM " . mc_leads_engine_table('lead_cf7_data') . " WHERE lead_id IN ({$ids_placeholder})");
+        $wpdb->query("DELETE FROM " . mc_leads_engine_table('bookings') . " WHERE lead_id IN ({$ids_placeholder})");
+        $wpdb->query("DELETE FROM {$leads_table} WHERE id IN ({$ids_placeholder})");
+    }
+
+    // 3. Purge orphaned bookings in date range
+    $bookings_table = mc_leads_engine_table('bookings');
+    $b_where = array('1=1');
+    $b_params = array();
+    if ($start_date !== null) {
+        $b_where[] = "created_at >= %s";
+        $b_params[] = $start_date;
+    }
+    if ($end_date !== null) {
+        $b_where[] = "created_at <= %s";
+        $b_params[] = $end_date;
+    }
+    $b_where_sql = implode(' AND ', $b_where);
+    $b_sql = "DELETE FROM {$bookings_table} WHERE {$b_where_sql}";
+    if (!empty($b_params)) {
+        $b_sql = $wpdb->prepare($b_sql, $b_params);
+    }
+    $wpdb->query($b_sql);
+
+    // 4. Purge step progress events in date range
+    $steps_table = mc_leads_engine_table('step_events');
+    $s_where = array('1=1');
+    $s_params = array();
+    if ($start_date !== null) {
+        $s_where[] = "created_at >= %s";
+        $s_params[] = $start_date;
+    }
+    if ($end_date !== null) {
+        $s_where[] = "created_at <= %s";
+        $s_params[] = $end_date;
+    }
+    $s_where_sql = implode(' AND ', $s_where);
+    $s_sql = "DELETE FROM {$steps_table} WHERE {$s_where_sql}";
+    if (!empty($s_params)) {
+        $s_sql = $wpdb->prepare($s_sql, $s_params);
+    }
+    $wpdb->query($s_sql);
+
+    wp_safe_redirect(add_query_arg(array('page' => 'mc-leads-engine-settings', 'purged' => 1), admin_url('admin.php')));
+    exit;
+}
+add_action('admin_init', 'mc_leads_engine_handle_data_purge', 5);
+
 function mc_leads_engine_render_settings_page() {
     if (!current_user_can('manage_options')) {
         wp_die(esc_html__('You do not have permission to access this page.', 'mc-leads-engine'));
@@ -87,6 +202,9 @@ function mc_leads_engine_render_settings_page() {
         
         <?php if (!empty($_GET['updated'])) : ?>
             <div class="notice notice-success is-dismissible"><p><?php esc_html_e('Settings saved.', 'mc-leads-engine'); ?></p></div>
+        <?php endif; ?>
+        <?php if (!empty($_GET['purged'])) : ?>
+            <div class="notice notice-success is-dismissible"><p><?php esc_html_e('Data purged successfully.', 'mc-leads-engine'); ?></p></div>
         <?php endif; ?>
         
         <form method="post" class="mc-settings-form">
@@ -113,6 +231,9 @@ function mc_leads_engine_render_settings_page() {
                     </button>
                     <button type="button" class="settings-tab-btn" data-tab="placeholders">
                         <span class="dashicons dashicons-editor-code"></span> <?php esc_html_e('Placeholder Guide', 'mc-leads-engine'); ?>
+                    </button>
+                    <button type="button" class="settings-tab-btn" data-tab="purging">
+                        <span class="dashicons dashicons-trash"></span> <?php esc_html_e('Data Maintenance', 'mc-leads-engine'); ?>
                     </button>
                 </div>
                 
@@ -489,6 +610,29 @@ function mc_leads_engine_render_settings_page() {
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Purging / Data Maintenance Tab -->
+                    <div class="settings-section-pane" data-pane="purging">
+                        <div class="card">
+                            <div class="card-title"><?php esc_html_e('Data Maintenance & Purging', 'mc-leads-engine'); ?></div>
+                            <p class="field-desc-top"><?php esc_html_e('Purge lead submissions, bookings, answers, and tracking data from the database. Warning: This action is permanent and cannot be undone.', 'mc-leads-engine'); ?></p>
+                            
+                            <div class="settings-field">
+                                <label class="field-label"><?php esc_html_e('Select Time Range to Delete:', 'mc-leads-engine'); ?></label>
+                                <select class="field-input" name="purge_range" style="max-width:300px;">
+                                    <option value="past_month"><?php esc_html_e('Older than Past Month (30+ days ago)', 'mc-leads-engine'); ?></option>
+                                    <option value="last_financial_year"><?php esc_html_e('Previous Financial Year (Apr 1 - Mar 31)', 'mc-leads-engine'); ?></option>
+                                    <option value="all_time"><?php esc_html_e('All Time (Start Afresh / Wipe All)', 'mc-leads-engine'); ?></option>
+                                </select>
+                            </div>
+                            
+                            <div style="margin-top:20px;">
+                                <button name="mc_leads_engine_purge_submit" value="1" class="button button-link-delete" type="submit" style="border:1px solid #ef4444; color:#ef4444; background:none; padding:6px 16px; border-radius:4px; cursor:pointer; font-weight:600;" onclick="return confirm('<?php echo esc_js(__('Are you absolutely sure you want to delete this data? This action is permanent and cannot be undone.', 'mc-leads-engine')); ?>');">
+                                    <?php esc_html_e('Purge Selected Data', 'mc-leads-engine'); ?>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
