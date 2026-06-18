@@ -216,6 +216,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const fAmt   = document.getElementById('prf-amount');
     const fScore = document.getElementById('prf-score');
 
+    // Prevent Enter key in inputs from submitting the parent form and instead trigger save
+    const pricingInputs = [fName, fMatch, fAmt, fScore];
+    pricingInputs.forEach(input => {
+      if (input) {
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            if (saveBtn) {
+              saveBtn.click();
+            }
+          }
+        });
+      }
+    });
+
+    if (basePriceEl) {
+      basePriceEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          basePriceEl.blur(); // Triggers the change event and saves to server
+        }
+      });
+    }
+
     const fmt = (n) => Number(n).toLocaleString('en-KE', { minimumFractionDigits: 0 });
 
     // ── Render rule cards ──

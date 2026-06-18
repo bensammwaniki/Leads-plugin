@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) {
 }
 
 function mc_leads_engine_admin_allowed_panels() {
-    return array('dashboard', 'surveys', 'builder', 'analytics', 'pricing', 'settings');
+    return array('dashboard', 'surveys', 'builder', 'analytics', 'settings');
 }
 
 function mc_leads_engine_admin_get_panel() {
@@ -19,7 +19,6 @@ function mc_leads_engine_admin_panel_title($panel) {
         'surveys' => __('Surveys', 'mc-leads-engine'),
         'builder' => __('Survey Builder', 'mc-leads-engine'),
         'analytics' => __('Analytics & Leads', 'mc-leads-engine'),
-        'pricing' => __('Pricing Rules', 'mc-leads-engine'),
         'settings' => __('Settings', 'mc-leads-engine'),
     );
 
@@ -32,7 +31,6 @@ function mc_leads_engine_admin_panel_icon($panel) {
         'surveys' => 'dashicons-media-document',
         'builder' => 'dashicons-edit',
         'analytics' => 'dashicons-chart-line',
-        'pricing' => 'dashicons-money-alt',
         'settings' => 'dashicons-admin-settings',
     );
 
@@ -84,7 +82,6 @@ function mc_leads_engine_admin_selected_url($panel, $survey_id = 0, $section_id 
         'surveys' => 'mc-leads-engine-surveys',
         'builder' => 'mc-leads-engine-builder',
         'analytics' => 'mc-leads-engine-analytics',
-        'pricing' => 'mc-leads-engine-pricing',
         'settings' => 'mc-leads-engine-settings',
     );
 
@@ -312,7 +309,6 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
     $builder_url = mc_leads_engine_admin_selected_url('builder', $selected_survey_id, $selected_section_id, $selected_question_id);
     $add_question_url = add_query_arg(array('question_id' => 0, 'new_question' => 1), mc_leads_engine_admin_selected_url('builder', $selected_survey_id, $selected_section_id, 0));
     $analytics_url = mc_leads_engine_admin_selected_url('analytics', $selected_survey_id);
-    $pricing_url = mc_leads_engine_admin_selected_url('pricing', $selected_survey_id);
     $settings_url = mc_leads_engine_admin_selected_url('settings');
 
     $lead_daily_values = array_map(function ($row) {
@@ -865,110 +861,6 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                         </div>
                     </section>
 
-                    <section class="panel<?php echo $panel === 'pricing' ? ' active' : ''; ?>" id="panel-pricing" data-panel="pricing">
-
-                        <!-- Panel intro description & sample rule -->
-                        <div class="pricing-intro-card">
-                            <div class="pricing-intro-title">
-                                <span class="dashicons dashicons-info"></span>
-                                <?php esc_html_e('How Pricing Rules Work', 'mc-leads-engine'); ?>
-                            </div>
-                            <p class="pricing-intro-text">
-                                <?php esc_html_e('Rules calculate dynamic pricing and lead scores based on the answers selected in surveys. The engine looks for keywords matched against question texts or option values.', 'mc-leads-engine'); ?>
-                            </p>
-                            <div class="pricing-sample-rule">
-                                <strong><?php esc_html_e('Sample Rule Example:', 'mc-leads-engine'); ?></strong>
-                                <ul>
-                                    <li><strong><?php esc_html_e('Name:', 'mc-leads-engine'); ?></strong> <?php esc_html_e('SEO Addon', 'mc-leads-engine'); ?></li>
-                                    <li><strong><?php esc_html_e('Type:', 'mc-leads-engine'); ?></strong> <span class="rule-type-badge badge-option"><?php esc_html_e('Option Match', 'mc-leads-engine'); ?></span></li>
-                                    <li><strong><?php esc_html_e('Match Keyword:', 'mc-leads-engine'); ?></strong> <code>seo</code></li>
-                                    <li><strong><?php esc_html_e('Amount (KES):', 'mc-leads-engine'); ?></strong> <code>50,000</code></li>
-                                    <li><strong><?php esc_html_e('Explanation:', 'mc-leads-engine'); ?></strong> <?php esc_html_e('If the customer selects an option containing "seo" (e.g. "SEO Package"), KES 50,000 is added to their estimate.', 'mc-leads-engine'); ?></li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- Base price + header -->
-                        <div class="pricing-header-row">
-                            <div class="pricing-base-wrap">
-                                <label class="pricing-base-label"><?php esc_html_e('Base Price (KES)', 'mc-leads-engine'); ?></label>
-                                <input type="number" id="mc-base-price" class="pricing-base-input" value="<?php echo esc_attr((float) ($settings['default_base_price'] ?? 0)); ?>" min="0" step="1" placeholder="0">
-                                <span class="pricing-base-hint"><?php esc_html_e('Applied to every lead before rules', 'mc-leads-engine'); ?></span>
-                            </div>
-                            <button type="button" id="mc-add-rule-btn" class="btn">
-                                <span class="dashicons dashicons-plus-alt2"></span> <?php esc_html_e('Add Rule', 'mc-leads-engine'); ?>
-                            </button>
-                        </div>
-
-                        <!-- Inline add/edit form (hidden by default) -->
-                        <div id="mc-rule-form" class="pricing-rule-form" style="display:none">
-                            <div class="pricing-rule-form-grid">
-                                <div class="pricing-form-field">
-                                    <label><?php esc_html_e('Rule Name', 'mc-leads-engine'); ?></label>
-                                    <input type="text" id="prf-name" class="field-input" placeholder="<?php esc_attr_e('e.g. SEO Package', 'mc-leads-engine'); ?>">
-                                </div>
-                                <div class="pricing-form-field">
-                                    <label><?php esc_html_e('Type', 'mc-leads-engine'); ?></label>
-                                    <select id="prf-type" class="filter-select">
-                                        <option value="fixed"><?php esc_html_e('Fixed — always adds amount', 'mc-leads-engine'); ?></option>
-                                        <option value="per_unit"><?php esc_html_e('Per Unit — amount × answer number', 'mc-leads-engine'); ?></option>
-                                        <option value="option"><?php esc_html_e('Option Match — adds amount if option selected', 'mc-leads-engine'); ?></option>
-                                    </select>
-                                </div>
-                                <div class="pricing-form-field">
-                                    <label><?php esc_html_e('Match Keyword', 'mc-leads-engine'); ?></label>
-                                    <input type="text" id="prf-match" class="field-input" placeholder="<?php esc_attr_e('e.g. seo, pages, booking', 'mc-leads-engine'); ?>">
-                                    <span class="pricing-field-hint"><?php esc_html_e('Matched against question text and selected answers', 'mc-leads-engine'); ?></span>
-                                </div>
-                                <div class="pricing-form-field">
-                                    <label><?php esc_html_e('Amount (KES)', 'mc-leads-engine'); ?></label>
-                                    <input type="number" id="prf-amount" class="field-input" placeholder="0" min="0" step="1">
-                                </div>
-                                <div class="pricing-form-field">
-                                    <label><?php esc_html_e('Score Impact', 'mc-leads-engine'); ?></label>
-                                    <input type="number" id="prf-score" class="field-input" placeholder="0" step="1">
-                                    <span class="pricing-field-hint"><?php esc_html_e('Optional — adds to the lead score', 'mc-leads-engine'); ?></span>
-                                </div>
-                            </div>
-                            <div class="pricing-form-actions">
-                                <button type="button" id="mc-rule-save-btn" class="btn"><?php esc_html_e('Save Rule', 'mc-leads-engine'); ?></button>
-                                <button type="button" id="mc-rule-cancel-btn" class="btn-ghost"><?php esc_html_e('Cancel', 'mc-leads-engine'); ?></button>
-                            </div>
-                        </div>
-
-                        <!-- Rule list -->
-                        <div id="mc-rule-list" class="rule-grid">
-                            <?php if (empty($pricing_rules)) : ?>
-                                <div class="pricing-empty" id="mc-rule-empty">
-                                    <span class="dashicons dashicons-tag"></span>
-                                    <span><?php esc_html_e('No pricing rules yet. Click "Add Rule" to get started.', 'mc-leads-engine'); ?></span>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-
-                        <!-- Pricing simulator -->
-                        <div class="card pricing-simulator" style="margin-top:16px">
-                            <div class="card-title"><?php esc_html_e('Pricing Simulator', 'mc-leads-engine'); ?> <span><?php esc_html_e('Test your rules', 'mc-leads-engine'); ?></span></div>
-                            <div class="pricing-sim-controls">
-                                <select id="mc-sim-survey" class="filter-select">
-                                    <option value="0"><?php esc_html_e('Select a survey…', 'mc-leads-engine'); ?></option>
-                                    <?php foreach ($surveys as $survey) : ?>
-                                        <option value="<?php echo esc_attr($survey['id']); ?>"><?php echo esc_html($survey['title']); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <button type="button" id="mc-sim-run" class="btn">
-                                    <span class="dashicons dashicons-controls-play"></span> <?php esc_html_e('Simulate', 'mc-leads-engine'); ?>
-                                </button>
-                            </div>
-                            <div id="mc-sim-result" class="pricing-sim-result" style="display:none"></div>
-                        </div>
-
-                        <!-- Hidden data bridge: initial rules from PHP → JS -->
-                        <textarea id="mc-pricing-rules-data" style="display:none"><?php echo esc_textarea(wp_json_encode($pricing_rules, JSON_UNESCAPED_UNICODE)); ?></textarea>
-                        <input type="hidden" id="mc-pricing-nonce" value="<?php echo esc_attr(wp_create_nonce('mc_leads_engine_nonce')); ?>">
-
-                    </section>
-
 
 
                     <section class="panel<?php echo $panel === 'settings' ? ' active' : ''; ?>" id="panel-settings" data-panel="settings">
@@ -994,6 +886,9 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                     </button>
                                     <button type="button" class="settings-tab-btn" data-tab="placeholders">
                                         <span class="dashicons dashicons-editor-code"></span> <?php esc_html_e('Placeholder Guide', 'mc-leads-engine'); ?>
+                                    </button>
+                                    <button type="button" class="settings-tab-btn" data-tab="pricing">
+                                        <span class="dashicons dashicons-money-alt"></span> <?php esc_html_e('Pricing Rules', 'mc-leads-engine'); ?>
                                     </button>
                                 </div>
                                 
@@ -1182,6 +1077,109 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                                 </tbody>
                                             </table>
                                         </div>
+                                    </div>
+
+                                    <!-- Pricing Rules Tab -->
+                                    <div class="settings-section-pane" data-pane="pricing" id="panel-pricing">
+                                        <!-- Panel intro description & sample rule -->
+                                        <div class="pricing-intro-card">
+                                            <div class="pricing-intro-title">
+                                                <span class="dashicons dashicons-info"></span>
+                                                <?php esc_html_e('How Pricing Rules Work', 'mc-leads-engine'); ?>
+                                            </div>
+                                            <p class="pricing-intro-text">
+                                                <?php esc_html_e('Rules calculate dynamic pricing and lead scores based on the answers selected in surveys. The engine looks for keywords matched against question texts or option values.', 'mc-leads-engine'); ?>
+                                            </p>
+                                            <div class="pricing-sample-rule">
+                                                <strong><?php esc_html_e('Sample Rule Example:', 'mc-leads-engine'); ?></strong>
+                                                <ul>
+                                                    <li><strong><?php esc_html_e('Name:', 'mc-leads-engine'); ?></strong> <?php esc_html_e('SEO Addon', 'mc-leads-engine'); ?></li>
+                                                    <li><strong><?php esc_html_e('Type:', 'mc-leads-engine'); ?></strong> <span class="rule-type-badge badge-option"><?php esc_html_e('Option Match', 'mc-leads-engine'); ?></span></li>
+                                                    <li><strong><?php esc_html_e('Match Keyword:', 'mc-leads-engine'); ?></strong> <code>seo</code></li>
+                                                    <li><strong><?php esc_html_e('Amount (KES):', 'mc-leads-engine'); ?></strong> <code>50,000</code></li>
+                                                    <li><strong><?php esc_html_e('Explanation:', 'mc-leads-engine'); ?></strong> <?php esc_html_e('If the customer selects an option containing "seo" (e.g. "SEO Package"), KES 50,000 is added to their estimate.', 'mc-leads-engine'); ?></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <!-- Base price + header -->
+                                        <div class="pricing-header-row">
+                                            <div class="pricing-base-wrap">
+                                                <label class="pricing-base-label"><?php esc_html_e('Base Price (KES)', 'mc-leads-engine'); ?></label>
+                                                <input type="number" id="mc-base-price" class="pricing-base-input" value="<?php echo esc_attr((float) ($settings['default_base_price'] ?? 0)); ?>" min="0" step="1" placeholder="0">
+                                                <span class="pricing-base-hint"><?php esc_html_e('Applied to every lead before rules', 'mc-leads-engine'); ?></span>
+                                            </div>
+                                            <button type="button" id="mc-add-rule-btn" class="btn">
+                                                <span class="dashicons dashicons-plus-alt2"></span> <?php esc_html_e('Add Rule', 'mc-leads-engine'); ?>
+                                            </button>
+                                        </div>
+
+                                        <!-- Inline add/edit form (hidden by default) -->
+                                        <div id="mc-rule-form" class="pricing-rule-form" style="display:none">
+                                            <div class="pricing-rule-form-grid">
+                                                <div class="pricing-form-field">
+                                                    <label><?php esc_html_e('Rule Name', 'mc-leads-engine'); ?></label>
+                                                    <input type="text" id="prf-name" class="field-input" placeholder="<?php esc_attr_e('e.g. SEO Package', 'mc-leads-engine'); ?>">
+                                                </div>
+                                                <div class="pricing-form-field">
+                                                    <label><?php esc_html_e('Type', 'mc-leads-engine'); ?></label>
+                                                    <select id="prf-type" class="filter-select">
+                                                        <option value="fixed"><?php esc_html_e('Fixed — always adds amount', 'mc-leads-engine'); ?></option>
+                                                        <option value="per_unit"><?php esc_html_e('Per Unit — amount × answer number', 'mc-leads-engine'); ?></option>
+                                                        <option value="option"><?php esc_html_e('Option Match — adds amount if option selected', 'mc-leads-engine'); ?></option>
+                                                    </select>
+                                                </div>
+                                                <div class="pricing-form-field">
+                                                    <label><?php esc_html_e('Match Keyword', 'mc-leads-engine'); ?></label>
+                                                    <input type="text" id="prf-match" class="field-input" placeholder="<?php esc_attr_e('e.g. seo, pages, booking', 'mc-leads-engine'); ?>">
+                                                    <span class="pricing-field-hint"><?php esc_html_e('Matched against question text and selected answers', 'mc-leads-engine'); ?></span>
+                                                </div>
+                                                <div class="pricing-form-field">
+                                                    <label><?php esc_html_e('Amount (KES)', 'mc-leads-engine'); ?></label>
+                                                    <input type="number" id="prf-amount" class="field-input" placeholder="0" min="0" step="1">
+                                                </div>
+                                                <div class="pricing-form-field">
+                                                    <label><?php esc_html_e('Score Impact', 'mc-leads-engine'); ?></label>
+                                                    <input type="number" id="prf-score" class="field-input" placeholder="0" step="1">
+                                                    <span class="pricing-field-hint"><?php esc_html_e('Optional — adds to the lead score', 'mc-leads-engine'); ?></span>
+                                                </div>
+                                            </div>
+                                            <div class="pricing-form-actions">
+                                                <button type="button" id="mc-rule-save-btn" class="btn"><?php esc_html_e('Save Rule', 'mc-leads-engine'); ?></button>
+                                                <button type="button" id="mc-rule-cancel-btn" class="btn-ghost"><?php esc_html_e('Cancel', 'mc-leads-engine'); ?></button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Rule list -->
+                                        <div id="mc-rule-list" class="rule-grid">
+                                            <?php if (empty($pricing_rules)) : ?>
+                                                <div class="pricing-empty" id="mc-rule-empty">
+                                                    <span class="dashicons dashicons-tag"></span>
+                                                    <span><?php esc_html_e('No pricing rules yet. Click "Add Rule" to get started.', 'mc-leads-engine'); ?></span>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <!-- Pricing simulator -->
+                                        <div class="card pricing-simulator" style="margin-top:16px">
+                                            <div class="card-title"><?php esc_html_e('Pricing Simulator', 'mc-leads-engine'); ?> <span><?php esc_html_e('Test your rules', 'mc-leads-engine'); ?></span></div>
+                                            <div class="pricing-sim-controls">
+                                                <select id="mc-sim-survey" class="filter-select">
+                                                    <option value="0"><?php esc_html_e('Select a survey…', 'mc-leads-engine'); ?></option>
+                                                    <?php foreach ($surveys as $survey) : ?>
+                                                        <option value="<?php echo esc_attr($survey['id']); ?>"><?php echo esc_html($survey['title']); ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                                <button type="button" id="mc-sim-run" class="btn">
+                                                    <span class="dashicons dashicons-controls-play"></span> <?php esc_html_e('Simulate', 'mc-leads-engine'); ?>
+                                                </button>
+                                            </div>
+                                            <div id="mc-sim-result" class="pricing-sim-result" style="display:none"></div>
+                                        </div>
+
+                                        <!-- Hidden data bridge: initial rules from PHP → JS -->
+                                        <textarea id="mc-pricing-rules-data" style="display:none"><?php echo esc_textarea(wp_json_encode($pricing_rules, JSON_UNESCAPED_UNICODE)); ?></textarea>
+                                        <input type="hidden" id="mc-pricing-nonce" value="<?php echo esc_attr(wp_create_nonce('mc_leads_engine_nonce')); ?>">
                                     </div>
                                 </div>
                             </div>

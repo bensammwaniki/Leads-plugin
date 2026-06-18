@@ -65,15 +65,6 @@ function mc_leads_engine_register_admin_menu() {
         'mc_leads_engine_render_analytics_page'
     );
 
-    add_submenu_page(
-        'mc-leads-engine',
-        __('Pricing Rules', 'mc-leads-engine'),
-        __('Pricing Rules', 'mc-leads-engine'),
-        'manage_options',
-        'mc-leads-engine-pricing',
-        'mc_leads_engine_render_pricing_page'
-    );
-
 
     add_submenu_page(
         'mc-leads-engine',
@@ -118,14 +109,6 @@ function mc_leads_engine_render_builder_page() {
     }
 
     mc_leads_engine_render_admin_app('builder');
-}
-
-function mc_leads_engine_render_pricing_page() {
-    if (!current_user_can('manage_options')) {
-        wp_die(esc_html__('You do not have permission to access this page.', 'mc-leads-engine'));
-    }
-
-    mc_leads_engine_render_admin_app('pricing');
 }
 
 
