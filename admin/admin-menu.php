@@ -49,15 +49,6 @@ function mc_leads_engine_register_admin_menu() {
 
     add_submenu_page(
         'mc-leads-engine',
-        __('Builder', 'mc-leads-engine'),
-        __('Builder', 'mc-leads-engine'),
-        'manage_options',
-        'mc-leads-engine-builder',
-        'mc_leads_engine_render_builder_page'
-    );
-
-    add_submenu_page(
-        'mc-leads-engine',
         __('Analytics & Leads', 'mc-leads-engine'),
         __('Analytics & Leads', 'mc-leads-engine'),
         'manage_options',
@@ -101,14 +92,6 @@ function mc_leads_engine_render_dashboard_page() {
     }
 
     mc_leads_engine_render_admin_app('dashboard');
-}
-
-function mc_leads_engine_render_builder_page() {
-    if (!current_user_can('manage_options')) {
-        wp_die(esc_html__('You do not have permission to access this page.', 'mc-leads-engine'));
-    }
-
-    mc_leads_engine_render_admin_app('builder');
 }
 
 
