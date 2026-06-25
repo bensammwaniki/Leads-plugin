@@ -466,15 +466,15 @@ function initSurvey(container) {
   }
 
   document.addEventListener('wpcf7beforesubmit', (event) => {
-    const cf7Form = container.querySelector('.wpcf7 form');
-    if (cf7Form && event.target === cf7Form) {
+    const cf7Wrapper = container.querySelector('.wpcf7');
+    if (cf7Wrapper && (event.target === cf7Wrapper || cf7Wrapper.contains(event.target))) {
       showLoadingOverlay('Saving your estimate...');
     }
   }, false);
 
   document.addEventListener('wpcf7mailsent', (event) => {
-    const cf7Form = container.querySelector('.wpcf7 form');
-    if (cf7Form && event.target === cf7Form) {
+    const cf7Wrapper = container.querySelector('.wpcf7');
+    if (cf7Wrapper && (event.target === cf7Wrapper || cf7Wrapper.contains(event.target))) {
       showLoadingOverlay('Estimate confirmed! Redirecting...');
       const responseLeadId = event.detail.apiResponse?.mc_lead_id;
       const leadId = responseLeadId ? responseLeadId : 'active';
@@ -484,22 +484,22 @@ function initSurvey(container) {
   }, false);
 
   document.addEventListener('wpcf7invalid', (event) => {
-    const cf7Form = container.querySelector('.wpcf7 form');
-    if (cf7Form && event.target === cf7Form) {
+    const cf7Wrapper = container.querySelector('.wpcf7');
+    if (cf7Wrapper && (event.target === cf7Wrapper || cf7Wrapper.contains(event.target))) {
       hideLoadingOverlay();
     }
   }, false);
 
   document.addEventListener('wpcf7spam', (event) => {
-    const cf7Form = container.querySelector('.wpcf7 form');
-    if (cf7Form && event.target === cf7Form) {
+    const cf7Wrapper = container.querySelector('.wpcf7');
+    if (cf7Wrapper && (event.target === cf7Wrapper || cf7Wrapper.contains(event.target))) {
       hideLoadingOverlay();
     }
   }, false);
 
   document.addEventListener('wpcf7mailfailed', (event) => {
-    const cf7Form = container.querySelector('.wpcf7 form');
-    if (cf7Form && event.target === cf7Form) {
+    const cf7Wrapper = container.querySelector('.wpcf7');
+    if (cf7Wrapper && (event.target === cf7Wrapper || cf7Wrapper.contains(event.target))) {
       hideLoadingOverlay();
     }
   }, false);
