@@ -10,7 +10,7 @@ $total_steps = count($sections) + 1;
 $is_cf7 = !empty($cf7_id);
 $saved_answers = isset($saved_answers) && is_array($saved_answers) ? $saved_answers : array();
 ?>
-<div class="mc-leads-engine mc-leads-engine-<?php echo esc_attr($is_cf7 ? 'cf7' : 'standard'); ?>" data-survey-id="<?php echo esc_attr($survey_id); ?>" data-session-id="<?php echo esc_attr($session_id); ?>" data-mode="<?php echo esc_attr($is_cf7 ? 'cf7' : 'standard'); ?>" data-total-steps="<?php echo esc_attr($total_steps); ?>" data-current-step="<?php echo esc_attr(max(1, (int) ($current_step ?? 1))); ?>">
+<div class="mc-leads-engine mc-leads-engine-<?php echo esc_attr($is_cf7 ? 'cf7' : 'standard'); ?>" data-survey-id="<?php echo esc_attr($survey_id); ?>" data-session-id="<?php echo esc_attr($session_id); ?>" data-mode="<?php echo esc_attr($is_cf7 ? 'cf7' : 'standard'); ?>" data-total-steps="<?php echo esc_attr($total_steps); ?>" data-current-step="<?php echo esc_attr(max(1, (int) ($current_step ?? 1))); ?>" data-clear-on-load="<?php echo empty($saved_answers) ? '1' : '0'; ?>">
     <div class="mc-leads-engine-card">
         <header class="mc-leads-engine-header">
             <h2><?php echo esc_html($survey['title']); ?></h2>

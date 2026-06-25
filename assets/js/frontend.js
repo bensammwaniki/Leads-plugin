@@ -16,6 +16,30 @@ function initSurvey(container) {
   let ajaxUrl = (window.MCLeadsEngine && window.MCLeadsEngine.ajaxUrl) || window.ajaxurl || '';
   const nonce = (window.MCLeadsEngine && window.MCLeadsEngine.nonce) || '';
 
+  // Clear browser-autofilled/cached form inputs if the session is brand new
+  if (container.dataset.clearOnLoad === '1') {
+    container.querySelectorAll('input, textarea, select').forEach(field => {
+      const type = (field.type || '').toLowerCase();
+      if (type === 'radio' || type === 'checkbox') {
+        field.checked = false;
+        const parentOption = field.closest('.mc-option');
+        if (parentOption) {
+          parentOption.classList.remove('mc-option-checked');
+        }
+      } else if (field.tagName === 'SELECT') {
+        field.selectedIndex = 0;
+      } else if (field.type !== 'hidden' && field.type !== 'submit') {
+        field.value = '';
+      }
+    });
+    
+    // Also reset Contact Form 7 form if present
+    const cf7Form = container.querySelector('.wpcf7 form');
+    if (cf7Form) {
+      cf7Form.reset();
+    }
+  }
+
   // Resolve hostname mismatch when testing on mobile devices in local network
   if (ajaxUrl && ajaxUrl.startsWith('http')) {
     try {
