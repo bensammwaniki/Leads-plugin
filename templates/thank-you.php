@@ -16,7 +16,7 @@ $new_estimate_url = remove_query_arg(array('mc_leads_submitted', 'lead_id'));
         <span class="dashicons dashicons-yes-alt mc-thank-you-icon"></span>
         <h2><?php esc_html_e('Thank You!', 'mc-leads-engine'); ?></h2>
         
-        <?php if ($booking) : ?>
+        <?php if ($survey_id === 0 && $booking) : ?>
             <p><?php esc_html_e('Your booking has been scheduled successfully.', 'mc-leads-engine'); ?></p>
             <div class="mc-final-summary">
                 <p><strong><?php esc_html_e('Meeting Type:', 'mc-leads-engine'); ?></strong> <?php 
@@ -31,26 +31,28 @@ $new_estimate_url = remove_query_arg(array('mc_leads_submitted', 'lead_id'));
                 <p><strong><?php esc_html_e('Date & Time:', 'mc-leads-engine'); ?></strong> <?php echo esc_html($booking['meeting_date'] . ' @ ' . $booking['meeting_time']); ?></p>
                 <p><strong><?php esc_html_e('Location:', 'mc-leads-engine'); ?></strong> <?php echo esc_html($booking['location_name'] . ($booking['location_address'] ? ' (' . $booking['location_address'] . ')' : '')); ?></p>
             </div>
-        <?php else : ?>
-            <p><?php esc_html_e('Your estimate request has been submitted successfully.', 'mc-leads-engine'); ?></p>
-            <?php if ($lead) : ?>
-                <div class="mc-final-summary">
-                    <p class="mc-summary-id"><strong><?php esc_html_e('Lead ID:', 'mc-leads-engine'); ?></strong> #<?php echo esc_html($lead['id']); ?></p>
-                    <p class="mc-summary-price"><strong><?php esc_html_e('Estimated Total:', 'mc-leads-engine'); ?></strong> KES <?php echo esc_html(number_format_i18n((float) $lead['total_price'], 2)); ?></p>
-                    <p class="mc-summary-score"><strong><?php esc_html_e('Lead Score:', 'mc-leads-engine'); ?></strong> <?php echo esc_html((int) $lead['lead_score']); ?></p>
-                </div>
-            <?php endif; ?>
+        <?php else : 
+            $survey_settings = mc_leads_engine_get_survey_settings($survey_id);
+            $message = !empty($survey_settings['final_message']) ? $survey_settings['final_message'] : __('Your estimate request has been submitted successfully.', 'mc-leads-engine');
+            $pricing = array(
+                'total_price' => $lead ? $lead['total_price'] : 0,
+                'lead_score'  => $lead ? $lead['lead_score'] : 0,
+            );
+            $message_formatted = mc_leads_engine_format_final_message($message, $pricing, $survey_id);
+            if ($lead) {
+                $message_formatted = str_replace('[lead_id]', $lead['id'], $message_formatted);
+            }
+        ?>
+            <div class="mc-thank-you-message" style="margin-bottom: 25px; line-height: 1.6; color: #4b5563;">
+                <?php echo wpautop($message_formatted); ?>
+            </div>
         <?php endif; ?>
         
         <p class="mc-thank-you-action">
             <?php
-            if ($booking) {
-                $book_again_url = add_query_arg('mc_new_booking', '1', $new_estimate_url);
-                echo '<a href="' . esc_url($book_again_url) . '" class="button button-primary mc-submit-survey">' . esc_html__('Book Another Meeting', 'mc-leads-engine') . '</a>';
-            } else {
-                $new_estimate_restart_url = add_query_arg('mc_leads_restart', '1', $new_estimate_url);
-                echo '<a href="' . esc_url($new_estimate_restart_url) . '" class="button button-primary mc-submit-survey">' . esc_html__('New Estimate', 'mc-leads-engine') . '</a>';
-            }
+            $button_url = ($survey_id === 0 && $booking) ? add_query_arg('mc_new_booking', '1', $new_estimate_url) : add_query_arg('mc_leads_restart', '1', $new_estimate_url);
+            $button_text = ($survey_id === 0 && $booking) ? esc_html__('Book Another Meeting', 'mc-leads-engine') : esc_html__('New Estimate', 'mc-leads-engine');
+            echo '<a href="' . esc_url($button_url) . '" class="button button-primary mc-submit-survey">' . $button_text . '</a>';
             ?>
         </p>
     </div>

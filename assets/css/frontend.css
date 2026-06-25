@@ -545,9 +545,7 @@
 }
 
 .mc-progress-price,
-.mc-progress-score,
-.mc-summary-score,
-.mc-summary-id {
+.mc-progress-score {
   display: none !important;
 }
 
