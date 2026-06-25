@@ -570,3 +570,59 @@
   transform: none !important;
   box-shadow: none !important;
 }
+
+.mc-leads-engine-card {
+  position: relative !important;
+}
+
+/* Survey Loading Overlay */
+.mc-leads-engine-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  border-radius: 8px;
+  animation: mcFadeIn 0.3s ease forwards;
+}
+
+.mc-leads-engine-loading-overlay .mc-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(241, 93, 97, 0.1);
+  border-top: 4px solid #F15D61;
+  border-radius: 50%;
+  animation: mc-spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+.mc-leads-engine-loading-overlay .mc-loading-msg {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  font-family: inherit;
+}
+
+/* Hide CF7 success message output in survey */
+.mc-leads-engine .wpcf7-form.sent .wpcf7-response-output,
+.mc-leads-engine .wpcf7-response-output.wpcf7-mail-sent-ok {
+  display: none !important;
+}
+
+@keyframes mcFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes mc-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

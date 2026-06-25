@@ -35,7 +35,7 @@ function initSurvey(container) {
   const priceDisplay = container.querySelector('.mc-live-price');
   const scoreDisplay = container.querySelector('.mc-live-score');
   const finalSessionField = container.querySelector('.mc-final-session-id');
-  const form = container.querySelector('.mc-leads-engine-form');
+  const form = container.querySelector('.mc-leads-engine-form, .mc-leads-engine-flow');
   const hiddenAnswersField = container.querySelector('input[name="mc_answers_json"]');
   let currentStep = parseInt(container.dataset.currentStep || '1', 10);
   let saveTimer = null;
@@ -407,6 +407,78 @@ function initSurvey(container) {
       });
     }
   }
+
+  // Listen to CF7 events to manage loading states and redirects in survey
+  function showLoadingOverlay(message) {
+    let overlay = container.querySelector('.mc-leads-engine-loading-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.className = 'mc-leads-engine-loading-overlay';
+      
+      const spinner = document.createElement('div');
+      spinner.className = 'mc-spinner';
+      overlay.appendChild(spinner);
+      
+      const msgEl = document.createElement('div');
+      msgEl.className = 'mc-loading-msg';
+      overlay.appendChild(msgEl);
+      
+      const card = container.querySelector('.mc-leads-engine-card');
+      if (card) {
+        card.appendChild(overlay);
+      }
+    }
+    const msgEl = overlay.querySelector('.mc-loading-msg');
+    if (msgEl) {
+      msgEl.textContent = message;
+    }
+  }
+
+  function hideLoadingOverlay() {
+    const overlay = container.querySelector('.mc-leads-engine-loading-overlay');
+    if (overlay) {
+      overlay.remove();
+    }
+  }
+
+  document.addEventListener('wpcf7beforesubmit', (event) => {
+    const cf7Form = container.querySelector('.wpcf7 form');
+    if (cf7Form && event.target === cf7Form) {
+      showLoadingOverlay('Saving your estimate...');
+    }
+  }, false);
+
+  document.addEventListener('wpcf7mailsent', (event) => {
+    const cf7Form = container.querySelector('.wpcf7 form');
+    if (cf7Form && event.target === cf7Form) {
+      showLoadingOverlay('Estimate confirmed! Redirecting...');
+      const responseLeadId = event.detail.apiResponse?.mc_lead_id;
+      const leadId = responseLeadId ? responseLeadId : 'active';
+      const thankYouUrl = window.location.origin + window.location.pathname + `?mc_leads_submitted=1&lead_id=${leadId}`;
+      window.location.href = thankYouUrl;
+    }
+  }, false);
+
+  document.addEventListener('wpcf7invalid', (event) => {
+    const cf7Form = container.querySelector('.wpcf7 form');
+    if (cf7Form && event.target === cf7Form) {
+      hideLoadingOverlay();
+    }
+  }, false);
+
+  document.addEventListener('wpcf7spam', (event) => {
+    const cf7Form = container.querySelector('.wpcf7 form');
+    if (cf7Form && event.target === cf7Form) {
+      hideLoadingOverlay();
+    }
+  }, false);
+
+  document.addEventListener('wpcf7mailfailed', (event) => {
+    const cf7Form = container.querySelector('.wpcf7 form');
+    if (cf7Form && event.target === cf7Form) {
+      hideLoadingOverlay();
+    }
+  }, false);
 
   function refresh() {
     wireInputs();
