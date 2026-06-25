@@ -79,10 +79,6 @@ if (!function_exists('mc_booking_get_svg_icon')) {
                         <p><?php esc_html_e('Visit us at our primary host studio space.', 'mc-leads-engine'); ?></p>
                     </div>
                 </div>
-
-                <div class="mc-step-nav">
-                    <button type="button" class="btn primary mc-next-btn" disabled><?php esc_html_e('Continue', 'mc-leads-engine'); ?></button>
-                </div>
             </div>
 
             <!-- Step 2: Location Selector -->

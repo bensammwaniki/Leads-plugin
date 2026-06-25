@@ -99,6 +99,15 @@ function mc_leads_engine_render_analytics_page() {
         foreach ($leads as $row) {
             $survey_row = mc_leads_engine_survey_repository()->get_survey($row['survey_id']);
             $is_booking = (bool) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM " . mc_leads_engine_table('bookings') . " WHERE lead_id = %d", $row['id']));
+            if (!$is_booking) {
+                $cf7_rows = mc_leads_engine_leads_repository()->get_cf7_data($row['id']);
+                if (!empty($cf7_rows)) {
+                    $cf7_data = json_decode($cf7_rows[0]['data_json'] ?? '{}', true);
+                    if (is_array($cf7_data) && isset($cf7_data['mc_booking_date'])) {
+                        $is_booking = true;
+                    }
+                }
+            }
             $survey_title = $is_booking ? __('Bookings', 'mc-leads-engine') : ($survey_row['title'] ?? $row['survey_id']);
             
             $name = mc_leads_engine_leads_repository()->find_client_name($row['id']);
@@ -108,7 +117,7 @@ function mc_leads_engine_render_analytics_page() {
             // Parse answers JSON
             $answers = json_decode($row['answers_json'] ?? '[]', true);
             $answers_summary_parts = array();
-            if (!$is_booking && is_array($answers)) {
+            if (is_array($answers)) {
                 foreach ($answers as $q_id => $val) {
                     $q_text = $questions_map[(int)$q_id] ?? sprintf('Question #%d', $q_id);
                     $val_str = is_array($val) ? implode(', ', $val) : (string)$val;
@@ -126,18 +135,10 @@ function mc_leads_engine_render_analytics_page() {
                     foreach ($cf7_data as $key => $val) {
                         if (!empty($val) && !in_array($key, array('cf7_form_id', 'mc_session_id', 'mc_survey_id', 'survey_data', 'pricing'), true)) {
                             $is_booking_key = (strpos($key, 'mc_booking_') === 0 || $key === 'mc_leads_session_id');
-                            
-                            if ($is_booking) {
-                                if ($is_booking_key) {
-                                    $val_str = is_array($val) ? implode(', ', $val) : (string)$val;
-                                    $answers_summary_parts[] = $key . ': ' . $val_str;
-                                }
-                            } else {
-                                $lkey = strtolower($key);
-                                if (!$is_booking_key && strpos($lkey, 'name') === false && strpos($lkey, 'email') === false && strpos($lkey, 'phone') === false && strpos($lkey, 'tel') === false && strpos($lkey, 'whatsapp') === false) {
-                                    $val_str = is_array($val) ? implode(', ', $val) : (string)$val;
-                                    $answers_summary_parts[] = $key . ': ' . $val_str;
-                                }
+                            $lkey = strtolower($key);
+                            if (!$is_booking_key && strpos($lkey, 'name') === false && strpos($lkey, 'email') === false && strpos($lkey, 'phone') === false && strpos($lkey, 'tel') === false && strpos($lkey, 'whatsapp') === false) {
+                                $val_str = is_array($val) ? implode(', ', $val) : (string)$val;
+                                $answers_summary_parts[] = $key . ': ' . $val_str;
                             }
                         }
                     }
@@ -336,6 +337,15 @@ function mc_leads_engine_render_analytics_page() {
                     foreach ($all_leads as $lead) : 
                         $survey_row = mc_leads_engine_survey_repository()->get_survey($lead['survey_id']);
                         $is_booking = (bool) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM " . mc_leads_engine_table('bookings') . " WHERE lead_id = %d", $lead['id']));
+                        if (!$is_booking) {
+                            $cf7_rows = mc_leads_engine_leads_repository()->get_cf7_data($lead['id']);
+                            if (!empty($cf7_rows)) {
+                                $cf7_data = json_decode($cf7_rows[0]['data_json'] ?? '{}', true);
+                                if (is_array($cf7_data) && isset($cf7_data['mc_booking_date'])) {
+                                    $is_booking = true;
+                                }
+                            }
+                        }
                         $name = mc_leads_engine_leads_repository()->find_client_name($lead['id']);
                         $email = mc_leads_engine_leads_repository()->find_client_email($lead['id']);
                         $phone = mc_leads_engine_leads_repository()->find_client_phone($lead['id']);
@@ -360,47 +370,40 @@ function mc_leads_engine_render_analytics_page() {
                             <td>
                                 <?php 
                                 $cf7_rows = mc_leads_engine_leads_repository()->get_cf7_data($lead['id']);
-                                $has_answers = (is_array($answers) && !empty($answers) && !$is_booking);
-                                $has_cf7 = !empty($cf7_rows);
+                                $list_items = array();
+                                
+                                if (is_array($answers)) {
+                                    foreach ($answers as $q_id => $val) { 
+                                        $q_text = $questions_map[(int)$q_id] ?? sprintf(__('Question #%d', 'mc-leads-engine'), $q_id);
+                                        $val_str = is_array($val) ? implode(', ', $val) : (string)$val;
+                                        if ($val_str !== '') {
+                                            $list_items[] = '<strong>' . esc_html($q_text) . ':</strong> ' . esc_html($val_str);
+                                        }
+                                    }
+                                }
+                                
+                                if (!empty($cf7_rows)) {
+                                    $cf7_data = json_decode($cf7_rows[0]['data_json'] ?? '{}', true);
+                                    if (is_array($cf7_data)) {
+                                        foreach ($cf7_data as $key => $val) {
+                                            if (!empty($val) && !in_array($key, array('cf7_form_id', 'mc_session_id', 'mc_survey_id', 'survey_data', 'pricing'), true)) {
+                                                $is_booking_key = (strpos($key, 'mc_booking_') === 0 || $key === 'mc_leads_session_id');
+                                                $lkey = strtolower($key);
+                                                if (!$is_booking_key && strpos($lkey, 'name') === false && strpos($lkey, 'email') === false && strpos($lkey, 'phone') === false && strpos($lkey, 'tel') === false && strpos($lkey, 'whatsapp') === false) {
+                                                    $val_str = is_array($val) ? implode(', ', $val) : (string)$val;
+                                                    $list_items[] = '<strong>' . esc_html($key) . ':</strong> ' . esc_html($val_str);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
 
-                                if ($has_answers || $has_cf7) : 
+                                if (!empty($list_items)) :
                                 ?>
                                     <ul class="mc-analytics-answers-list">
-                                        <?php 
-                                        if (!$is_booking && is_array($answers)) {
-                                            foreach ($answers as $q_id => $val) { 
-                                                $q_text = $questions_map[(int)$q_id] ?? sprintf(__('Question #%d', 'mc-leads-engine'), $q_id);
-                                                $val_str = is_array($val) ? implode(', ', $val) : (string)$val;
-                                                if ($val_str !== '') {
-                                                    echo '<li><strong>' . esc_html($q_text) . ':</strong> ' . esc_html($val_str) . '</li>';
-                                                }
-                                            }
-                                        }
-                                        
-                                        if ($has_cf7) {
-                                            $cf7_data = json_decode($cf7_rows[0]['data_json'] ?? '{}', true);
-                                            if (is_array($cf7_data)) {
-                                                foreach ($cf7_data as $key => $val) {
-                                                    if (!empty($val) && !in_array($key, array('cf7_form_id', 'mc_session_id', 'mc_survey_id', 'survey_data', 'pricing'), true)) {
-                                                        $is_booking_key = (strpos($key, 'mc_booking_') === 0 || $key === 'mc_leads_session_id');
-                                                        
-                                                        if ($is_booking) {
-                                                            if ($is_booking_key) {
-                                                                $val_str = is_array($val) ? implode(', ', $val) : (string)$val;
-                                                                echo '<li><strong>' . esc_html($key) . ':</strong> ' . esc_html($val_str) . '</li>';
-                                                            }
-                                                        } else {
-                                                            $lkey = strtolower($key);
-                                                            if (!$is_booking_key && strpos($lkey, 'name') === false && strpos($lkey, 'email') === false && strpos($lkey, 'phone') === false && strpos($lkey, 'tel') === false && strpos($lkey, 'whatsapp') === false) {
-                                                                $val_str = is_array($val) ? implode(', ', $val) : (string)$val;
-                                                                echo '<li><strong>' . esc_html($key) . ':</strong> ' . esc_html($val_str) . '</li>';
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        ?>
+                                        <?php foreach ($list_items as $item) : ?>
+                                            <li><?php echo $item; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></li>
+                                        <?php endforeach; ?>
                                     </ul>
                                 <?php else : ?>
                                     <span class="description">-</span>

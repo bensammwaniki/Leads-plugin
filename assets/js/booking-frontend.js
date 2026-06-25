@@ -98,6 +98,11 @@ function initBookingWizard(container) {
         step1Next.disabled = false;
         step1Next.removeAttribute('disabled');
       }
+
+      // Auto-advance to next step with a tiny delay to allow the selection animation to be visible
+      setTimeout(() => {
+        changeStep(state.currentStep + 1);
+      }, 250);
     });
   });
 
@@ -526,15 +531,72 @@ function initBookingWizard(container) {
     }
   }
 
-  // 6. Listen to CF7 successfully sent event to handle redirects
+  // 6. Listen to CF7 events to manage loading states and redirects
+  function showLoadingOverlay(message) {
+    let overlay = container.querySelector('.mc-booking-loading-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.className = 'mc-booking-loading-overlay';
+      
+      const spinner = document.createElement('div');
+      spinner.className = 'mc-spinner';
+      overlay.appendChild(spinner);
+      
+      const msgEl = document.createElement('div');
+      msgEl.className = 'mc-loading-msg';
+      overlay.appendChild(msgEl);
+      
+      const card = container.querySelector('.mc-booking-card');
+      if (card) {
+        card.appendChild(overlay);
+      }
+    }
+    const msgEl = overlay.querySelector('.mc-loading-msg');
+    if (msgEl) {
+      msgEl.textContent = message;
+    }
+  }
+
+  function hideLoadingOverlay() {
+    const overlay = container.querySelector('.mc-booking-loading-overlay');
+    if (overlay) {
+      overlay.remove();
+    }
+  }
+
+  document.addEventListener('wpcf7beforesubmit', (event) => {
+    if (String(event.detail.contactFormId) === String(cf7Id)) {
+      showLoadingOverlay('Scheduling your meeting...');
+    }
+  }, false);
+
   document.addEventListener('wpcf7mailsent', (event) => {
     // Check if the submitted form matches the booking wizard's form
     if (String(event.detail.contactFormId) === String(cf7Id)) {
+      showLoadingOverlay('Booking confirmed! Redirecting...');
       const responseLeadId = event.detail.apiResponse?.mc_lead_id;
       const leadId = responseLeadId ? responseLeadId : 'active';
       // Redirect or show thank you page containing lead details
       const thankYouUrl = window.location.origin + window.location.pathname + `?mc_leads_submitted=1&lead_id=${leadId}`;
       window.location.href = thankYouUrl;
+    }
+  }, false);
+
+  document.addEventListener('wpcf7invalid', (event) => {
+    if (String(event.detail.contactFormId) === String(cf7Id)) {
+      hideLoadingOverlay();
+    }
+  }, false);
+
+  document.addEventListener('wpcf7spam', (event) => {
+    if (String(event.detail.contactFormId) === String(cf7Id)) {
+      hideLoadingOverlay();
+    }
+  }, false);
+
+  document.addEventListener('wpcf7mailfailed', (event) => {
+    if (String(event.detail.contactFormId) === String(cf7Id)) {
+      hideLoadingOverlay();
     }
   }, false);
 }

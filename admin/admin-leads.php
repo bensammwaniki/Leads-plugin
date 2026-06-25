@@ -234,6 +234,15 @@ function mc_leads_engine_render_leads_page() {
                     global $wpdb;
                     $survey_row = mc_leads_engine_survey_repository()->get_survey($row['survey_id']);
                     $is_booking = (bool) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM " . mc_leads_engine_table('bookings') . " WHERE lead_id = %d", $row['id']));
+                    if (!$is_booking) {
+                        $cf7_rows = mc_leads_engine_leads_repository()->get_cf7_data($row['id']);
+                        if (!empty($cf7_rows)) {
+                            $cf7_data = json_decode($cf7_rows[0]['data_json'] ?? '{}', true);
+                            if (is_array($cf7_data) && isset($cf7_data['mc_booking_date'])) {
+                                $is_booking = true;
+                            }
+                        }
+                    }
                     ?>
                     <tr>
                         <td><a href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-leads', 'lead_id' => $row['id'], 'survey_id' => $survey_id, 'min_score' => $min_score, 'orderby' => $orderby, 'order' => $order), admin_url('admin.php'))); ?>"><?php echo esc_html($row['id']); ?></a></td>

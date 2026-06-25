@@ -823,14 +823,26 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                             </div>
                             <div class="leads-grid">
                                 <?php foreach (array_slice($leads, 0, 20) as $lead) :
+                                    global $wpdb;
+                                    $is_booking = (bool) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM " . mc_leads_engine_table('bookings') . " WHERE lead_id = %d", $lead['id']));
+                                    if (!$is_booking) {
+                                        $cf7_rows = mc_leads_engine_leads_repository()->get_cf7_data($lead['id']);
+                                        if (!empty($cf7_rows)) {
+                                            $cf7_data = json_decode($cf7_rows[0]['data_json'] ?? '{}', true);
+                                            if (is_array($cf7_data) && isset($cf7_data['mc_booking_date'])) {
+                                                $is_booking = true;
+                                            }
+                                        }
+                                    }
                                     $survey_row = mc_leads_engine_survey_repository()->get_survey($lead['survey_id']);
-                                    $initials = strtoupper(substr((string) ($survey_row['title'] ?? 'MC'), 0, 2));
+                                    $title = $is_booking ? __('Bookings', 'mc-leads-engine') : ($survey_row['title'] ?? __('Lead', 'mc-leads-engine'));
+                                    $initials = strtoupper(substr((string) ($is_booking ? 'BK' : ($survey_row['title'] ?? 'MC')), 0, 2));
                                     $score_class = (int) $lead['lead_score'] >= 80 ? 'score-high' : ((int) $lead['lead_score'] >= 50 ? 'score-med' : '');
                                 ?>
                                     <div class="lead-card">
                                         <div class="lead-avatar"><?php echo esc_html($initials); ?></div>
                                         <div class="lead-info">
-                                            <div class="lead-name"><?php echo esc_html($survey_row['title'] ?? __('Lead', 'mc-leads-engine')); ?></div>
+                                            <div class="lead-name"><?php echo esc_html($title); ?></div>
                                             <div class="lead-sub"><?php echo esc_html(sprintf(__('%s · %s', 'mc-leads-engine'), $survey_row['status'] ?? '', $lead['created_at'])); ?></div>
                                         </div>
                                         <div class="lead-value">
