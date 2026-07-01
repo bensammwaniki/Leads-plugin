@@ -63,6 +63,7 @@ function initSurvey(container) {
   const hiddenAnswersField = container.querySelector('input[name="mc_answers_json"]');
   let currentStep = parseInt(container.dataset.currentStep || '1', 10);
   let saveTimer = null;
+  let startedEventDispatched = false;
 
   function getVisibleStep() {
     return Math.min(Math.max(currentStep, 1), totalSteps);
@@ -79,6 +80,22 @@ function initSurvey(container) {
     updateProgress();
     injectCf7Fields();
     checkStepValidation();
+
+    // Dispatch step completed custom event
+    document.dispatchEvent(new CustomEvent('mc_leads_survey_step', {
+      detail: { surveyId: surveyId, step: currentStep }
+    }));
+
+    // Dispatch start custom event on step 1
+    if (currentStep === 1 && !startedEventDispatched) {
+      document.dispatchEvent(new CustomEvent('mc_leads_survey_start', {
+        detail: {
+          surveyId: surveyId,
+          surveyTitle: container.querySelector('.mc-leads-title, .mc-leads-engine-title')?.textContent.trim() || 'Survey'
+        }
+      }));
+      startedEventDispatched = true;
+    }
   }
 
   function updateProgress() {
@@ -358,6 +375,15 @@ function initSurvey(container) {
     const latestAnswers = collectAnswers();
     syncHiddenAnswerPayload(latestAnswers);
 
+    // Dispatch survey submit custom event
+    document.dispatchEvent(new CustomEvent('mc_leads_survey_submit', {
+      detail: {
+        surveyId: surveyId,
+        price: priceDisplay ? parseFloat(priceDisplay.textContent.replace(/[^0-9.]/g, '')) : 0,
+        score: scoreDisplay ? parseInt(scoreDisplay.textContent, 10) : 0
+      }
+    }));
+
     const tempForm = document.createElement('form');
     tempForm.method = 'POST';
     tempForm.action = form.dataset.action || '';
@@ -476,6 +502,16 @@ function initSurvey(container) {
     const cf7Wrapper = container.querySelector('.wpcf7');
     if (cf7Wrapper && (event.target === cf7Wrapper || cf7Wrapper.contains(event.target))) {
       showLoadingOverlay('Estimate confirmed! Redirecting...');
+      
+      // Dispatch survey submit custom event on successful CF7 submission
+      document.dispatchEvent(new CustomEvent('mc_leads_survey_submit', {
+        detail: {
+          surveyId: surveyId,
+          price: priceDisplay ? parseFloat(priceDisplay.textContent.replace(/[^0-9.]/g, '')) : 0,
+          score: scoreDisplay ? parseInt(scoreDisplay.textContent, 10) : 0
+        }
+      }));
+
       const responseLeadId = event.detail.apiResponse?.mc_lead_id;
       const leadId = responseLeadId ? responseLeadId : 'active';
       const thankYouUrl = window.location.origin + window.location.pathname + `?mc_leads_submitted=1&lead_id=${leadId}`;

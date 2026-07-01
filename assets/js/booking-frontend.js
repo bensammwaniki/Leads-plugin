@@ -153,6 +153,11 @@ function initBookingWizard(container) {
       }
     });
 
+    // Dispatch booking step completed custom event
+    document.dispatchEvent(new CustomEvent('mc_leads_booking_step', {
+      detail: { step: state.currentStep }
+    }));
+
     // Update progress elements
     const pct = ((state.currentStep) / 4) * 100;
     if (progressFill) progressFill.style.width = `${pct}%`;
@@ -574,6 +579,17 @@ function initBookingWizard(container) {
     // Check if the submitted form matches the booking wizard's form
     if (String(event.detail.contactFormId) === String(cf7Id)) {
       showLoadingOverlay('Booking confirmed! Redirecting...');
+      
+      // Dispatch booking scheduled custom event for passive tracking
+      document.dispatchEvent(new CustomEvent('mc_leads_booking_scheduled', {
+        detail: {
+          bookingType: state.meetingType,
+          date: state.selectedDate,
+          time: state.selectedTime,
+          location: state.locationAddress ? `${state.locationName} (${state.locationAddress})` : state.locationName
+        }
+      }));
+
       const responseLeadId = event.detail.apiResponse?.mc_lead_id;
       const leadId = responseLeadId ? responseLeadId : 'active';
       // Redirect or show thank you page containing lead details

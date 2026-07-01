@@ -63,6 +63,20 @@ function mc_leads_engine_handle_settings_save() {
         'booking_score_coffee'       => isset($_POST['booking_score_coffee']) ? (int) $_POST['booking_score_coffee'] : (int) ($current_settings['booking_score_coffee'] ?? 20),
         'booking_score_office'       => isset($_POST['booking_score_office']) ? (int) $_POST['booking_score_office'] : (int) ($current_settings['booking_score_office'] ?? 30),
         'booking_score_host'         => isset($_POST['booking_score_host']) ? (int) $_POST['booking_score_host'] : (int) ($current_settings['booking_score_host'] ?? 20),
+        
+        // Consent & Tracking Settings variables
+        'cookie_banner_enable'       => isset($_POST['cookie_banner_enable']) ? 1 : 0,
+        'cookie_banner_title'        => sanitize_text_field(wp_unslash($_POST['cookie_banner_title'] ?? $current_settings['cookie_banner_title'] ?? '')),
+        'cookie_banner_message'      => sanitize_textarea_field(wp_unslash($_POST['cookie_banner_message'] ?? $current_settings['cookie_banner_message'] ?? '')),
+        'cookie_banner_btn_accept'   => sanitize_text_field(wp_unslash($_POST['cookie_banner_btn_accept'] ?? $current_settings['cookie_banner_btn_accept'] ?? '')),
+        'cookie_banner_btn_reject'   => sanitize_text_field(wp_unslash($_POST['cookie_banner_btn_reject'] ?? $current_settings['cookie_banner_btn_reject'] ?? '')),
+        'cookie_banner_btn_settings' => sanitize_text_field(wp_unslash($_POST['cookie_banner_btn_settings'] ?? $current_settings['cookie_banner_btn_settings'] ?? '')),
+        'cookie_banner_theme'        => sanitize_key($_POST['cookie_banner_theme'] ?? $current_settings['cookie_banner_theme'] ?? 'glassmorphism'),
+        'tracking_ga_id'             => sanitize_text_field(wp_unslash($_POST['tracking_ga_id'] ?? $current_settings['tracking_ga_id'] ?? '')),
+        'tracking_ga_enable'         => isset($_POST['tracking_ga_enable']) ? 1 : 0,
+        'tracking_pixel_id'          => sanitize_text_field(wp_unslash($_POST['tracking_pixel_id'] ?? $current_settings['tracking_pixel_id'] ?? '')),
+        'tracking_pixel_enable'      => isset($_POST['tracking_pixel_enable']) ? 1 : 0,
+        'tracking_whatsapp_click'    => isset($_POST['tracking_whatsapp_click']) ? 1 : 0,
     );
 
     update_option('mc_leads_engine_settings', $settings);
@@ -237,6 +251,9 @@ function mc_leads_engine_render_settings_page() {
                     </button>
                     <button type="button" class="settings-tab-btn" data-tab="booking">
                         <span class="dashicons dashicons-calendar-alt"></span> <?php esc_html_e('Booking Settings', 'mc-leads-engine'); ?>
+                    </button>
+                    <button type="button" class="settings-tab-btn" data-tab="consent">
+                        <span class="dashicons dashicons-shield"></span> <?php esc_html_e('Consent & Tracking', 'mc-leads-engine'); ?>
                     </button>
                     <button type="button" class="settings-tab-btn" data-tab="placeholders">
                         <span class="dashicons dashicons-editor-code"></span> <?php esc_html_e('Placeholder Guide', 'mc-leads-engine'); ?>
@@ -559,6 +576,94 @@ function mc_leads_engine_render_settings_page() {
                                     <label class="field-label"><?php esc_html_e('Predefined Host Location Score', 'mc-leads-engine'); ?></label>
                                     <input class="field-input" type="number" name="booking_score_host" value="<?php echo esc_attr($settings['booking_score_host'] ?? 20); ?>">
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Consent & Tracking Tab -->
+                    <div class="settings-section-pane" data-pane="consent">
+                        <div class="card">
+                            <div class="card-title"><?php esc_html_e('Cookie Consent Banner', 'mc-leads-engine'); ?></div>
+                            <p class="field-desc-top"><?php esc_html_e('Configure a premium, floating cookie banner to get consent for passive tracking. Core functionality is never blocked.', 'mc-leads-engine'); ?></p>
+                            
+                            <div class="settings-field">
+                                <label class="field-label" style="font-weight:600; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" name="cookie_banner_enable" value="1" <?php checked($settings['cookie_banner_enable'] ?? 0, 1); ?>>
+                                    <?php esc_html_e('Enable Cookie Consent Banner', 'mc-leads-engine'); ?>
+                                </label>
+                            </div>
+                            
+                            <div class="settings-field">
+                                <label class="field-label"><?php esc_html_e('Banner Heading Title', 'mc-leads-engine'); ?></label>
+                                <input class="field-input" type="text" name="cookie_banner_title" value="<?php echo esc_attr($settings['cookie_banner_title'] ?? ''); ?>">
+                            </div>
+                            
+                            <div class="settings-field">
+                                <label class="field-label"><?php esc_html_e('Banner Body Message', 'mc-leads-engine'); ?></label>
+                                <textarea class="field-input" rows="4" name="cookie_banner_message"><?php echo esc_textarea($settings['cookie_banner_message'] ?? ''); ?></textarea>
+                            </div>
+                            
+                            <div class="settings-row">
+                                <div class="settings-field">
+                                    <label class="field-label"><?php esc_html_e('Accept Button Text', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="text" name="cookie_banner_btn_accept" value="<?php echo esc_attr($settings['cookie_banner_btn_accept'] ?? ''); ?>">
+                                </div>
+                                <div class="settings-field">
+                                    <label class="field-label"><?php esc_html_e('Reject Button Text', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="text" name="cookie_banner_btn_reject" value="<?php echo esc_attr($settings['cookie_banner_btn_reject'] ?? ''); ?>">
+                                </div>
+                                <div class="settings-field">
+                                    <label class="field-label"><?php esc_html_e('Customize Button Text', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="text" name="cookie_banner_btn_settings" value="<?php echo esc_attr($settings['cookie_banner_btn_settings'] ?? ''); ?>">
+                                </div>
+                            </div>
+
+                            <div class="settings-field">
+                                <label class="field-label"><?php esc_html_e('Visual Design Theme', 'mc-leads-engine'); ?></label>
+                                <select class="field-input" name="cookie_banner_theme">
+                                    <option value="glassmorphism" <?php selected($settings['cookie_banner_theme'] ?? '', 'glassmorphism'); ?>>Glassmorphism (Premium)</option>
+                                    <option value="light" <?php selected($settings['cookie_banner_theme'] ?? '', 'light'); ?>>Sleek Light</option>
+                                    <option value="dark" <?php selected($settings['cookie_banner_theme'] ?? '', 'dark'); ?>>Modern Dark</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-top:20px;">
+                            <div class="card-title"><?php esc_html_e('Google Analytics (gtag.js)', 'mc-leads-engine'); ?></div>
+                            <div class="settings-field">
+                                <label class="field-label" style="font-weight:600; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" name="tracking_ga_enable" value="1" <?php checked($settings['tracking_ga_enable'] ?? 0, 1); ?>>
+                                    <?php esc_html_e('Enable Google Analytics Tracking', 'mc-leads-engine'); ?>
+                                </label>
+                            </div>
+                            <div class="settings-field">
+                                <label class="field-label"><?php esc_html_e('Google Analytics Measurement ID', 'mc-leads-engine'); ?></label>
+                                <input class="field-input" type="text" name="tracking_ga_id" value="<?php echo esc_attr($settings['tracking_ga_id'] ?? ''); ?>" placeholder="G-XXXXXXXXXX">
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-top:20px;">
+                            <div class="card-title"><?php esc_html_e('Meta Pixel (Facebook Pixel)', 'mc-leads-engine'); ?></div>
+                            <div class="settings-field">
+                                <label class="field-label" style="font-weight:600; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" name="tracking_pixel_enable" value="1" <?php checked($settings['tracking_pixel_enable'] ?? 0, 1); ?>>
+                                    <?php esc_html_e('Enable Meta Pixel Tracking', 'mc-leads-engine'); ?>
+                                </label>
+                            </div>
+                            <div class="settings-field">
+                                <label class="field-label"><?php esc_html_e('Meta Pixel ID', 'mc-leads-engine'); ?></label>
+                                <input class="field-input" type="text" name="tracking_pixel_id" value="<?php echo esc_attr($settings['tracking_pixel_id'] ?? ''); ?>" placeholder="e.g. 1234567890">
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-top:20px;">
+                            <div class="card-title"><?php esc_html_e('WhatsApp Click Tracking', 'mc-leads-engine'); ?></div>
+                            <p class="field-desc-top"><?php esc_html_e('Track clicks to WhatsApp wa.me / api.whatsapp.com links dynamically on your site when tracking consent is granted.', 'mc-leads-engine'); ?></p>
+                            <div class="settings-field">
+                                <label class="field-label" style="font-weight:600; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" name="tracking_whatsapp_click" value="1" <?php checked($settings['tracking_whatsapp_click'] ?? 0, 1); ?>>
+                                    <?php esc_html_e('Enable WhatsApp click events conversion tracking', 'mc-leads-engine'); ?>
+                                </label>
                             </div>
                         </div>
                     </div>

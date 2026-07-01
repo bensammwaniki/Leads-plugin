@@ -15,6 +15,7 @@ class MC_Leads_Engine_Leads {
         $cf7_data = is_array($cf7_data) ? $cf7_data : array();
 
         $existing = $this->find_lead_by_session($session_id, $survey_id);
+        
         $payload = array(
             'survey_id' => $survey_id,
             'session_id' => $session_id,
@@ -22,10 +23,71 @@ class MC_Leads_Engine_Leads {
             'lead_score' => isset($pricing['lead_score']) ? (int) $pricing['lead_score'] : 0,
             'answers_json' => wp_json_encode($answers),
             'pricing_json' => wp_json_encode($pricing),
-            'created_at' => current_time('mysql'),
         );
 
+        // Check if passive tracking and consent are allowed
+        $tracking_enabled = false;
+        $consent_json = '';
+
+        $settings = mc_leads_engine_get_settings();
+        if (empty($settings['cookie_banner_enable'])) {
+            $tracking_enabled = true;
+            $consent_json = wp_json_encode(array('analytics' => true, 'marketing' => true));
+        } elseif (!empty($_COOKIE['mc_leads_consent'])) {
+            $consent_json = wp_unslash($_COOKIE['mc_leads_consent']);
+            $consent = json_decode($consent_json, true);
+            if (is_array($consent) && (!empty($consent['analytics']) || !empty($consent['marketing']))) {
+                $tracking_enabled = true;
+            }
+        }
+
+        if ($tracking_enabled) {
+            $payload['utm_source']   = sanitize_text_field(wp_unslash($_COOKIE['mc_leads_utm_source'] ?? ''));
+            $payload['utm_medium']   = sanitize_text_field(wp_unslash($_COOKIE['mc_leads_utm_medium'] ?? ''));
+            $payload['utm_campaign'] = sanitize_text_field(wp_unslash($_COOKIE['mc_leads_utm_campaign'] ?? ''));
+            $payload['utm_term']     = sanitize_text_field(wp_unslash($_COOKIE['mc_leads_utm_term'] ?? ''));
+            $payload['utm_content']  = sanitize_text_field(wp_unslash($_COOKIE['mc_leads_utm_content'] ?? ''));
+            $payload['referrer']     = esc_url_raw(wp_unslash($_COOKIE['mc_leads_referrer'] ?? ''));
+            $payload['ip_address']   = sanitize_text_field($_SERVER['REMOTE_ADDR'] ?? '');
+            $payload['user_agent']   = sanitize_text_field($_SERVER['HTTP_USER_AGENT'] ?? '');
+            $payload['ga_client_id'] = sanitize_text_field(wp_unslash($_COOKIE['mc_leads_ga_client_id'] ?? ''));
+            $payload['consent_state'] = sanitize_textarea_field($consent_json);
+        } else {
+            $payload['utm_source']   = null;
+            $payload['utm_medium']   = null;
+            $payload['utm_campaign'] = null;
+            $payload['utm_term']     = null;
+            $payload['utm_content']  = null;
+            $payload['referrer']     = null;
+            $payload['ip_address']   = null;
+            $payload['user_agent']   = null;
+            $payload['ga_client_id'] = null;
+            $payload['consent_state'] = sanitize_textarea_field($consent_json);
+        }
+
+        $payload['created_at'] = current_time('mysql');
+
         $is_new = !$existing;
+
+        $format_array = array(
+            '%d', // survey_id
+            '%s', // session_id
+            '%f', // total_price
+            '%d', // lead_score
+            '%s', // answers_json
+            '%s', // pricing_json
+            '%s', // utm_source
+            '%s', // utm_medium
+            '%s', // utm_campaign
+            '%s', // utm_term
+            '%s', // utm_content
+            '%s', // referrer
+            '%s', // ip_address
+            '%s', // user_agent
+            '%s', // ga_client_id
+            '%s', // consent_state
+            '%s', // created_at
+        );
 
         if ($existing) {
             $lead_id = (int) $existing['id'];
@@ -33,7 +95,7 @@ class MC_Leads_Engine_Leads {
                 mc_leads_engine_table('leads'),
                 $payload,
                 array('id' => $lead_id),
-                array('%d', '%s', '%f', '%d', '%s', '%s', '%s'),
+                $format_array,
                 array('%d')
             );
             $wpdb->delete(mc_leads_engine_table('lead_answers'), array('lead_id' => $lead_id), array('%d'));
@@ -41,7 +103,7 @@ class MC_Leads_Engine_Leads {
             $wpdb->insert(
                 mc_leads_engine_table('leads'),
                 $payload,
-                array('%d', '%s', '%f', '%d', '%s', '%s', '%s')
+                $format_array
             );
             $lead_id = (int) $wpdb->insert_id;
         }

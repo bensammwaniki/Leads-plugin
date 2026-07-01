@@ -3,7 +3,7 @@
 Plugin Name: MC Leads Engine
 Plugin URI: https://memoriescreative.com/
 Description: Modular survey, pricing, lead capture, CF7 integration, analytics, and shortcode engine.
-Version: 1.2.0
+Version: 1.3.0
 Author: Bensam Mwaniki
 Author URI: https://memoriescreative.com/
 Requires at least: 5.8
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('MC_LEADS_ENGINE_VERSION', '1.2.0');
+define('MC_LEADS_ENGINE_VERSION', '1.3.0');
 define('MC_LEADS_ENGINE_FILE', __FILE__);
 define('MC_LEADS_ENGINE_PATH', plugin_dir_path(__FILE__));
 define('MC_LEADS_ENGINE_URL', plugin_dir_url(__FILE__));
@@ -29,6 +29,7 @@ require_once MC_LEADS_ENGINE_PATH . 'includes/class-xlsx-writer.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-leads.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-cf7-integration.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-booking.php';
+require_once MC_LEADS_ENGINE_PATH . 'includes/class-consent-tracker.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-shortcodes.php';
 
 function mc_leads_engine_table($suffix) {
@@ -129,6 +130,20 @@ function mc_leads_engine_get_settings() {
         'booking_score_coffee'       => 20,
         'booking_score_office'       => 30,
         'booking_score_host'         => 20,
+        
+        // Consent & Tracking defaults
+        'cookie_banner_enable'       => 0,
+        'cookie_banner_title'        => __('We value your privacy', 'mc-leads-engine'),
+        'cookie_banner_message'      => __('We use cookies to enhance your experience, serve personalized ads or content, and analyze our traffic. By clicking "Accept All", you consent to our use of cookies.', 'mc-leads-engine'),
+        'cookie_banner_btn_accept'   => __('Accept All', 'mc-leads-engine'),
+        'cookie_banner_btn_reject'   => __('Reject All', 'mc-leads-engine'),
+        'cookie_banner_btn_settings' => __('Customize', 'mc-leads-engine'),
+        'cookie_banner_theme'        => 'glassmorphism',
+        'tracking_ga_id'             => '',
+        'tracking_ga_enable'         => 0,
+        'tracking_pixel_id'          => '',
+        'tracking_pixel_enable'      => 0,
+        'tracking_whatsapp_click'    => 0,
     );
 
     $settings = get_option('mc_leads_engine_settings', array());
@@ -327,6 +342,16 @@ function mc_leads_engine_booking() {
     return $booking;
 }
 
+function mc_leads_engine_consent_tracker() {
+    static $tracker = null;
+
+    if (!$tracker) {
+        $tracker = new MC_Leads_Engine_Consent_Tracker();
+    }
+
+    return $tracker;
+}
+
 function mc_leads_engine_boot() {
     mc_leads_engine_session()->maybe_start_session();
 
@@ -348,6 +373,7 @@ function mc_leads_engine_boot() {
 
     mc_leads_engine_cf7_integration();
     mc_leads_engine_booking();
+    mc_leads_engine_consent_tracker();
     new MC_Leads_Engine_Shortcodes();
 }
 add_action('plugins_loaded', 'mc_leads_engine_boot');
