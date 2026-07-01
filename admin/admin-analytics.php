@@ -56,7 +56,8 @@ function mc_leads_engine_render_analytics_page() {
     $per_page  = 50;
     $offset    = ($paged - 1) * $per_page;
     $days_allowed = array(7, 14, 30, 90);
-    $days      = in_array((int) ($_GET['days'] ?? 14), $days_allowed, true) ? (int) $_GET['days'] : 14;
+    $days_raw  = isset($_GET['days']) ? (int) $_GET['days'] : 14;
+    $days      = in_array($days_raw, $days_allowed, true) ? $days_raw : 14;
 
     $allowed_orderby = array('id', 'created_at', 'lead_score', 'total_price');
     if (!in_array($orderby, $allowed_orderby, true)) {
