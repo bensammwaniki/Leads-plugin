@@ -534,6 +534,20 @@ function initBookingWizard(container) {
       }
       field.value = dataMapping[key];
     }
+
+    // Ensure there is a submit button in the CF7 form
+    const submitBtn = cf7Form.querySelector('input[type="submit"], button[type="submit"], .wpcf7-submit');
+    if (!submitBtn) {
+      const fallbackSubmit = document.createElement('input');
+      fallbackSubmit.type = 'submit';
+      fallbackSubmit.value = 'Confirm Booking';
+      fallbackSubmit.className = 'wpcf7-submit';
+      
+      const submitWrap = document.createElement('p');
+      submitWrap.style.margin = '20px 0 0 0';
+      submitWrap.appendChild(fallbackSubmit);
+      cf7Form.appendChild(submitWrap);
+    }
   }
 
   // 6. Listen to CF7 events to manage loading states and redirects

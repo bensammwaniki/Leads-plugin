@@ -191,6 +191,20 @@ function initSurvey(container) {
       formEl.appendChild(surveyField);
     }
     surveyField.value = String(surveyId);
+
+    // Ensure there is a submit button in the CF7 form
+    const submitBtn = formEl.querySelector('input[type="submit"], button[type="submit"], .wpcf7-submit');
+    if (!submitBtn) {
+      const fallbackSubmit = document.createElement('input');
+      fallbackSubmit.type = 'submit';
+      fallbackSubmit.value = 'Submit Estimate';
+      fallbackSubmit.className = 'wpcf7-submit';
+      
+      const submitWrap = document.createElement('p');
+      submitWrap.style.margin = '20px 0 0 0';
+      submitWrap.appendChild(fallbackSubmit);
+      formEl.appendChild(submitWrap);
+    }
   }
 
   function saveProgress() {
