@@ -506,4 +506,84 @@ document.addEventListener('DOMContentLoaded', () => {
   initSettingsTabs('.mc-leads-engine-admin', 'mc-whatsapp-gateway', 'mc-whatsapp-api-key-label', 'mc-whatsapp-instance-id-label', 'mc-whatsapp-sender-field');
   // Init for SPA panel settings
   initSettingsTabs('#panel-settings', 'mc-spa-whatsapp-gateway', 'mc-spa-whatsapp-api-key-label', 'mc-spa-whatsapp-instance-id-label', 'mc-spa-whatsapp-sender-field');
+
+  // ── Lead Status Pipeline ──────────────────────────────────────────────────
+  document.querySelectorAll('.mc-status-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const leadId = btn.dataset.lead;
+      const status = btn.dataset.status;
+      if (!leadId || !status || !window.mcLeadsEngine) return;
+
+      btn.disabled = true;
+      fetch(mcLeadsEngine.ajaxUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          action: 'mc_leads_update_status',
+          nonce:   mcLeadsEngine.nonce,
+          lead_id: leadId,
+          status:  status,
+        }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success) {
+            document.querySelectorAll('.mc-status-btn').forEach((b) => b.classList.remove('active'));
+            btn.classList.add('active');
+          } else {
+            alert(data.data?.message || 'Update failed.');
+          }
+        })
+        .catch(() => alert('Request failed.'))
+        .finally(() => { btn.disabled = false; });
+    });
+  });
+
+  // ── Add Note ─────────────────────────────────────────────────────────────
+  const noteBtn      = document.getElementById('mc-add-note-btn');
+  const noteInput    = document.getElementById('mc-note-input');
+  const notesTimeline = document.getElementById('mc-activity-timeline');
+
+  if (noteBtn && noteInput && notesTimeline && window.mcLeadsEngine) {
+    noteBtn.addEventListener('click', () => {
+      const note   = noteInput.value.trim();
+      const leadId = noteBtn.dataset.lead;
+      if (!note) return;
+
+      noteBtn.disabled = true;
+      fetch(mcLeadsEngine.ajaxUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          action:  'mc_leads_add_note',
+          nonce:   mcLeadsEngine.nonce,
+          lead_id: leadId,
+          note:    note,
+        }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success) {
+            const d = data.data;
+            const li = document.createElement('li');
+            li.className = 'mc-activity-item';
+            li.innerHTML = `
+              <span class="mc-activity-icon dashicons dashicons-edit-page"></span>
+              <div class="mc-activity-content">
+                <span class="mc-activity-type">Note</span>
+                <span class="mc-activity-time">${d.time} &bull; ${d.user}</span>
+                <p class="mc-activity-body">${d.body.replace(/</g,'&lt;')}</p>
+              </div>`;
+            const emptyMsg = notesTimeline.querySelector('.mc-activity-empty');
+            if (emptyMsg) emptyMsg.remove();
+            notesTimeline.prepend(li);
+            noteInput.value = '';
+          } else {
+            alert(data.data?.message || 'Could not save note.');
+          }
+        })
+        .catch(() => alert('Request failed.'))
+        .finally(() => { noteBtn.disabled = false; });
+    });
+  }
 });

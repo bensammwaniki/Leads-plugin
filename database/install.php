@@ -74,10 +74,14 @@ function mc_leads_engine_install() {
         user_agent text NULL,
         ga_client_id varchar(100) NULL,
         consent_state text NULL,
+        status varchar(30) NOT NULL DEFAULT 'new',
+        status_notes text NULL,
+        status_updated_at datetime NULL,
         created_at datetime NOT NULL,
         PRIMARY KEY  (id),
         KEY survey_id (survey_id),
-        KEY session_id (session_id)
+        KEY session_id (session_id),
+        KEY status (status)
     ) $charset_collate;";
 
     $tables[] = "CREATE TABLE " . mc_leads_engine_table('lead_answers') . " (
@@ -105,6 +109,7 @@ function mc_leads_engine_install() {
         lead_id bigint(20) unsigned NOT NULL,
         cf7_form_id bigint(20) unsigned NOT NULL,
         data_json longtext NULL,
+        created_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
         PRIMARY KEY  (id),
         KEY lead_id (lead_id),
         KEY cf7_form_id (cf7_form_id)
@@ -138,6 +143,18 @@ function mc_leads_engine_install() {
         PRIMARY KEY  (id),
         KEY lead_id (lead_id),
         KEY meeting_date (meeting_date)
+    ) $charset_collate;";
+
+    $tables[] = "CREATE TABLE " . mc_leads_engine_table('lead_activity') . " (
+        id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+        lead_id bigint(20) unsigned NOT NULL,
+        user_id bigint(20) unsigned NULL,
+        activity_type varchar(40) NOT NULL,
+        body text NULL,
+        created_at datetime NOT NULL,
+        PRIMARY KEY  (id),
+        KEY lead_id (lead_id),
+        KEY created_at (created_at)
     ) $charset_collate;";
 
     foreach ($tables as $sql) {

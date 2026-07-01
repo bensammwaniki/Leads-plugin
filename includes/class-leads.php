@@ -115,6 +115,11 @@ class MC_Leads_Engine_Leads {
 
         if ($is_new) {
             $this->record_lead_metrics($survey_id, $payload['total_price'], $payload['lead_score']);
+            // Invalidate cached analytics transients so new data shows immediately
+            delete_transient('mc_leads_answer_freq_0');
+            delete_transient('mc_leads_answer_freq_' . $survey_id);
+            delete_transient('mc_leads_utm_attr_30');
+            delete_transient('mc_leads_utm_attr_0');
         }
 
         // Only trigger notifications here for non-booking leads.
@@ -147,36 +152,93 @@ class MC_Leads_Engine_Leads {
         );
     }
 
+    /**
+     * Update the pipeline status of a lead.
+     *
+     * @param int    $lead_id
+     * @param string $status  One of: new, contacted, qualified, proposal_sent, won, lost
+     * @param string $notes   Optional internal note about the status change
+     * @return bool
+     */
+    public function update_lead_status($lead_id, $status, $notes = '') {
+        global $wpdb;
+
+        $lead_id  = absint($lead_id);
+        $allowed  = mc_leads_get_statuses();
+        $status   = in_array($status, $allowed, true) ? $status : 'new';
+        $notes    = sanitize_textarea_field($notes);
+
+        if (!$lead_id) {
+            return false;
+        }
+
+        $result = (bool) $wpdb->update(
+            mc_leads_engine_table('leads'),
+            array(
+                'status'            => $status,
+                'status_notes'      => $notes,
+                'status_updated_at' => current_time('mysql'),
+            ),
+            array('id' => $lead_id),
+            array('%s', '%s', '%s'),
+            array('%d')
+        );
+
+        if ($result) {
+            // Log to activity trail
+            $label = mc_leads_status_label($status);
+            $body  = sprintf(__('Status changed to: %s', 'mc-leads-engine'), $label);
+            if ($notes) {
+                $body .= ' — ' . $notes;
+            }
+            MC_Leads_Activity::log($lead_id, 'status_change', $body, get_current_user_id());
+        }
+
+        return $result;
+    }
+
     public function get_leads($args = array()) {
         global $wpdb;
 
         $defaults = array(
             'survey_id' => 0,
             'min_score' => 0,
-            'limit' => 50,
-            'offset' => 0,
-            'orderby' => 'created_at',
-            'order' => 'DESC',
+            'search'    => '',
+            'limit'     => 50,
+            'offset'    => 0,
+            'orderby'   => 'created_at',
+            'order'     => 'DESC',
         );
         $args = wp_parse_args($args, $defaults);
 
-        $where = '1=1';
+        $where  = '1=1';
         $params = array();
 
         if (!empty($args['survey_id'])) {
-            $where .= ' AND survey_id = %d';
+            $where   .= ' AND survey_id = %d';
             $params[] = absint($args['survey_id']);
         }
 
         if (!empty($args['min_score'])) {
-            $where .= ' AND lead_score >= %d';
+            $where   .= ' AND lead_score >= %d';
             $params[] = absint($args['min_score']);
         }
 
+        if (!empty($args['search'])) {
+            $s = '%' . $wpdb->esc_like(sanitize_text_field($args['search'])) . '%';
+            // Search inside CF7 data_json (stored in lead_cf7_data table)
+            $cf7_table = mc_leads_engine_table('lead_cf7_data');
+            $where .= " AND (EXISTS (
+                SELECT 1 FROM {$cf7_table} cf7
+                WHERE cf7.lead_id = id AND cf7.data_json LIKE %s
+            ))";
+            $params[] = $s;
+        }
+
         $orderby = in_array($args['orderby'], array('created_at', 'lead_score', 'total_price', 'id'), true) ? $args['orderby'] : 'created_at';
-        $order = strtoupper($args['order']) === 'ASC' ? 'ASC' : 'DESC';
-        $limit = absint($args['limit']);
-        $offset = absint($args['offset']);
+        $order   = strtoupper($args['order']) === 'ASC' ? 'ASC' : 'DESC';
+        $limit   = absint($args['limit']);
+        $offset  = absint($args['offset']);
 
         $sql = "SELECT * FROM " . mc_leads_engine_table('leads') . " WHERE {$where} ORDER BY {$orderby} {$order} LIMIT {$limit} OFFSET {$offset}";
         if ($params) {
@@ -184,6 +246,54 @@ class MC_Leads_Engine_Leads {
         }
 
         return $wpdb->get_results($sql, ARRAY_A);
+    }
+
+    /**
+     * Count leads matching the same criteria as get_leads() (without limit/offset/order).
+     * Used for pagination.
+     *
+     * @param array $args  Same keys as get_leads() minus limit/offset/orderby/order
+     * @return int
+     */
+    public function count_leads($args = array()) {
+        global $wpdb;
+
+        $defaults = array(
+            'survey_id' => 0,
+            'min_score' => 0,
+            'search'    => '',
+        );
+        $args = wp_parse_args($args, $defaults);
+
+        $where  = '1=1';
+        $params = array();
+
+        if (!empty($args['survey_id'])) {
+            $where   .= ' AND survey_id = %d';
+            $params[] = absint($args['survey_id']);
+        }
+
+        if (!empty($args['min_score'])) {
+            $where   .= ' AND lead_score >= %d';
+            $params[] = absint($args['min_score']);
+        }
+
+        if (!empty($args['search'])) {
+            $s = '%' . $wpdb->esc_like(sanitize_text_field($args['search'])) . '%';
+            $cf7_table = mc_leads_engine_table('lead_cf7_data');
+            $where .= " AND (EXISTS (
+                SELECT 1 FROM {$cf7_table} cf7
+                WHERE cf7.lead_id = id AND cf7.data_json LIKE %s
+            ))";
+            $params[] = $s;
+        }
+
+        $sql = "SELECT COUNT(*) FROM " . mc_leads_engine_table('leads') . " WHERE {$where}";
+        if ($params) {
+            $sql = $wpdb->prepare($sql, $params);
+        }
+
+        return (int) $wpdb->get_var($sql);
     }
 
     public function get_lead($lead_id) {
@@ -419,6 +529,64 @@ class MC_Leads_Engine_Leads {
         return $rows;
     }
 
+    /**
+     * Build a flat list of answer summary items for display or export.
+     * Replaces the duplicated parsing code that was in admin-analytics.php
+     * and admin-leads.php.
+     *
+     * @param array $lead         Full lead row (must include 'answers_json' and 'id').
+     * @param array $questions_map Map of question_id => question_text.
+     * @param bool  $is_html      If true, wraps items in <strong> for HTML output.
+     * @return array  Flat array of formatted strings like "Question: Answer"
+     */
+    public function build_answers_summary($lead, $questions_map = array(), $is_html = false) {
+        $list_items = array();
+
+        // 1. Survey answers from answers_json
+        $answers = json_decode($lead['answers_json'] ?? '[]', true);
+        if (is_array($answers)) {
+            foreach ($answers as $q_id => $val) {
+                $q_text  = $questions_map[(int) $q_id] ?? sprintf(__('Question #%d', 'mc-leads-engine'), $q_id);
+                $val_str = is_array($val) ? implode(', ', $val) : (string) $val;
+                if ($val_str !== '') {
+                    $list_items[] = $is_html
+                        ? '<strong>' . esc_html($q_text) . ':</strong> ' . esc_html($val_str)
+                        : esc_html($q_text) . ': ' . esc_html($val_str);
+                }
+            }
+        }
+
+        // 2. CF7 non-contact fields
+        $cf7_rows = isset($lead['cf7']) ? $lead['cf7'] : $this->get_cf7_data($lead['id']);
+        if (!empty($cf7_rows)) {
+            $cf7_data = json_decode($cf7_rows[0]['data_json'] ?? '{}', true);
+            if (is_array($cf7_data)) {
+                $skip_keys = array('cf7_form_id', 'mc_session_id', 'mc_survey_id', 'survey_data', 'pricing');
+                foreach ($cf7_data as $key => $val) {
+                    if (empty($val) || in_array($key, $skip_keys, true)) {
+                        continue;
+                    }
+                    $is_booking_key = (strpos($key, 'mc_booking_') === 0 || $key === 'mc_leads_session_id');
+                    $lkey = strtolower($key);
+                    $is_contact = strpos($lkey, 'name') !== false
+                               || strpos($lkey, 'email') !== false
+                               || strpos($lkey, 'phone') !== false
+                               || strpos($lkey, 'tel') !== false
+                               || strpos($lkey, 'whatsapp') !== false;
+
+                    if (!$is_booking_key && !$is_contact) {
+                        $val_str = is_array($val) ? implode(', ', $val) : (string) $val;
+                        $list_items[] = $is_html
+                            ? '<strong>' . esc_html($key) . ':</strong> ' . esc_html($val_str)
+                            : esc_html($key) . ': ' . esc_html($val_str);
+                    }
+                }
+            }
+        }
+
+        return $list_items;
+    }
+
     public function get_daily_lead_stats($days = 14) {
         global $wpdb;
 
@@ -444,10 +612,10 @@ class MC_Leads_Engine_Leads {
             $timestamp = $start_timestamp + (DAY_IN_SECONDS * $i);
             $day_key = wp_date('Y-m-d', $timestamp);
             $series[$day_key] = array(
-                'day' => $day_key,
-                'label' => wp_date('M j', $timestamp),
+                'day'        => $day_key,
+                'label'      => wp_date('M j', $timestamp),
                 'lead_count' => 0,
-                'revenue' => 0,
+                'revenue'    => 0,
             );
         }
 
@@ -462,6 +630,115 @@ class MC_Leads_Engine_Leads {
         }
 
         return array_values($series);
+    }
+
+    /**
+     * Get the frequency of each answer option per question for a survey.
+     * Results are cached for 1 hour via transients.
+     *
+     * @param int $survey_id  0 = all surveys
+     * @return array  Keyed by question_id, each value is array of ['answer_value', 'cnt', 'question_text']
+     */
+    public function get_answer_frequency($survey_id = 0) {
+        global $wpdb;
+
+        $survey_id  = absint($survey_id);
+        $cache_key  = 'mc_leads_answer_freq_' . $survey_id;
+        $cached     = get_transient($cache_key);
+
+        if ($cached !== false) {
+            return $cached;
+        }
+
+        $where  = '';
+        $params = array();
+
+        if ($survey_id) {
+            $where    = 'WHERE s.survey_id = %d';
+            $params[] = $survey_id;
+        }
+
+        $sql = "SELECT la.question_id, la.answer_value,
+                       COUNT(*) AS cnt,
+                       q.question_text
+                FROM " . mc_leads_engine_table('lead_answers') . " la
+                JOIN " . mc_leads_engine_table('survey_questions') . " q  ON q.id  = la.question_id
+                JOIN " . mc_leads_engine_table('survey_sections')  . " s  ON s.id  = q.section_id
+                {$where}
+                GROUP BY la.question_id, la.answer_value
+                ORDER BY la.question_id ASC, cnt DESC";
+
+        if ($params) {
+            $sql = $wpdb->prepare($sql, $params); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        }
+
+        $rows   = $wpdb->get_results($sql, ARRAY_A);
+        $result = array();
+
+        foreach ($rows as $row) {
+            $qid = (int) $row['question_id'];
+            if (!isset($result[$qid])) {
+                $result[$qid] = array(
+                    'question_text' => $row['question_text'],
+                    'options'       => array(),
+                );
+            }
+            $result[$qid]['options'][] = array(
+                'label' => $row['answer_value'],
+                'count' => (int) $row['cnt'],
+            );
+        }
+
+        set_transient($cache_key, $result, HOUR_IN_SECONDS);
+
+        return $result;
+    }
+
+    /**
+     * Get lead counts grouped by UTM source/medium/campaign.
+     * Results are cached for 30 minutes.
+     *
+     * @param int $days  Look-back window in days (0 = all time)
+     * @return array
+     */
+    public function get_utm_attribution($days = 30) {
+        global $wpdb;
+
+        $days      = absint($days);
+        $cache_key = 'mc_leads_utm_attr_' . $days;
+        $cached    = get_transient($cache_key);
+
+        if ($cached !== false) {
+            return $cached;
+        }
+
+        $where  = "WHERE utm_source IS NOT NULL AND utm_source != ''";
+        $params = array();
+
+        if ($days > 0) {
+            $where   .= ' AND created_at >= %s';
+            $params[] = gmdate('Y-m-d H:i:s', strtotime("-{$days} days"));
+        }
+
+        $sql = "SELECT utm_source, utm_medium, utm_campaign,
+                       COUNT(*) AS lead_count,
+                       ROUND(AVG(lead_score), 1) AS avg_score,
+                       ROUND(AVG(total_price), 2) AS avg_value
+                FROM " . mc_leads_engine_table('leads') . "
+                {$where}
+                GROUP BY utm_source, utm_medium, utm_campaign
+                ORDER BY lead_count DESC
+                LIMIT 20";
+
+        if ($params) {
+            $sql = $wpdb->prepare($sql, $params); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        }
+
+        $result = $wpdb->get_results($sql, ARRAY_A) ?: array();
+
+        set_transient($cache_key, $result, 30 * MINUTE_IN_SECONDS);
+
+        return $result;
     }
 
     protected function save_answers($lead_id, $answers) {
@@ -538,7 +815,14 @@ class MC_Leads_Engine_Leads {
             $user_body = $this->parse_message_placeholders($settings[$body_key] ?? '', $lead_id, true);
             
             if (!empty($user_subject) && !empty($user_body)) {
-                wp_mail($client_email, $user_subject, $user_body, $headers);
+                $sent = wp_mail($client_email, $user_subject, $user_body, $headers);
+                if ($sent) {
+                    MC_Leads_Activity::log(
+                        $lead_id,
+                        'email_sent',
+                        sprintf(__('Confirmation email sent to client: %s', 'mc-leads-engine'), $client_email)
+                    );
+                }
             }
         }
 
@@ -552,7 +836,14 @@ class MC_Leads_Engine_Leads {
             $admin_body = $this->parse_message_placeholders($settings[$body_key] ?? '', $lead_id, true);
             
             if (!empty($admin_subject) && !empty($admin_body)) {
-                wp_mail($admin_recipient, $admin_subject, $admin_body, $headers);
+                $sent = wp_mail($admin_recipient, $admin_subject, $admin_body, $headers);
+                if ($sent) {
+                    MC_Leads_Activity::log(
+                        $lead_id,
+                        'email_sent',
+                        sprintf(__('Admin notification email sent to: %s', 'mc-leads-engine'), $admin_recipient)
+                    );
+                }
             }
         }
 
@@ -562,7 +853,14 @@ class MC_Leads_Engine_Leads {
         $whatsapp_body = $this->parse_message_placeholders($settings[$whatsapp_body_key] ?? '', $lead_id, false);
         
         if (!empty($admin_phone) && !empty($whatsapp_body)) {
-            $this->send_whatsapp_notification($admin_phone, $whatsapp_body);
+            $sent = $this->send_whatsapp_notification($admin_phone, $whatsapp_body);
+            if ($sent) {
+                MC_Leads_Activity::log(
+                    $lead_id,
+                    'whatsapp_sent',
+                    sprintf(__('WhatsApp notification sent to admin: %s', 'mc-leads-engine'), $admin_phone)
+                );
+            }
         }
 
         // 4. User WhatsApp notification
@@ -571,7 +869,14 @@ class MC_Leads_Engine_Leads {
         $user_whatsapp_body = $this->parse_message_placeholders($settings[$user_whatsapp_body_key] ?? '', $lead_id, false);
         
         if (!empty($client_phone) && !empty($user_whatsapp_body)) {
-            $this->send_whatsapp_notification($client_phone, $user_whatsapp_body);
+            $sent = $this->send_whatsapp_notification($client_phone, $user_whatsapp_body);
+            if ($sent) {
+                MC_Leads_Activity::log(
+                    $lead_id,
+                    'whatsapp_sent',
+                    sprintf(__('WhatsApp confirmation sent to client: %s', 'mc-leads-engine'), $client_phone)
+                );
+            }
         }
     }
 
@@ -790,6 +1095,11 @@ class MC_Leads_Engine_Leads {
             '[created_at]'   => $lead['created_at'],
             '[survey_id]'    => $lead['survey_id'],
             '[survey_title]' => $survey_title,
+            // Phase 3B: attribution & status placeholders
+            '[utm_source]'   => $lead['utm_source']   ?? '',
+            '[utm_medium]'   => $lead['utm_medium']   ?? '',
+            '[utm_campaign]' => $lead['utm_campaign'] ?? '',
+            '[lead_status]'  => mc_leads_status_label($lead['status'] ?? 'new'),
         );
 
         // Fetch booking details if available

@@ -775,4 +775,113 @@
   100% { transform: rotate(360deg); }
 }
 
+/* ========================================================
+   MC BOOKING FORM UNIFIED LAYOUT & ACCENT STYLING
+   ======================================================== */
+
+.mc-booking-form {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.mc-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+}
+
+.mc-row,
+.mc-form__row {
+  display: flex;
+  gap: 14px;
+  margin: 10px 0px;
+  flex-wrap: wrap;
+}
+
+.mc-form__group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.mc-input,
+.mc-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  background: #fff;
+  transition: all 0.25s ease;
+}
+
+.mc-input:focus,
+.mc-textarea:focus {
+  border-color: #ff5a5f;
+  box-shadow: 0 0 0 3px rgba(255, 90, 95, 0.12);
+  outline: none;
+}
+
+.mc-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.mc-readonly {
+  background: #f8f8f8;
+  cursor: not-allowed;
+  font-weight: 500;
+}
+
+.mc-actions,
+.mc-form__actions {
+  margin-top: 15px !important; /* Override negative margin to keep submit button fully visible and clickable */
+}
+
+.mc-cf7-wrapper form p {
+  margin: 0;
+  width: 100%;
+}
+
+.mc-button {
+  width: 100%;
+  padding: 14px 18px;
+  background: #ff5a5f;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.mc-button:hover {
+  background: #e14b50;
+  transform: translateY(-1px);
+}
+
+.mc-button:active {
+  transform: scale(0.98);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .mc-row,
+  .mc-form__row {
+    flex-direction: column;
+  }
+  .mc-form__group {
+    min-width: 100%;
+  }
+}
+
 

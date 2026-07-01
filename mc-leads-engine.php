@@ -14,12 +14,13 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('MC_LEADS_ENGINE_VERSION', '1.3.0');
+define('MC_LEADS_ENGINE_VERSION', '1.4.0');
 define('MC_LEADS_ENGINE_FILE', __FILE__);
 define('MC_LEADS_ENGINE_PATH', plugin_dir_path(__FILE__));
 define('MC_LEADS_ENGINE_URL', plugin_dir_url(__FILE__));
 
 require_once MC_LEADS_ENGINE_PATH . 'database/install.php';
+require_once MC_LEADS_ENGINE_PATH . 'includes/helpers.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-session.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-survey.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-section.php';
@@ -27,6 +28,8 @@ require_once MC_LEADS_ENGINE_PATH . 'includes/class-question.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-pricing-engine.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-xlsx-writer.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-leads.php';
+require_once MC_LEADS_ENGINE_PATH . 'includes/class-activity.php';
+require_once MC_LEADS_ENGINE_PATH . 'includes/class-digest.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-cf7-integration.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-booking.php';
 require_once MC_LEADS_ENGINE_PATH . 'includes/class-consent-tracker.php';
@@ -144,6 +147,13 @@ function mc_leads_engine_get_settings() {
         'tracking_pixel_id'          => '',
         'tracking_pixel_enable'      => 0,
         'tracking_whatsapp_click'    => 0,
+
+        // Lead scoring bands
+        'score_hot_threshold'        => 80,
+        'score_warm_threshold'       => 50,
+
+        // Weekly digest email
+        'digest_email_enable'        => 0,
     );
 
     $settings = get_option('mc_leads_engine_settings', array());
@@ -401,3 +411,54 @@ add_action('template_redirect', 'mc_leads_engine_handle_session_actions');
 
 register_activation_hook(__FILE__, 'mc_leads_engine_install');
 
+// ─── Weekly Digest Cron ────────────────────────────────────────────────────
+add_action('mc_leads_engine_weekly_digest', array('MC_Leads_Digest', 'send'));
+
+if (!wp_next_scheduled('mc_leads_engine_weekly_digest')) {
+    wp_schedule_event(time(), 'weekly', 'mc_leads_engine_weekly_digest');
+}
+
+// ─── AJAX: Update lead status ─────────────────────────────────────────────
+add_action('wp_ajax_mc_leads_update_status', function () {
+    check_ajax_referer('mc_leads_engine_nonce', 'nonce');
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(array('message' => __('Permission denied.', 'mc-leads-engine')));
+    }
+
+    $lead_id = absint($_POST['lead_id'] ?? 0);
+    $status  = sanitize_key($_POST['status'] ?? '');
+    $notes   = sanitize_textarea_field($_POST['notes'] ?? '');
+
+    if (!$lead_id || !$status) {
+        wp_send_json_error(array('message' => __('Invalid data.', 'mc-leads-engine')));
+    }
+
+    $ok = mc_leads_engine_leads_repository()->update_lead_status($lead_id, $status, $notes);
+    $ok ? wp_send_json_success() : wp_send_json_error(array('message' => __('Update failed.', 'mc-leads-engine')));
+});
+
+// ─── AJAX: Add manual activity note ──────────────────────────────────────
+add_action('wp_ajax_mc_leads_add_note', function () {
+    check_ajax_referer('mc_leads_engine_nonce', 'nonce');
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(array('message' => __('Permission denied.', 'mc-leads-engine')));
+    }
+
+    $lead_id = absint($_POST['lead_id'] ?? 0);
+    $note    = sanitize_textarea_field($_POST['note'] ?? '');
+
+    if (!$lead_id || !$note) {
+        wp_send_json_error(array('message' => __('Note cannot be empty.', 'mc-leads-engine')));
+    }
+
+    $ok = MC_Leads_Activity::log($lead_id, 'note', $note, get_current_user_id());
+    if ($ok) {
+        wp_send_json_success(array(
+            'time' => current_time('mysql'),
+            'user' => wp_get_current_user()->display_name ?: __('Admin', 'mc-leads-engine'),
+            'body' => $note,
+        ));
+    } else {
+        wp_send_json_error(array('message' => __('Could not save note.', 'mc-leads-engine')));
+    }
+});

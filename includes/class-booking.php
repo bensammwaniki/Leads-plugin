@@ -178,8 +178,15 @@ class MC_Leads_Engine_Booking {
                 $lead_id = absint($lead_id);
             }
             $session->clear_session();
+
+            // Look up the real survey_id from the lead record.
+            // Booking-only leads have survey_id = 0; survey leads have survey_id > 0.
+            // Passing the correct value ensures thank-you.php shows the right content.
+            $lead_row   = mc_leads_engine_leads_repository()->get_lead($lead_id);
+            $lead_survey_id = absint($lead_row['survey_id'] ?? 0);
+
             return mc_leads_engine_render_template('thank-you.php', array(
-                'survey_id' => 0,
+                'survey_id' => $lead_survey_id,
                 'lead_id'   => $lead_id,
             ));
         }

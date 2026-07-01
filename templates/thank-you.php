@@ -21,11 +21,16 @@ $message_formatted = mc_leads_engine_format_final_message($message, $pricing, $s
 if ($lead) {
     $message_formatted = str_replace('[lead_id]', $lead['id'], $message_formatted);
 }
+
+// A booking-only lead has survey_id = 0 (created from the [mc_booking] shortcode).
+// A survey lead has survey_id > 0, even if it later has a booking linked to it.
+// Only show the booking confirmation block for true booking-only leads.
+$is_booking_lead = ($survey_id === 0 && !empty($booking));
 ?>
 <div class="mc-leads-engine mc-leads-engine-thank-you">
     <div class="mc-leads-engine-card mc-thank-you-card">
         
-        <?php if ($survey_id === 0 && $booking) : ?>
+        <?php if ($is_booking_lead) : ?>
             <div class="mc-thank-you-message">
                 <p><?php esc_html_e('Your booking has been scheduled successfully.', 'mc-leads-engine'); ?></p>
             </div>
@@ -50,8 +55,8 @@ if ($lead) {
         
         <p class="mc-thank-you-action">
             <?php
-            $button_url = ($survey_id === 0 && $booking) ? add_query_arg('mc_new_booking', '1', $new_estimate_url) : add_query_arg('mc_leads_restart', '1', $new_estimate_url);
-            $button_text = ($survey_id === 0 && $booking) ? esc_html__('Book Another Meeting', 'mc-leads-engine') : esc_html__('New Estimate', 'mc-leads-engine');
+            $button_url = $is_booking_lead ? add_query_arg('mc_new_booking', '1', $new_estimate_url) : add_query_arg('mc_leads_restart', '1', $new_estimate_url);
+            $button_text = $is_booking_lead ? esc_html__('Book Another Meeting', 'mc-leads-engine') : esc_html__('New Estimate', 'mc-leads-engine');
             echo '<a href="' . esc_url($button_url) . '" class="button button-primary mc-submit-survey">' . $button_text . '</a>';
             ?>
         </p>
