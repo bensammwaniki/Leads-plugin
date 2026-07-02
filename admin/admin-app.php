@@ -487,18 +487,23 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                             </div>
                         </div>
 
-                        <?php if ($selected_survey_id && $selected_survey) : ?>
+                        <?php if (isset($_GET['survey_id'])) : ?>
 
                         <!-- ── Tab pills ─────────────────────────── -->
                         <div class="sv-tabs">
-                            <button class="sv-tab active" data-sv-tab="builder">▦ <?php esc_html_e('Builder', 'mc-leads-engine'); ?></button>
-                            <button class="sv-tab" data-sv-tab="settings">
-                                ⚙ <?php esc_html_e('Survey settings', 'mc-leads-engine'); ?>
-                                <span class="status-dot" style="background:<?php echo $selected_survey['status'] === 'draft' ? '#f59e0b' : '#22c55e'; ?>;"></span>
+                            <?php if ($selected_survey_id && $selected_survey) : ?>
+                                <button class="sv-tab active" data-sv-tab="builder">▦ <?php esc_html_e('Builder', 'mc-leads-engine'); ?></button>
+                            <?php endif; ?>
+                            <button class="sv-tab<?php echo (!$selected_survey_id || !$selected_survey) ? ' active' : ''; ?>" data-sv-tab="settings">
+                                ⚙ <?php echo ($selected_survey_id && $selected_survey) ? esc_html__('Survey settings', 'mc-leads-engine') : esc_html__('Create Survey', 'mc-leads-engine'); ?>
+                                <?php if ($selected_survey_id && $selected_survey) : ?>
+                                    <span class="status-dot" style="background:<?php echo $selected_survey['status'] === 'draft' ? '#f59e0b' : '#22c55e'; ?>;"></span>
+                                <?php endif; ?>
                             </button>
                         </div>
 
                         <!-- ── BUILDER TAB ─────────────────────── -->
+                        <?php if ($selected_survey_id && $selected_survey) : ?>
                         <div class="sv-tab-pane active" data-sv-pane="builder">
                             <div class="builder-grid">
 
@@ -797,9 +802,10 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
 
                             </div>
                         </div><!-- /.sv-tab-pane[builder] -->
+                        <?php endif; ?>
 
                         <!-- ── SETTINGS TAB ─────────────────────── -->
-                        <div class="sv-tab-pane" data-sv-pane="settings">
+                        <div class="sv-tab-pane<?php echo (!$selected_survey_id || !$selected_survey) ? ' active' : ''; ?>" data-sv-pane="settings">
                             <?php $survey_settings = mc_leads_engine_get_survey_settings($selected_survey_id); ?>
                             <form method="post" class="sv-settings-form">
                                 <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
