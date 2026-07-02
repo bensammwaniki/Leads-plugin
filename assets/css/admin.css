@@ -3066,3 +3066,660 @@ select.field-input,
   background: var(--mc-brand);
   color: #fff !important;
 }
+
+/* ══════════════════════════════════════════════
+   Survey Builder Redesign — sv-* components
+   ══════════════════════════════════════════════ */
+
+/* ── Survey Top Bar ─────────────────────────── */
+.sv-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid var(--mc-border);
+  border-radius: var(--mc-radius);
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.sv-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.sv-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.sv-survey-select {
+  max-width: 260px;
+  height: 36px;
+  border: 1px solid var(--mc-border);
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 13px;
+  color: var(--mc-text);
+  background: var(--mc-surface-soft);
+  cursor: pointer;
+}
+
+.sv-shortcode-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--mc-brand-soft);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 20px;
+  font-size: 11px;
+  color: var(--mc-brand);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.sv-shortcode-chip code {
+  background: none;
+  padding: 0;
+  border: none;
+  font-size: 11px;
+  color: var(--mc-brand);
+}
+
+.sv-shortcode-chip .sv-copy-hint {
+  opacity: 0.5;
+  font-weight: 400;
+  font-size: 10px;
+}
+
+.sv-shortcode-chip:hover {
+  background: rgba(37, 99, 235, 0.12);
+  border-color: rgba(37, 99, 235, 0.35);
+}
+
+.btn.btn-danger {
+  background: transparent;
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.btn.btn-danger:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* ── Tab pills ──────────────────────────────── */
+.sv-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--mc-border);
+  margin-bottom: 12px;
+}
+
+.sv-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mc-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  border-radius: 6px 6px 0 0;
+  transition: all 0.18s ease;
+}
+
+.sv-tab:hover {
+  color: var(--mc-text);
+  background: var(--mc-surface-soft);
+}
+
+.sv-tab.active {
+  color: var(--mc-brand);
+  border-bottom-color: var(--mc-brand);
+  background: var(--mc-brand-soft);
+  font-weight: 600;
+}
+
+.sv-tab .dashicons {
+  font-size: 15px !important;
+  width: 15px !important;
+  height: 15px !important;
+}
+
+.sv-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.sv-status-dot.draft  { background: #f59e0b; }
+.sv-status-dot.live   { background: #22c55e; }
+
+/* ── Tab panes ──────────────────────────────── */
+.sv-tab-pane {
+  display: none;
+}
+
+.sv-tab-pane.active {
+  display: block;
+}
+
+/* ── Builder 3-column layout ────────────────── */
+.sv-builder {
+  display: grid;
+  grid-template-columns: 220px 280px 1fr;
+  gap: 0;
+  border: 1px solid var(--mc-border);
+  border-radius: var(--mc-radius);
+  background: #fff;
+  overflow: hidden;
+  min-height: 420px;
+}
+
+/* ── Shared rail/col header ─────────────────── */
+.sv-rail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--mc-border);
+  background: var(--mc-surface-soft);
+  flex-shrink: 0;
+}
+
+.sv-rail-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mc-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Sections rail ──────────────────────────── */
+.sv-sections-rail {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--mc-border);
+  overflow-y: auto;
+}
+
+.sv-add-section-form {
+  flex-shrink: 0;
+}
+
+.sv-add-section-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--mc-border);
+}
+
+.sv-add-section-input {
+  height: 30px !important;
+  padding: 4px 8px !important;
+  font-size: 12px !important;
+}
+
+.sv-sections-list {
+  flex: 1;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sv-section-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px !important;
+  gap: 6px;
+  border-radius: 8px;
+  border: 1px solid var(--mc-border);
+  background: var(--mc-surface-soft);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.sv-section-chip.active {
+  border-color: rgba(37, 99, 235, 0.3);
+  background: var(--mc-brand-soft);
+}
+
+.sv-section-chip.active .section-link {
+  color: var(--mc-brand);
+  font-weight: 600;
+}
+
+.sv-section-actions {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.sv-q-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  border-radius: 10px;
+  background: var(--mc-brand-soft);
+  color: var(--mc-brand);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 0 5px;
+}
+
+/* ── Small icon action buttons ──────────────── */
+.sv-icon-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--mc-muted);
+  cursor: pointer;
+  opacity: 0.5;
+  transition: all 0.15s ease;
+  padding: 0 !important;
+}
+
+.sv-icon-action .dashicons {
+  font-size: 13px !important;
+  width: 13px !important;
+  height: 13px !important;
+  line-height: 13px !important;
+}
+
+.sv-icon-action:hover {
+  opacity: 1;
+  border-color: var(--mc-border);
+  background: #fff;
+}
+
+.sv-icon-action.sv-icon-danger:hover {
+  border-color: #fca5a5;
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+/* ── Questions column ───────────────────────── */
+.sv-questions-col {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--mc-border);
+  overflow-y: auto;
+}
+
+.sv-questions-list {
+  flex: 1;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ── Question cards ─────────────────────────── */
+.sv-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  border: 1px solid var(--mc-border);
+  background: var(--mc-surface-soft);
+  color: var(--mc-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sv-type-badge.sv-type-radio    { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+.sv-type-badge.sv-type-checkbox { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
+.sv-type-badge.sv-type-number   { background: #fff7ed; color: #ea580c; border-color: #fed7aa; }
+.sv-type-badge.sv-type-text     { background: #fdf4ff; color: #9333ea; border-color: #e9d5ff; }
+.sv-type-badge.sv-type-cf7      { background: #fefce8; color: #ca8a04; border-color: #fde68a; }
+
+.sv-required-dot {
+  font-size: 10px;
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+/* ── Question Editor column ─────────────────── */
+.sv-editor-col {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sv-editor-body {
+  flex: 1;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.sv-question-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Field groups ───────────────────────────── */
+.sv-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sv-field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mc-text);
+  letter-spacing: 0.01em;
+}
+
+.sv-field-hint {
+  font-size: 11px;
+  color: var(--mc-muted);
+  line-height: 1.4;
+}
+
+.sv-inline-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.sv-field-grow  { flex: 1; min-width: 140px; }
+.sv-field-shrink { width: 80px; flex-shrink: 0; }
+.sv-field-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* ── Toggle (reuse existing toggle-checkbox) ── */
+.sv-toggle-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+}
+
+.sv-toggle-label {
+  font-size: 12px;
+  color: var(--mc-text);
+  cursor: pointer;
+}
+
+/* ── Options section ────────────────────────── */
+.sv-options-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--mc-border);
+  margin-top: 4px;
+}
+
+.sv-options-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sv-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sv-opt-col-hints {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 6px;
+  padding: 0 2px 2px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--mc-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sv-opts-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sv-opt-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 6px;
+  align-items: center;
+  padding: 5px 6px;
+  background: var(--mc-surface-soft);
+  border: 1px solid var(--mc-border);
+  border-radius: 6px;
+}
+
+.sv-opt-row .sv-opt-main {
+  min-width: 0;
+}
+
+.sv-opt-row .sv-opt-main input,
+.sv-opt-row .sv-opt-meta input {
+  height: 30px !important;
+  padding: 4px 8px !important;
+  font-size: 12px !important;
+}
+
+.sv-opt-meta {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.sv-opt-num {
+  width: 68px;
+  flex-shrink: 0;
+  font-size: 10px !important;
+}
+
+.sv-opt-order { width: 52px !important; }
+
+.sv-add-opt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mc-brand);
+  background: var(--mc-brand-soft);
+  border: 1px dashed rgba(37, 99, 235, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-top: 4px;
+  align-self: flex-start;
+}
+
+.sv-add-opt-btn:hover {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: var(--mc-brand);
+}
+
+.sv-editor-actions {
+  padding-top: 10px;
+  border-top: 1px solid var(--mc-border);
+  margin-top: 4px;
+}
+
+/* ── Empty states ───────────────────────────── */
+.sv-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--mc-muted);
+  font-size: 12px;
+}
+
+.sv-empty-state .dashicons {
+  font-size: 28px !important;
+  width: 28px !important;
+  height: 28px !important;
+  opacity: 0.3;
+}
+
+.sv-empty-state p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.sv-editor-empty {
+  flex: 1;
+}
+
+/* ── Settings tab pane ──────────────────────── */
+.sv-settings-form {
+  padding: 4px 0;
+}
+
+.sv-settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 14px;
+  background: #fff;
+  border: 1px solid var(--mc-border);
+  border-radius: var(--mc-radius);
+}
+
+.sv-settings-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sv-settings-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sv-toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sv-toggle-text {
+  font-size: 12px;
+  color: var(--mc-text);
+  cursor: pointer;
+}
+
+/* ── No survey selected state ───────────────── */
+.sv-no-survey {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 60px 24px;
+  text-align: center;
+  color: var(--mc-muted);
+  background: #fff;
+  border: 1px solid var(--mc-border);
+  border-radius: var(--mc-radius);
+}
+
+.sv-no-survey-icon {
+  font-size: 48px !important;
+  width: 48px !important;
+  height: 48px !important;
+  opacity: 0.2;
+}
+
+.sv-no-survey h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--mc-text);
+}
+
+.sv-no-survey p {
+  margin: 0;
+  font-size: 13px;
+  max-width: 340px;
+}
+
+/* ── Responsive ─────────────────────────────── */
+@media (max-width: 1100px) {
+  .sv-builder {
+    grid-template-columns: 1fr;
+  }
+
+  .sv-sections-rail,
+  .sv-questions-col {
+    border-right: none;
+    border-bottom: 1px solid var(--mc-border);
+  }
+}
+
+@media (max-width: 900px) {
+  .sv-settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sv-opt-num { width: 54px; }
+  .sv-opt-order { width: 40px !important; }
+}
+
+@media (max-width: 640px) {
+  .sv-bar { flex-direction: column; align-items: stretch; }
+  .sv-bar-right { justify-content: flex-end; }
+  .sv-inline-row { flex-direction: column; }
+  .sv-field-shrink,
+  .sv-field-toggle { width: 100%; }
+}
+

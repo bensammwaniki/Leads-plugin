@@ -586,4 +586,37 @@ document.addEventListener('DOMContentLoaded', () => {
         .finally(() => { noteBtn.disabled = false; });
     });
   }
+
+  /* ── Survey Builder Tab Switching ─────────────────────────── */
+  const svTabs = document.querySelectorAll('.sv-tab');
+  const svPanes = document.querySelectorAll('.sv-tab-pane');
+  svTabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.svTab;
+      svTabs.forEach((t) => t.classList.toggle('active', t === tab));
+      svPanes.forEach((p) => p.classList.toggle('active', p.dataset.svPane === target));
+    });
+  });
+
+  /* ── Shortcode chip copy ────────────────────────────────────  */
+  document.querySelectorAll('.sv-shortcode-chip').forEach((chip) => {
+    chip.addEventListener('click', async () => {
+      const text = chip.dataset.shortcode || chip.querySelector('code')?.textContent || '';
+      if (!text) return;
+      const hint = chip.querySelector('.sv-copy-hint');
+      const originalHint = hint ? hint.textContent : '';
+      try {
+        await navigator.clipboard.writeText(text);
+        if (hint) hint.textContent = '✓ Copied!';
+      } catch (_) {
+        // Fallback: select the code text manually
+        const range = document.createRange();
+        range.selectNode(chip.querySelector('code'));
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        if (hint) hint.textContent = '✓ Copied!';
+      }
+      setTimeout(() => { if (hint) hint.textContent = originalHint; }, 1400);
+    });
+  });
 });

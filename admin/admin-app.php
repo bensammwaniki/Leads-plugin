@@ -449,129 +449,94 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                     </section>
 
                     <section class="panel<?php echo $panel === 'surveys' ? ' active' : ''; ?>" id="panel-surveys" data-panel="surveys">
-                        <div class="survey-dashboard-header">
-                            <div class="survey-dashboard-row">
-                                <div style="display:flex; align-items:center; gap:12px; flex-grow:1; flex-wrap:wrap;">
-                                    <label class="field-label" style="font-weight:700; text-transform:uppercase; font-size:11px; letter-spacing:0.04em; color:var(--mc-muted); margin:0;"><?php esc_html_e('Active Survey:', 'mc-leads-engine'); ?></label>
-                                    <select class="filter-select" style="max-width:240px; margin:0;" onchange="window.location.href = 'admin.php?page=mc-leads-engine-surveys&mc_panel=surveys&survey_id=' + this.value">
-                                        <option value="0"><?php esc_html_e('-- Create/Select Survey --', 'mc-leads-engine'); ?></option>
-                                        <?php foreach ($surveys as $survey) : ?>
-                                            <option value="<?php echo esc_attr($survey['id']); ?>" <?php selected($selected_survey_id, $survey['id']); ?>><?php echo esc_html($survey['title']); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <?php if ($selected_survey_id) : ?>
-                                        <div style="font-size:11px; background:#f1f5f9; border:1px solid #cbd5e1; padding:4px 8px; border-radius:4px; color:var(--mc-text);">
-                                            <?php esc_html_e('Shortcode:', 'mc-leads-engine'); ?> <code style="background:none; padding:0; border:none; color:var(--mc-brand); font-weight:600;"><?php echo esc_html(mc_leads_engine_get_survey_shortcode($selected_survey_id)); ?></code>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                                <div style="display:flex; gap:8px; align-items:center;">
-                                    <a class="btn primary" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0), admin_url('admin.php'))); ?>">
-                                        <span class="dashicons dashicons-plus-alt2"></span> <?php esc_html_e('New Survey', 'mc-leads-engine'); ?>
-                                    </a>
-                                    <?php if ($selected_survey_id) : ?>
-                                        <form method="post" onsubmit="return confirm('<?php echo esc_js(__('Delete this survey?', 'mc-leads-engine')); ?>');" style="display:inline-block; margin:0;">
-                                            <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
-                                            <input type="hidden" name="page" value="mc-leads-engine-surveys">
-                                            <input type="hidden" name="mc_panel" value="surveys">
-                                            <input type="hidden" name="mc_leads_engine_action" value="delete_survey">
-                                            <input type="hidden" name="survey_id" value="<?php echo esc_attr($selected_survey_id); ?>">
-                                            <button class="button button-link-delete" style="border:1px solid #ef4444; color:#ef4444; background:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:600; height:34px; line-height:1;" type="submit"><?php esc_html_e('Delete', 'mc-leads-engine'); ?></button>
-                                        </form>
-                                    <?php endif; ?>
-                                </div>
+
+                        <!-- ── Survey Top Bar ──────────────────────── -->
+                        <div class="sv-bar">
+                            <div class="sv-bar-left">
+                                <select class="sv-survey-select" onchange="window.location.href='<?php echo esc_url(admin_url('admin.php?page=mc-leads-engine-surveys&mc_panel=surveys&survey_id=')); ?>' + this.value">
+                                    <option value="0"><?php esc_html_e('Select a survey…', 'mc-leads-engine'); ?></option>
+                                    <?php foreach ($surveys as $survey) : ?>
+                                        <option value="<?php echo esc_attr($survey['id']); ?>" <?php selected($selected_survey_id, $survey['id']); ?>><?php echo esc_html($survey['title']); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <?php if ($selected_survey_id) : ?>
+                                    <button class="sv-shortcode-chip" type="button"
+                                        data-shortcode="<?php echo esc_attr(mc_leads_engine_get_survey_shortcode($selected_survey_id)); ?>"
+                                        title="<?php esc_attr_e('Click to copy shortcode', 'mc-leads-engine'); ?>">
+                                        <span class="dashicons dashicons-shortcode"></span>
+                                        <code><?php echo esc_html(mc_leads_engine_get_survey_shortcode($selected_survey_id)); ?></code>
+                                        <span class="sv-copy-hint"><?php esc_html_e('Copy', 'mc-leads-engine'); ?></span>
+                                    </button>
+                                <?php endif; ?>
                             </div>
-
-                            <?php if ($selected_survey_id === 0 || $selected_survey) : ?>
-                                <?php $survey_settings = mc_leads_engine_get_survey_settings($selected_survey_id); ?>
-                                <form method="post" class="survey-dashboard-grid-2col">
-                                    <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
-                                    <input type="hidden" name="page" value="mc-leads-engine-surveys">
-                                    <input type="hidden" name="mc_panel" value="surveys">
-                                    <input type="hidden" name="mc_leads_engine_action" value="save_survey">
-                                    <input type="hidden" name="survey_id" value="<?php echo esc_attr($selected_survey_id); ?>">
-                                    
-                                    <!-- Column 1: Title, Status, Final Step Titles, Toggles & Save Button -->
-                                    <div class="survey-dashboard-left-col">
-                                        <div class="settings-field">
-                                            <label class="field-label"><?php esc_html_e('Title', 'mc-leads-engine'); ?></label>
-                                            <input class="field-input" type="text" name="title" value="<?php echo esc_attr($selected_survey['title'] ?? ''); ?>">
-                                        </div>
-                                        <div class="settings-field">
-                                            <label class="field-label"><?php esc_html_e('Status', 'mc-leads-engine'); ?></label>
-                                            <select class="field-input" name="status">
-                                                <option value="draft" <?php selected(($selected_survey['status'] ?? 'draft'), 'draft'); ?>><?php esc_html_e('Draft', 'mc-leads-engine'); ?></option>
-                                                <option value="published" <?php selected(($selected_survey['status'] ?? ''), 'published'); ?>><?php esc_html_e('Published', 'mc-leads-engine'); ?></option>
-                                            </select>
-                                        </div>
-                                        <!-- Final Step Title and Button Text side-by-side -->
-                                        <div class="survey-double-fields-row">
-                                            <div class="settings-field" style="flex:1;">
-                                                <label class="field-label"><?php esc_html_e('Final Step Title', 'mc-leads-engine'); ?></label>
-                                                <input class="field-input" type="text" name="final_step_title" value="<?php echo esc_attr($survey_settings['final_step_title'] ?? ''); ?>">
-                                            </div>
-                                            <div class="settings-field" style="flex:1;">
-                                                <label class="field-label"><?php esc_html_e('Final Step Button Text', 'mc-leads-engine'); ?></label>
-                                                <input class="field-input" type="text" name="final_button_text" value="<?php echo esc_attr($survey_settings['final_button_text']); ?>">
-                                            </div>
-                                        </div>
-                                        <!-- Checkboxes side-by-side -->
-                                        <div class="survey-toggles-row">
-                                            <div class="toggle-row" style="margin-bottom:0; justify-content:space-between; flex:1; height:38px; box-sizing:border-box;">
-                                                <span class="toggle-label" style="font-size:12px;"><?php esc_html_e('Show Estimated Price', 'mc-leads-engine'); ?></span>
-                                                <input type="checkbox" class="toggle-checkbox" name="show_final_price" value="1" <?php checked(!empty($survey_settings['show_final_price'])); ?>>
-                                            </div>
-                                            <div class="toggle-row" style="margin-bottom:0; justify-content:space-between; flex:1; height:38px; box-sizing:border-box;">
-                                                <span class="toggle-label" style="font-size:12px;"><?php esc_html_e('Show Lead Score', 'mc-leads-engine'); ?></span>
-                                                <input type="checkbox" class="toggle-checkbox" name="show_final_score" value="1" <?php checked(!empty($survey_settings['show_final_score'])); ?>>
-                                            </div>
-                                        </div>
-                                        <div class="settings-field action-field">
-                                            <button class="btn primary" type="submit" style="width:100%; height:38px; justify-content:center;"><?php esc_html_e('Save Survey Settings', 'mc-leads-engine'); ?></button>
-                                        </div>
-                                    </div>
-
-                                    <!-- Column 2: Description & Final Step Message textareas -->
-                                    <div class="survey-dashboard-right-col">
-                                        <div class="settings-field">
-                                            <label class="field-label"><?php esc_html_e('Description', 'mc-leads-engine'); ?></label>
-                                            <textarea class="field-input" rows="5" name="description" style="height: auto; min-height: 120px; resize: vertical;"><?php echo esc_textarea($selected_survey['description'] ?? ''); ?></textarea>
-                                        </div>
-                                        <div class="settings-field">
-                                            <label class="field-label"><?php esc_html_e('Final Step Message', 'mc-leads-engine'); ?></label>
-                                            <textarea class="field-input" rows="5" name="final_message" style="height: auto; min-height: 120px; resize: vertical;" placeholder="<?php esc_attr_e('e.g. Review your answers below.', 'mc-leads-engine'); ?>"><?php echo esc_textarea($survey_settings['final_message']); ?></textarea>
-                                        </div>
-                                    </div>
-                                </form>
-                            <?php endif; ?>
+                            <div class="sv-bar-right">
+                                <a class="btn primary" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0), admin_url('admin.php'))); ?>">
+                                    <span class="dashicons dashicons-plus-alt2"></span> <?php esc_html_e('New Survey', 'mc-leads-engine'); ?>
+                                </a>
+                                <?php if ($selected_survey_id) : ?>
+                                    <form method="post" onsubmit="return confirm('<?php echo esc_js(__('Delete this survey? This cannot be undone.', 'mc-leads-engine')); ?>');" style="margin:0;">
+                                        <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
+                                        <input type="hidden" name="page" value="mc-leads-engine-surveys">
+                                        <input type="hidden" name="mc_panel" value="surveys">
+                                        <input type="hidden" name="mc_leads_engine_action" value="delete_survey">
+                                        <input type="hidden" name="survey_id" value="<?php echo esc_attr($selected_survey_id); ?>">
+                                        <button class="btn btn-danger" type="submit"><span class="dashicons dashicons-trash"></span> <?php esc_html_e('Delete', 'mc-leads-engine'); ?></button>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
                         </div>
 
-                        <!-- Bottom Content: 3-Column Builder Layout (Only if a survey is selected) -->
                         <?php if ($selected_survey_id && $selected_survey) : ?>
-                            <div class="builder-layout">
-                                <!-- Panel 1: Sections -->
-                                <div class="builder-panel">
-                                    <div class="panel-header section-header">
-                                        <span><?php esc_html_e('Sections', 'mc-leads-engine'); ?></span>
-                                        <form method="post" action="<?php echo esc_url(admin_url('admin.php')); ?>" class="section-add-form">
+
+                        <!-- ── Tab pills ─────────────────────────── -->
+                        <div class="sv-tabs">
+                            <button class="sv-tab active" data-sv-tab="builder">
+                                <span class="dashicons dashicons-screenoptions"></span>
+                                <?php esc_html_e('Builder', 'mc-leads-engine'); ?>
+                            </button>
+                            <button class="sv-tab" data-sv-tab="settings">
+                                <span class="dashicons dashicons-admin-settings"></span>
+                                <?php esc_html_e('Survey Settings', 'mc-leads-engine'); ?>
+                                <?php if ($selected_survey['status'] === 'draft') : ?>
+                                    <span class="sv-status-dot draft"></span>
+                                <?php else : ?>
+                                    <span class="sv-status-dot live"></span>
+                                <?php endif; ?>
+                            </button>
+                        </div>
+
+                        <!-- ── BUILDER TAB ─────────────────────── -->
+                        <div class="sv-tab-pane active" data-sv-pane="builder">
+                            <div class="sv-builder">
+
+                                <!-- Rail 1: Sections -->
+                                <div class="sv-sections-rail">
+                                    <div class="sv-rail-header">
+                                        <span class="sv-rail-label"><?php esc_html_e('Sections', 'mc-leads-engine'); ?></span>
+                                        <form method="post" action="<?php echo esc_url(admin_url('admin.php')); ?>" class="section-add-form sv-add-section-form">
                                             <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
                                             <input type="hidden" name="page" value="mc-leads-engine-surveys">
                                             <input type="hidden" name="mc_panel" value="surveys">
                                             <input type="hidden" name="mc_leads_engine_action" value="save_section">
                                             <input type="hidden" name="survey_id" value="<?php echo esc_attr($selected_survey_id); ?>">
                                             <input type="hidden" name="section_id" value="0">
-                                            <div class="section-add-row">
-                                                <input class="field-input section-add-input" type="text" name="section_title" placeholder="<?php esc_attr_e('New section name', 'mc-leads-engine'); ?>">
-                                                <button class="button button-primary" type="submit"><span class="dashicons dashicons-plus-alt2"></span></button>
+                                            <div class="sv-add-section-row">
+                                                <input class="field-input sv-add-section-input" type="text" name="section_title" placeholder="<?php esc_attr_e('New section…', 'mc-leads-engine'); ?>">
+                                                <button class="btn" type="submit" title="<?php esc_attr_e('Add section', 'mc-leads-engine'); ?>"><span class="dashicons dashicons-plus-alt2"></span></button>
                                             </div>
                                         </form>
                                     </div>
-                                    <div class="panel-body">
+                                    <div class="sv-sections-list">
                                         <?php if (empty($sections)) : ?>
-                                            <p class="description" style="padding:12px;"><?php esc_html_e('No sections yet. Add one above.', 'mc-leads-engine'); ?></p>
+                                            <div class="sv-empty-state">
+                                                <span class="dashicons dashicons-category"></span>
+                                                <p><?php esc_html_e('No sections yet.', 'mc-leads-engine'); ?></p>
+                                            </div>
                                         <?php endif; ?>
-                                        <?php foreach ($sections as $section) : ?>
-                                            <div class="section-item<?php echo absint($section['id']) === $selected_section_id ? ' active' : ''; ?>" data-section-id="<?php echo absint($section['id']); ?>">
+                                        <?php foreach ($sections as $section) :
+                                            $sec_q_count = count($section['questions'] ?? []);
+                                        ?>
+                                            <div class="section-item sv-section-chip<?php echo absint($section['id']) === $selected_section_id ? ' active' : ''; ?>" data-section-id="<?php absint($section['id']); ?>">
                                                 <div class="section-left">
                                                     <a class="section-link" href="<?php echo esc_url(mc_leads_engine_admin_selected_url('surveys', $selected_survey_id, $section['id'], 0)); ?>">
                                                         <span class="section-title-text"><?php echo esc_html($section['title']); ?></span>
@@ -587,16 +552,19 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                                         <input class="field-input section-title-input" type="text" name="section_title" value="<?php echo esc_attr($section['title']); ?>" data-original-title="<?php echo esc_attr($section['title']); ?>">
                                                     </form>
                                                 </div>
-                                                <div class="section-meta">
-                                                    <button type="button" class="section-edit-trigger" aria-label="<?php esc_attr_e('Edit section title', 'mc-leads-engine'); ?>"><span class="dashicons dashicons-edit"></span></button>
-                                                    <form method="post" action="<?php echo esc_url(admin_url('admin.php')); ?>" class="section-delete-form">
+                                                <div class="sv-section-actions section-meta">
+                                                    <?php if ($sec_q_count > 0) : ?>
+                                                        <span class="sv-q-count"><?php echo esc_html($sec_q_count); ?></span>
+                                                    <?php endif; ?>
+                                                    <button type="button" class="sv-icon-action section-edit-trigger" aria-label="<?php esc_attr_e('Rename', 'mc-leads-engine'); ?>"><span class="dashicons dashicons-edit"></span></button>
+                                                    <form method="post" action="<?php echo esc_url(admin_url('admin.php')); ?>" class="section-delete-form" style="display:contents">
                                                         <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
                                                         <input type="hidden" name="page" value="mc-leads-engine-surveys">
                                                         <input type="hidden" name="mc_panel" value="surveys">
                                                         <input type="hidden" name="mc_leads_engine_action" value="delete_section">
                                                         <input type="hidden" name="survey_id" value="<?php echo esc_attr($selected_survey_id); ?>">
                                                         <input type="hidden" name="section_id" value="<?php echo esc_attr($section['id']); ?>">
-                                                        <button type="submit" class="icon-btn del section-delete" aria-label="<?php esc_attr_e('Delete section', 'mc-leads-engine'); ?>"><span class="dashicons dashicons-trash"></span></button>
+                                                        <button type="submit" class="sv-icon-action sv-icon-danger section-delete" aria-label="<?php esc_attr_e('Delete section', 'mc-leads-engine'); ?>"><span class="dashicons dashicons-trash"></span></button>
                                                     </form>
                                                 </div>
                                             </div>
@@ -604,40 +572,52 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                     </div>
                                 </div>
 
-                                <!-- Panel 2: Questions -->
-                                <div class="builder-panel">
-                                    <div class="panel-header">
-                                        <span><?php esc_html_e('Questions', 'mc-leads-engine'); ?></span>
+                                <!-- Col 2: Questions -->
+                                <div class="sv-questions-col">
+                                    <div class="sv-rail-header">
+                                        <span class="sv-rail-label">
+                                            <?php echo $selected_section ? esc_html($selected_section['title']) : esc_html__('Questions', 'mc-leads-engine'); ?>
+                                        </span>
                                         <?php if ($selected_section_id) : ?>
-                                            <a href="<?php echo esc_url($add_question_url); ?>" title="<?php esc_attr_e('Add question', 'mc-leads-engine'); ?>"><span class="dashicons dashicons-plus-alt2"></span></a>
+                                            <a class="btn" href="<?php echo esc_url($add_question_url); ?>">
+                                                <span class="dashicons dashicons-plus-alt2"></span> <?php esc_html_e('Add', 'mc-leads-engine'); ?>
+                                            </a>
                                         <?php endif; ?>
                                     </div>
-                                    <div class="panel-body question-drag-container" data-survey-id="<?php echo esc_attr($selected_survey_id); ?>" data-section-id="<?php echo esc_attr($selected_section_id); ?>">
+                                    <div class="sv-questions-list question-drag-container" data-survey-id="<?php echo esc_attr($selected_survey_id); ?>" data-section-id="<?php echo esc_attr($selected_section_id); ?>">
                                         <?php if (!$selected_section_id) : ?>
-                                            <p class="description" style="padding:12px;"><?php esc_html_e('Select a section to view questions.', 'mc-leads-engine'); ?></p>
+                                            <div class="sv-empty-state">
+                                                <span class="dashicons dashicons-arrow-left-alt"></span>
+                                                <p><?php esc_html_e('Pick a section first.', 'mc-leads-engine'); ?></p>
+                                            </div>
                                         <?php elseif (empty($selected_questions)) : ?>
-                                            <div class="empty-state">
-                                                <p class="description" style="padding:12px 12px 0;"><?php esc_html_e('No questions in this section yet.', 'mc-leads-engine'); ?></p>
-                                                <a class="empty-add" href="<?php echo esc_url($add_question_url); ?>"><span class="dashicons dashicons-plus-alt2"></span> <?php esc_html_e('Add question', 'mc-leads-engine'); ?></a>
+                                            <div class="sv-empty-state">
+                                                <span class="dashicons dashicons-edit-large"></span>
+                                                <p><?php esc_html_e('No questions yet.', 'mc-leads-engine'); ?></p>
+                                                <a class="btn primary" href="<?php echo esc_url($add_question_url); ?>"><span class="dashicons dashicons-plus-alt2"></span> <?php esc_html_e('Add question', 'mc-leads-engine'); ?></a>
                                             </div>
                                         <?php endif; ?>
 
-                                        <?php foreach ($selected_questions as $question) : ?>
-                                            <div class="q-card<?php echo absint($question['id']) === $selected_question_id ? ' active' : ''; ?>" data-question-id="<?php echo absint($question['id']); ?>">
+                                        <?php
+                                        $q_type_labels = array(
+                                            'radio'    => __('Choice', 'mc-leads-engine'),
+                                            'checkbox' => __('Multi', 'mc-leads-engine'),
+                                            'number'   => __('Number', 'mc-leads-engine'),
+                                            'text'     => __('Text', 'mc-leads-engine'),
+                                            'cf7'      => __('CF7', 'mc-leads-engine'),
+                                        );
+                                        foreach ($selected_questions as $question) :
+                                            $q_type     = $question['type'] ?? 'radio';
+                                            $q_type_lbl = $q_type_labels[$q_type] ?? $q_type;
+                                            $q_active   = absint($question['id']) === $selected_question_id;
+                                        ?>
+                                            <div class="q-card<?php echo $q_active ? ' active' : ''; ?>" data-question-id="<?php echo absint($question['id']); ?>">
                                                 <a class="q-card-link" href="<?php echo esc_url(mc_leads_engine_admin_selected_url('surveys', $selected_survey_id, $selected_section_id, $question['id'])); ?>">
-                                                    <div class="q-card-top">
-                                                        <?php echo esc_html($question['question_text']); ?>
-                                                    </div>
+                                                    <div class="q-card-top"><?php echo esc_html($question['question_text']); ?></div>
                                                     <div class="q-card-meta">
-                                                        <?php if (!empty($question['required'])) : ?><span class="q-tag" style="background:var(--mc-brand-soft);color:var(--mc-brand);border-color:#B5D4F4"><?php esc_html_e('Required', 'mc-leads-engine'); ?></span><?php endif; ?>
+                                                        <span class="sv-type-badge sv-type-<?php echo esc_attr($q_type); ?>"><?php echo esc_html($q_type_lbl); ?></span>
+                                                        <?php if (!empty($question['required'])) : ?><span class="sv-required-dot" title="<?php esc_attr_e('Required', 'mc-leads-engine'); ?>">★</span><?php endif; ?>
                                                     </div>
-                                                    <?php if (!empty($question['options'])) : ?>
-                                                        <div class="q-options">
-                                                            <?php foreach ($question['options'] as $option) : ?>
-                                                                <div class="q-opt"><?php echo esc_html($option['label']); ?> <span class="price"><?php echo esc_html(($option['price_impact'] >= 0 ? '+' : '') . number_format_i18n((float) $option['price_impact'], 0)); ?></span></div>
-                                                            <?php endforeach; ?>
-                                                        </div>
-                                                    <?php endif; ?>
                                                 </a>
                                                 <form method="post" action="<?php echo esc_url(admin_url('admin.php')); ?>" class="q-card-delete-form">
                                                     <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
@@ -648,145 +628,200 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                                     <input type="hidden" name="section_id" value="<?php echo esc_attr($selected_section_id); ?>">
                                                     <input type="hidden" name="question_id" value="<?php echo esc_attr($question['id']); ?>">
                                                     <span class="dashicons dashicons-menu q-card-drag-handle"></span>
-                                                    <button type="submit" class="icon-btn del q-card-delete" aria-label="<?php esc_attr_e('Delete question', 'mc-leads-engine'); ?>"><span class="dashicons dashicons-trash"></span></button>
+                                                    <button type="submit" class="sv-icon-action sv-icon-danger" aria-label="<?php esc_attr_e('Delete question', 'mc-leads-engine'); ?>"><span class="dashicons dashicons-trash"></span></button>
                                                 </form>
                                             </div>
                                         <?php endforeach; ?>
                                     </div>
                                 </div>
 
-                                <!-- Panel 3: Question Editor Settings -->
-                                <div class="builder-panel">
-                                    <div class="panel-header"><?php esc_html_e('Question Settings', 'mc-leads-engine'); ?></div>
-                                    <div class="panel-body">
-                                        <?php if (!$selected_survey || !$selected_section) : ?>
-                                            <p class="description" style="padding:12px;"><?php esc_html_e('Select a section to edit questions.', 'mc-leads-engine'); ?></p>
+                                <!-- Col 3: Question editor -->
+                                <div class="sv-editor-col">
+                                    <div class="sv-rail-header">
+                                        <span class="sv-rail-label"><?php echo $selected_question ? esc_html__('Edit Question', 'mc-leads-engine') : esc_html__('New Question', 'mc-leads-engine'); ?></span>
+                                    </div>
+                                    <div class="sv-editor-body">
+                                        <?php if (!$selected_section) : ?>
+                                            <div class="sv-empty-state sv-editor-empty">
+                                                <span class="dashicons dashicons-arrow-left-alt"></span>
+                                                <p><?php esc_html_e('Select a section and question to start editing.', 'mc-leads-engine'); ?></p>
+                                            </div>
                                         <?php else : ?>
-                                            <form method="post">
+                                            <form method="post" class="sv-question-form">
                                                 <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
                                                 <input type="hidden" name="redirect_to" value="<?php echo esc_attr($current_url); ?>">
                                                 <input type="hidden" name="mc_leads_engine_action" value="save_question">
                                                 <input type="hidden" name="survey_id" value="<?php echo esc_attr($selected_survey_id); ?>">
                                                 <input type="hidden" name="section_id" value="<?php echo esc_attr($selected_section_id); ?>">
                                                 <input type="hidden" name="question_id" value="<?php echo esc_attr($selected_question['id'] ?? 0); ?>">
-                                                <div class="settings-field">
-                                                    <div class="field-label"><?php esc_html_e('Question text / CF7 shortcode', 'mc-leads-engine'); ?></div>
-                                                    <textarea class="field-input" rows="2" name="question_text" placeholder="<?php esc_attr_e('Question text or CF7 shortcode', 'mc-leads-engine'); ?>"><?php echo esc_textarea($selected_question['question_text'] ?? ''); ?></textarea>
-                                                    <div class="description"><?php esc_html_e('Use a Contact Form 7 shortcode here when the question type is Contact Form 7.', 'mc-leads-engine'); ?></div>
+
+                                                <div class="sv-field-group">
+                                                    <label class="sv-field-label"><?php esc_html_e('Question text', 'mc-leads-engine'); ?></label>
+                                                    <textarea class="field-input" rows="2" name="question_text" placeholder="<?php esc_attr_e('e.g. What type of project is this?', 'mc-leads-engine'); ?>"><?php echo esc_textarea($selected_question['question_text'] ?? ''); ?></textarea>
+                                                    <span class="sv-field-hint"><?php esc_html_e('You can paste a CF7 shortcode here if Answer type is Contact Form 7.', 'mc-leads-engine'); ?></span>
                                                 </div>
-                                                <div class="settings-field">
-                                                    <div class="field-label"><?php esc_html_e('Answer type', 'mc-leads-engine'); ?></div>
-                                                    <select class="field-input" name="type">
-                                                        <option value="radio" <?php selected(($selected_question['type'] ?? ''), 'radio'); ?>><?php esc_html_e('Multiple Choice', 'mc-leads-engine'); ?></option>
-                                                        <option value="checkbox" <?php selected(($selected_question['type'] ?? ''), 'checkbox'); ?>><?php esc_html_e('Multiple Choice (Multi)', 'mc-leads-engine'); ?></option>
-                                                        <option value="number" <?php selected(($selected_question['type'] ?? ''), 'number'); ?>><?php esc_html_e('Number Input', 'mc-leads-engine'); ?></option>
-                                                        <option value="text" <?php selected(($selected_question['type'] ?? ''), 'text'); ?>><?php esc_html_e('Text Input', 'mc-leads-engine'); ?></option>
-                                                        <option value="cf7" <?php selected(($selected_question['type'] ?? ''), 'cf7'); ?>><?php esc_html_e('Contact Form 7', 'mc-leads-engine'); ?></option>
-                                                    </select>
-                                                </div>
-                                                <div class="toggle-row">
-                                                    <span class="toggle-label"><?php esc_html_e('Required', 'mc-leads-engine'); ?></span>
-                                                    <input type="checkbox" class="toggle-checkbox" name="required" value="1" <?php checked(!empty($selected_question['required'])); ?>>
-                                                </div>
-                                                <div class="settings-field">
-                                                    <div class="field-label"><?php esc_html_e('Order', 'mc-leads-engine'); ?></div>
-                                                    <input class="field-input" type="number" name="order_index" value="<?php echo esc_attr($selected_question['order_index'] ?? 0); ?>">
-                                                </div>
-                                                <?php if (($selected_question['type'] ?? '') !== 'cf7') : ?>
-                                                    <div style="margin-top:12px">
-                                                        <div class="field-label"><?php esc_html_e('Options', 'mc-leads-engine'); ?></div>
-                                                        <div class="rule-desc" style="margin-top:6px;">
-                                                            <?php esc_html_e('Each option can change the price and score. Use Order to control display priority, and remove unused rows with the trash button.', 'mc-leads-engine'); ?>
+
+                                                <div class="sv-inline-row">
+                                                    <div class="sv-field-group sv-field-grow">
+                                                        <label class="sv-field-label"><?php esc_html_e('Answer type', 'mc-leads-engine'); ?></label>
+                                                        <select class="field-input" name="type">
+                                                            <option value="radio"    <?php selected(($selected_question['type'] ?? ''), 'radio'); ?>><?php esc_html_e('Multiple Choice (single)', 'mc-leads-engine'); ?></option>
+                                                            <option value="checkbox" <?php selected(($selected_question['type'] ?? ''), 'checkbox'); ?>><?php esc_html_e('Multiple Choice (multi)', 'mc-leads-engine'); ?></option>
+                                                            <option value="number"   <?php selected(($selected_question['type'] ?? ''), 'number'); ?>><?php esc_html_e('Number input', 'mc-leads-engine'); ?></option>
+                                                            <option value="text"     <?php selected(($selected_question['type'] ?? ''), 'text'); ?>><?php esc_html_e('Text input', 'mc-leads-engine'); ?></option>
+                                                            <option value="cf7"      <?php selected(($selected_question['type'] ?? ''), 'cf7'); ?>><?php esc_html_e('Contact Form 7', 'mc-leads-engine'); ?></option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="sv-field-group sv-field-shrink">
+                                                        <label class="sv-field-label"><?php esc_html_e('Order', 'mc-leads-engine'); ?></label>
+                                                        <input class="field-input" type="number" name="order_index" value="<?php echo esc_attr($selected_question['order_index'] ?? 0); ?>">
+                                                    </div>
+                                                    <div class="sv-field-group sv-field-toggle">
+                                                        <label class="sv-field-label"><?php esc_html_e('Required', 'mc-leads-engine'); ?></label>
+                                                        <div class="sv-toggle-wrap">
+                                                            <input type="checkbox" class="toggle-checkbox" id="q-required" name="required" value="1" <?php checked(!empty($selected_question['required'])); ?>>
+                                                            <label for="q-required" class="sv-toggle-label"></label>
                                                         </div>
-                                                        <?php $existing_options = !empty($selected_question['id']) ? (new MC_Leads_Engine_Question())->get_options($selected_question['id']) : array(); ?>
-                                                        <div class="rule-grid" data-option-builder data-next-index="<?php echo esc_attr(max(1, count($existing_options))); ?>">
-                                                            <div class="options-list" data-option-list>
-                                                                <?php for ($i = 0; $i < max(1, count($existing_options)); $i++) : $opt = $existing_options[$i] ?? array(); ?>
-                                                                <div class="rule-card" data-option-row>
-                                                                     <div class="rule-info">
-                                                                         <div class="option-field-wrap">
-                                                                             <label class="option-field-label"><?php esc_html_e('Label', 'mc-leads-engine'); ?></label>
-                                                                             <input class="field-input" type="text" name="options[<?php echo esc_attr($i); ?>][label]" placeholder="<?php esc_attr_e('Label', 'mc-leads-engine'); ?>" value="<?php echo esc_attr($opt['label'] ?? ''); ?>">
-                                                                         </div>
-                                                                         <div class="option-field-wrap">
-                                                                             <label class="option-field-label"><?php esc_html_e('Value', 'mc-leads-engine'); ?></label>
-                                                                             <input class="field-input" type="text" name="options[<?php echo esc_attr($i); ?>][value]" placeholder="<?php esc_attr_e('Value', 'mc-leads-engine'); ?>" value="<?php echo esc_attr($opt['value'] ?? ''); ?>">
-                                                                         </div>
-                                                                         <div class="option-field-wrap description-field-wrap">
-                                                                             <label class="option-field-label"><?php esc_html_e('Description', 'mc-leads-engine'); ?></label>
-                                                                             <input class="field-input" type="text" name="options[<?php echo esc_attr($i); ?>][description]" placeholder="<?php esc_attr_e('Description (optional)', 'mc-leads-engine'); ?>" value="<?php echo esc_attr($opt['description'] ?? ''); ?>">
-                                                                         </div>
-                                                                         <div class="rule-field-grid">
-                                                                             <div class="option-field-wrap">
-                                                                                 <label class="option-field-label"><?php esc_html_e('Price', 'mc-leads-engine'); ?></label>
-                                                                                 <input class="field-input" type="number" step="0.01" name="options[<?php echo esc_attr($i); ?>][price_impact]" placeholder="<?php esc_attr_e('Price', 'mc-leads-engine'); ?>" value="<?php echo esc_attr($opt['price_impact'] ?? 0); ?>">
-                                                                             </div>
-                                                                             <div class="option-field-wrap">
-                                                                                 <label class="option-field-label"><?php esc_html_e('Score', 'mc-leads-engine'); ?></label>
-                                                                                 <input class="field-input" type="number" name="options[<?php echo esc_attr($i); ?>][score_impact]" placeholder="<?php esc_attr_e('Score', 'mc-leads-engine'); ?>" value="<?php echo esc_attr($opt['score_impact'] ?? 0); ?>">
-                                                                             </div>
-                                                                             <div class="option-field-wrap">
-                                                                                 <label class="option-field-label"><?php esc_html_e('Order', 'mc-leads-engine'); ?></label>
-                                                                                 <input class="field-input" type="number" name="options[<?php echo esc_attr($i); ?>][order_index]" placeholder="<?php esc_attr_e('Order', 'mc-leads-engine'); ?>" value="<?php echo esc_attr($opt['order_index'] ?? $i); ?>">
-                                                                             </div>
-                                                                             <div class="option-field-wrap delete-btn-wrap">
-                                                                                 <label class="option-field-label">&nbsp;</label>
-                                                                                 <button type="button" class="icon-btn del" data-remove-option-row><span class="dashicons dashicons-trash"></span></button>
-                                                                             </div>
-                                                                         </div>
-                                                                     </div>
-                                                                 </div>
-                                                            <?php endfor; ?>
-                                                        </div>
-                                                        <template data-option-template>
-                                                             <div class="rule-card" data-option-row>
-                                                                 <div class="rule-info">
-                                                                     <div class="option-field-wrap">
-                                                                         <label class="option-field-label"><?php esc_html_e('Label', 'mc-leads-engine'); ?></label>
-                                                                         <input class="field-input" type="text" name="options[__INDEX__][label]" placeholder="<?php esc_attr_e('Label', 'mc-leads-engine'); ?>" value="">
-                                                                     </div>
-                                                                     <div class="option-field-wrap">
-                                                                         <label class="option-field-label"><?php esc_html_e('Value', 'mc-leads-engine'); ?></label>
-                                                                         <input class="field-input" type="text" name="options[__INDEX__][value]" placeholder="<?php esc_attr_e('Value', 'mc-leads-engine'); ?>" value="">
-                                                                     </div>
-                                                                     <div class="option-field-wrap description-field-wrap">
-                                                                         <label class="option-field-label"><?php esc_html_e('Description', 'mc-leads-engine'); ?></label>
-                                                                         <input class="field-input" type="text" name="options[__INDEX__][description]" placeholder="<?php esc_attr_e('Description (optional)', 'mc-leads-engine'); ?>" value="">
-                                                                     </div>
-                                                                     <div class="rule-field-grid">
-                                                                         <div class="option-field-wrap">
-                                                                             <label class="option-field-label"><?php esc_html_e('Price', 'mc-leads-engine'); ?></label>
-                                                                             <input class="field-input" type="number" step="0.01" name="options[__INDEX__][price_impact]" placeholder="<?php esc_attr_e('Price', 'mc-leads-engine'); ?>" value="0">
-                                                                         </div>
-                                                                         <div class="option-field-wrap">
-                                                                             <label class="option-field-label"><?php esc_html_e('Score', 'mc-leads-engine'); ?></label>
-                                                                             <input class="field-input" type="number" name="options[__INDEX__][score_impact]" placeholder="<?php esc_attr_e('Score', 'mc-leads-engine'); ?>" value="0">
-                                                                         </div>
-                                                                         <div class="option-field-wrap">
-                                                                             <label class="option-field-label"><?php esc_html_e('Order', 'mc-leads-engine'); ?></label>
-                                                                             <input class="field-input" type="number" name="options[__INDEX__][order_index]" placeholder="<?php esc_attr_e('Order', 'mc-leads-engine'); ?>" value="0">
-                                                                         </div>
-                                                                         <div class="option-field-wrap delete-btn-wrap">
-                                                                             <label class="option-field-label">&nbsp;</label>
-                                                                             <button type="button" class="icon-btn del" data-remove-option-row><span class="dashicons dashicons-trash"></span></button>
-                                                                         </div>
-                                                                     </div>
-                                                                 </div>
-                                                             </div>
-                                                        </template>
-                                                        <div class="empty-add" data-add-option-row><span class="dashicons dashicons-plus-alt2"></span> <?php esc_html_e('Option', 'mc-leads-engine'); ?></div>
                                                     </div>
                                                 </div>
+
+                                                <?php if (($selected_question['type'] ?? '') !== 'cf7') : ?>
+                                                    <div class="sv-options-section">
+                                                        <div class="sv-options-header">
+                                                            <span class="sv-field-label"><?php esc_html_e('Answer options', 'mc-leads-engine'); ?></span>
+                                                            <span class="sv-field-hint"><?php esc_html_e('Each option can add to the price and lead score.', 'mc-leads-engine'); ?></span>
+                                                        </div>
+                                                        <?php $existing_options = !empty($selected_question['id']) ? (new MC_Leads_Engine_Question())->get_options($selected_question['id']) : array(); ?>
+                                                        <div class="sv-options-list" data-option-builder data-next-index="<?php echo esc_attr(max(1, count($existing_options))); ?>">
+                                                            <div class="sv-opt-col-hints">
+                                                                <span class="sv-opt-main"><?php esc_html_e('Label', 'mc-leads-engine'); ?></span>
+                                                                <span class="sv-opt-meta">
+                                                                    <span class="sv-opt-num"><?php esc_html_e('Value', 'mc-leads-engine'); ?></span>
+                                                                    <span class="sv-opt-num"><?php esc_html_e('+Price', 'mc-leads-engine'); ?></span>
+                                                                    <span class="sv-opt-num"><?php esc_html_e('+Score', 'mc-leads-engine'); ?></span>
+                                                                    <span class="sv-opt-num sv-opt-order"><?php esc_html_e('Order', 'mc-leads-engine'); ?></span>
+                                                                </span>
+                                                                <span></span>
+                                                            </div>
+                                                            <div class="sv-opts-rows" data-option-list>
+                                                                <?php for ($i = 0; $i < max(1, count($existing_options)); $i++) : $opt = $existing_options[$i] ?? array(); ?>
+                                                                    <div class="sv-opt-row" data-option-row>
+                                                                        <input class="field-input sv-opt-main" type="text" name="options[<?php echo esc_attr($i); ?>][label]" placeholder="<?php esc_attr_e('Label', 'mc-leads-engine'); ?>" value="<?php echo esc_attr($opt['label'] ?? ''); ?>">
+                                                                        <div class="sv-opt-meta">
+                                                                            <input class="field-input sv-opt-num" type="text" name="options[<?php echo esc_attr($i); ?>][value]" placeholder="<?php esc_attr_e('Value', 'mc-leads-engine'); ?>" value="<?php echo esc_attr($opt['value'] ?? ''); ?>">
+                                                                            <input class="field-input sv-opt-num" type="number" step="0.01" name="options[<?php echo esc_attr($i); ?>][price_impact]" placeholder="+0" value="<?php echo esc_attr($opt['price_impact'] ?? 0); ?>">
+                                                                            <input class="field-input sv-opt-num" type="number" name="options[<?php echo esc_attr($i); ?>][score_impact]" placeholder="+0" value="<?php echo esc_attr($opt['score_impact'] ?? 0); ?>">
+                                                                            <input class="field-input sv-opt-num sv-opt-order" type="number" name="options[<?php echo esc_attr($i); ?>][order_index]" placeholder="0" value="<?php echo esc_attr($opt['order_index'] ?? $i); ?>">
+                                                                            <input type="hidden" name="options[<?php echo esc_attr($i); ?>][description]" value="<?php echo esc_attr($opt['description'] ?? ''); ?>">
+                                                                        </div>
+                                                                        <button type="button" class="sv-icon-action sv-icon-danger" data-remove-option-row aria-label="<?php esc_attr_e('Remove', 'mc-leads-engine'); ?>"><span class="dashicons dashicons-no-alt"></span></button>
+                                                                    </div>
+                                                                <?php endfor; ?>
+                                                            </div>
+                                                            <template data-option-template>
+                                                                <div class="sv-opt-row" data-option-row>
+                                                                    <input class="field-input sv-opt-main" type="text" name="options[__INDEX__][label]" placeholder="<?php esc_attr_e('Label', 'mc-leads-engine'); ?>" value="">
+                                                                    <div class="sv-opt-meta">
+                                                                        <input class="field-input sv-opt-num" type="text" name="options[__INDEX__][value]" placeholder="<?php esc_attr_e('Value', 'mc-leads-engine'); ?>" value="">
+                                                                        <input class="field-input sv-opt-num" type="number" step="0.01" name="options[__INDEX__][price_impact]" placeholder="+0" value="0">
+                                                                        <input class="field-input sv-opt-num" type="number" name="options[__INDEX__][score_impact]" placeholder="+0" value="0">
+                                                                        <input class="field-input sv-opt-num sv-opt-order" type="number" name="options[__INDEX__][order_index]" placeholder="0" value="0">
+                                                                        <input type="hidden" name="options[__INDEX__][description]" value="">
+                                                                    </div>
+                                                                    <button type="button" class="sv-icon-action sv-icon-danger" data-remove-option-row aria-label="<?php esc_attr_e('Remove', 'mc-leads-engine'); ?>"><span class="dashicons dashicons-no-alt"></span></button>
+                                                                </div>
+                                                            </template>
+                                                            <button type="button" class="sv-add-opt-btn" data-add-option-row>
+                                                                <span class="dashicons dashicons-plus-alt2"></span> <?php esc_html_e('Add option', 'mc-leads-engine'); ?>
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 <?php endif; ?>
-                                                <div style="margin-top:14px"><button class="btn primary" type="submit"><?php esc_html_e('Save question', 'mc-leads-engine'); ?></button></div>
+
+                                                <div class="sv-editor-actions">
+                                                    <button class="btn primary" type="submit"><?php esc_html_e('Save question', 'mc-leads-engine'); ?></button>
+                                                </div>
                                             </form>
                                         <?php endif; ?>
                                     </div>
                                 </div>
-                            </div>
+
+                            </div><!-- /.sv-builder -->
+                        </div><!-- /.sv-tab-pane[builder] -->
+
+                        <!-- ── SETTINGS TAB ─────────────────────── -->
+                        <div class="sv-tab-pane" data-sv-pane="settings">
+                            <?php $survey_settings = mc_leads_engine_get_survey_settings($selected_survey_id); ?>
+                            <form method="post" class="sv-settings-form">
+                                <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
+                                <input type="hidden" name="page" value="mc-leads-engine-surveys">
+                                <input type="hidden" name="mc_panel" value="surveys">
+                                <input type="hidden" name="mc_leads_engine_action" value="save_survey">
+                                <input type="hidden" name="survey_id" value="<?php echo esc_attr($selected_survey_id); ?>">
+                                <div class="sv-settings-grid">
+                                    <div class="sv-settings-col">
+                                        <div class="sv-field-group">
+                                            <label class="sv-field-label"><?php esc_html_e('Survey title', 'mc-leads-engine'); ?></label>
+                                            <input class="field-input" type="text" name="title" value="<?php echo esc_attr($selected_survey['title'] ?? ''); ?>">
+                                        </div>
+                                        <div class="sv-field-group">
+                                            <label class="sv-field-label"><?php esc_html_e('Status', 'mc-leads-engine'); ?></label>
+                                            <select class="field-input" name="status">
+                                                <option value="draft" <?php selected(($selected_survey['status'] ?? 'draft'), 'draft'); ?>><?php esc_html_e('Draft (not live)', 'mc-leads-engine'); ?></option>
+                                                <option value="published" <?php selected(($selected_survey['status'] ?? ''), 'published'); ?>><?php esc_html_e('Published (live)', 'mc-leads-engine'); ?></option>
+                                            </select>
+                                        </div>
+                                        <div class="sv-field-group">
+                                            <label class="sv-field-label"><?php esc_html_e('Final step title', 'mc-leads-engine'); ?></label>
+                                            <input class="field-input" type="text" name="final_step_title" value="<?php echo esc_attr($survey_settings['final_step_title'] ?? ''); ?>">
+                                        </div>
+                                        <div class="sv-field-group">
+                                            <label class="sv-field-label"><?php esc_html_e('Submit button text', 'mc-leads-engine'); ?></label>
+                                            <input class="field-input" type="text" name="final_button_text" value="<?php echo esc_attr($survey_settings['final_button_text'] ?? ''); ?>">
+                                        </div>
+                                        <div class="sv-settings-toggles">
+                                            <div class="sv-toggle-group">
+                                                <div class="sv-toggle-wrap">
+                                                    <input type="checkbox" class="toggle-checkbox" id="svs-show-price" name="show_final_price" value="1" <?php checked(!empty($survey_settings['show_final_price'])); ?>>
+                                                    <label for="svs-show-price" class="sv-toggle-label"></label>
+                                                </div>
+                                                <label for="svs-show-price" class="sv-toggle-text"><?php esc_html_e('Show estimated price on final step', 'mc-leads-engine'); ?></label>
+                                            </div>
+                                            <div class="sv-toggle-group">
+                                                <div class="sv-toggle-wrap">
+                                                    <input type="checkbox" class="toggle-checkbox" id="svs-show-score" name="show_final_score" value="1" <?php checked(!empty($survey_settings['show_final_score'])); ?>>
+                                                    <label for="svs-show-score" class="sv-toggle-label"></label>
+                                                </div>
+                                                <label for="svs-show-score" class="sv-toggle-text"><?php esc_html_e('Show lead score on final step', 'mc-leads-engine'); ?></label>
+                                            </div>
+                                        </div>
+                                        <button class="btn primary" type="submit" style="width:100%;"><?php esc_html_e('Save survey settings', 'mc-leads-engine'); ?></button>
+                                    </div>
+                                    <div class="sv-settings-col">
+                                        <div class="sv-field-group">
+                                            <label class="sv-field-label"><?php esc_html_e('Description (internal)', 'mc-leads-engine'); ?></label>
+                                            <textarea class="field-input" rows="6" name="description" style="min-height:120px;resize:vertical;"><?php echo esc_textarea($selected_survey['description'] ?? ''); ?></textarea>
+                                        </div>
+                                        <div class="sv-field-group">
+                                            <label class="sv-field-label"><?php esc_html_e('Final step message', 'mc-leads-engine'); ?></label>
+                                            <textarea class="field-input" rows="6" name="final_message" style="min-height:120px;resize:vertical;" placeholder="<?php esc_attr_e('e.g. Thanks! Review your answers below.', 'mc-leads-engine'); ?>"><?php echo esc_textarea($survey_settings['final_message'] ?? ''); ?></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div><!-- /.sv-tab-pane[settings] -->
+
                         <?php else : ?>
-                            <div class="notice notice-info inline" style="margin-top:10px;"><p><?php esc_html_e('Please create or select a survey to begin building sections and questions.', 'mc-leads-engine'); ?></p></div>
+                        <div class="sv-no-survey">
+                            <span class="dashicons dashicons-feedback sv-no-survey-icon"></span>
+                            <h3><?php esc_html_e('No survey selected', 'mc-leads-engine'); ?></h3>
+                            <p><?php esc_html_e('Choose a survey from the dropdown above, or create a new one to get started.', 'mc-leads-engine'); ?></p>
+                            <a class="btn primary" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0), admin_url('admin.php'))); ?>">
+                                <span class="dashicons dashicons-plus-alt2"></span> <?php esc_html_e('Create your first survey', 'mc-leads-engine'); ?>
+                            </a>
+                        </div>
                         <?php endif; ?>
+
                     </section>
 
                     <section class="panel<?php echo $panel === 'analytics' ? ' active' : ''; ?>" id="panel-analytics" data-panel="analytics">
