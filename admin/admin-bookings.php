@@ -141,72 +141,13 @@ function mc_leads_engine_render_bookings_page() {
 
     ?>
     <div class="wrap mc-leads-engine-admin">
-        <h1 class="wp-heading-inline"><?php esc_html_e('Bookings Dashboard', 'mc-leads-engine'); ?></h1>
-        <hr class="wp-header-end">
-
-        <!-- Booking Analytics Cards -->
-        <div class="mc-leads-engine-cards" style="margin-top:20px; margin-bottom:20px;">
-            <div class="mc-card">
-                <strong><?php echo esc_html(number_format_i18n($total_bookings)); ?></strong>
-                <span><?php esc_html_e('Total Reservations', 'mc-leads-engine'); ?></span>
-            </div>
-            <div class="mc-card">
-                <strong><?php echo esc_html(number_format_i18n($online_count)); ?></strong>
-                <span><?php esc_html_e('Online Video Calls', 'mc-leads-engine'); ?></span>
-            </div>
-            <div class="mc-card">
-                <strong><?php echo esc_html(number_format_i18n($coffee_count)); ?></strong>
-                <span><?php esc_html_e('Coffee Meetings', 'mc-leads-engine'); ?></span>
-            </div>
-            <div class="mc-card">
-                <strong><?php echo esc_html(number_format_i18n($office_count)); ?></strong>
-                <span><?php esc_html_e('Office Visits', 'mc-leads-engine'); ?></span>
-            </div>
-            <div class="mc-card">
-                <strong><?php echo esc_html(number_format_i18n($host_count)); ?></strong>
-                <span><?php esc_html_e('At Our Studio', 'mc-leads-engine'); ?></span>
-            </div>
-        </div>
-
-        <div class="mc-panel">
-            <h2><?php esc_html_e('Scheduled Meetings', 'mc-leads-engine'); ?></h2>
-
-            <?php
-            $sort_id_url = add_query_arg(array(
-                'orderby' => 'id',
-                'order'   => ($orderby === 'id' && $order === 'DESC') ? 'ASC' : 'DESC',
-            ));
-            $sort_date_url = add_query_arg(array(
-                'orderby' => 'date',
-                'order'   => ($orderby === 'date' && $order === 'DESC') ? 'ASC' : 'DESC',
-            ));
-            ?>
-            <form method="get" class="mc-analytics-filter-form" style="margin-bottom: 20px;">
-                <input type="hidden" name="page" value="mc-leads-engine-bookings">
-                <input type="hidden" name="orderby" value="<?php echo esc_attr($orderby); ?>">
-                <input type="hidden" name="order" value="<?php echo esc_attr($order); ?>">
-
-                <label>
-                    <?php esc_html_e('Meeting Format:', 'mc-leads-engine'); ?>
-                    <select name="meeting_type">
-                        <option value="all" <?php selected($filter_type, 'all'); ?>><?php esc_html_e('All Formats', 'mc-leads-engine'); ?></option>
-                        <option value="online" <?php selected($filter_type, 'online'); ?>><?php esc_html_e('Online Call', 'mc-leads-engine'); ?></option>
-                        <option value="coffee" <?php selected($filter_type, 'coffee'); ?>><?php esc_html_e('Coffee Meeting', 'mc-leads-engine'); ?></option>
-                        <option value="office" <?php selected($filter_type, 'office'); ?>><?php esc_html_e('Office Visit', 'mc-leads-engine'); ?></option>
-                        <option value="host" <?php selected($filter_type, 'host'); ?>><?php esc_html_e('Our Studio', 'mc-leads-engine'); ?></option>
-                    </select>
-                </label>
-
-                <label>
-                    <?php esc_html_e('Date/Status:', 'mc-leads-engine'); ?>
-                    <select name="status">
-                        <option value="all" <?php selected($filter_status, 'all'); ?>><?php esc_html_e('All Bookings', 'mc-leads-engine'); ?></option>
-                        <option value="upcoming" <?php selected($filter_status, 'upcoming'); ?>><?php esc_html_e('Upcoming Meetings', 'mc-leads-engine'); ?></option>
-                        <option value="past" <?php selected($filter_status, 'past'); ?>><?php esc_html_e('Past Meetings', 'mc-leads-engine'); ?></option>
-                    </select>
-                </label>
-
-                <button class="button button-primary" type="submit"><?php esc_html_e('Filter', 'mc-leads-engine'); ?></button>
+        <!-- Top Bar -->
+        <div class="main" style="background: transparent; box-shadow: none; border-radius: 0;">
+            <div class="topbar" style="padding: 14px 0; background: transparent; border-bottom: 1px solid var(--mc-border); margin-bottom: 20px;">
+                <div>
+                    <div class="topbar-title" style="font-size: 20px; font-weight: 800;"><?php esc_html_e('Bookings', 'mc-leads-engine'); ?></div>
+                    <div class="topbar-sub" style="font-size: 11px; color: var(--mc-muted);"><?php esc_html_e('Scheduled meetings · synced with Google Calendar', 'mc-leads-engine'); ?></div>
+                </div>
                 <?php 
                 $export_url = add_query_arg(array(
                     'page' => 'mc-leads-engine-bookings',
@@ -218,111 +159,181 @@ function mc_leads_engine_render_bookings_page() {
                     '_wpnonce' => wp_create_nonce('mc_leads_engine_export_bookings')
                 ), admin_url('admin.php'));
                 ?>
-                <a class="button button-secondary" href="<?php echo esc_url($export_url); ?>">
+                <a class="btn" href="<?php echo esc_url($export_url); ?>">
+                    <span class="dashicons dashicons-media-spreadsheet" style="vertical-align:middle; font-size:16px; margin-right:4px;"></span>
                     <?php esc_html_e('Export to Excel', 'mc-leads-engine'); ?>
                 </a>
+            </div>
+
+            <!-- Booking Analytics Cards -->
+            <div class="stat-grid" style="margin-bottom:20px;">
+                <div class="stat-card">
+                    <div class="stat-label"><span class="dashicons dashicons-calendar-alt"></span> <?php esc_html_e('Total Reservations', 'mc-leads-engine'); ?></div>
+                    <div class="stat-value"><?php echo esc_html(number_format_i18n($total_bookings)); ?></div>
+                    <div class="stat-delta"><?php esc_html_e('All-time meetings', 'mc-leads-engine'); ?></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label"><span class="dashicons dashicons-desktop"></span> <?php esc_html_e('Online Video Calls', 'mc-leads-engine'); ?></div>
+                    <div class="stat-value"><?php echo esc_html(number_format_i18n($online_count)); ?></div>
+                    <div class="stat-delta"><?php esc_html_e('Google Meet / Zoom', 'mc-leads-engine'); ?></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label"><span class="dashicons dashicons-coffee"></span> <?php esc_html_e('Coffee Meetings', 'mc-leads-engine'); ?></div>
+                    <div class="stat-value"><?php echo esc_html(number_format_i18n($coffee_count)); ?></div>
+                    <div class="stat-delta"><?php esc_html_e('Out-of-office meetings', 'mc-leads-engine'); ?></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label"><span class="dashicons dashicons-building"></span> <?php esc_html_e('Office Visits', 'mc-leads-engine'); ?></div>
+                    <div class="stat-value"><?php echo esc_html(number_format_i18n($office_count)); ?></div>
+                    <div class="stat-delta"><?php esc_html_e('Client office visits', 'mc-leads-engine'); ?></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label"><span class="dashicons dashicons-admin-home"></span> <?php esc_html_e('At Our Studio', 'mc-leads-engine'); ?></div>
+                    <div class="stat-value"><?php echo esc_html(number_format_i18n($host_count)); ?></div>
+                    <div class="stat-delta"><?php esc_html_e('Memories Creative Studio', 'mc-leads-engine'); ?></div>
+                </div>
+            </div>
+
+            <!-- Filter Bar -->
+            <form method="get" class="filter-bar" style="margin-bottom: 20px;">
+                <input type="hidden" name="page" value="mc-leads-engine-bookings">
+                <input type="hidden" name="orderby" value="<?php echo esc_attr($orderby); ?>">
+                <input type="hidden" name="order" value="<?php echo esc_attr($order); ?>">
+
+                <div class="filter-field">
+                    <label><?php esc_html_e('Meeting format', 'mc-leads-engine'); ?></label>
+                    <select class="filter-select" name="meeting_type">
+                        <option value="all" <?php selected($filter_type, 'all'); ?>><?php esc_html_e('All Formats', 'mc-leads-engine'); ?></option>
+                        <option value="online" <?php selected($filter_type, 'online'); ?>><?php esc_html_e('Online Call', 'mc-leads-engine'); ?></option>
+                        <option value="coffee" <?php selected($filter_type, 'coffee'); ?>><?php esc_html_e('Coffee Meeting', 'mc-leads-engine'); ?></option>
+                        <option value="office" <?php selected($filter_type, 'office'); ?>><?php esc_html_e('Office Visit', 'mc-leads-engine'); ?></option>
+                        <option value="host" <?php selected($filter_type, 'host'); ?>><?php esc_html_e('Our Studio', 'mc-leads-engine'); ?></option>
+                    </select>
+                </div>
+
+                <div class="filter-field">
+                    <label><?php esc_html_e('Date / status', 'mc-leads-engine'); ?></label>
+                    <select class="filter-select" name="status">
+                        <option value="all" <?php selected($filter_status, 'all'); ?>><?php esc_html_e('All Bookings', 'mc-leads-engine'); ?></option>
+                        <option value="upcoming" <?php selected($filter_status, 'upcoming'); ?>><?php esc_html_e('Upcoming Meetings', 'mc-leads-engine'); ?></option>
+                        <option value="past" <?php selected($filter_status, 'past'); ?>><?php esc_html_e('Past Meetings', 'mc-leads-engine'); ?></option>
+                    </select>
+                </div>
+
+                <div class="filter-spacer"></div>
+                <button class="btn primary" type="submit"><?php esc_html_e('Apply Filters', 'mc-leads-engine'); ?></button>
             </form>
 
-            <div style="overflow-x: auto;">
-                <table class="widefat striped mc-analytics-leads-table">
-                    <thead>
-                        <tr>
-                            <th>
-                                <a href="<?php echo esc_url($sort_id_url); ?>" style="text-decoration:none;">
-                                    <?php esc_html_e('ID', 'mc-leads-engine'); ?>
-                                    <?php if ($orderby === 'id') : ?>
-                                        <span class="dashicons dashicons-arrow-<?php echo $order === 'ASC' ? 'up' : 'down'; ?>-alt2" style="font-size:16px; width:16px; height:16px; vertical-align:middle;"></span>
-                                    <?php endif; ?>
-                                </a>
-                            </th>
-                            <th>
-                                <a href="<?php echo esc_url($sort_date_url); ?>" style="text-decoration:none;">
-                                    <?php esc_html_e('Date & Time', 'mc-leads-engine'); ?>
-                                    <?php if ($orderby === 'date') : ?>
-                                        <span class="dashicons dashicons-arrow-<?php echo $order === 'ASC' ? 'up' : 'down'; ?>-alt2" style="font-size:16px; width:16px; height:16px; vertical-align:middle;"></span>
-                                    <?php endif; ?>
-                                </a>
-                            </th>
-                            <th><?php esc_html_e('Meeting Type', 'mc-leads-engine'); ?></th>
-                            <th><?php esc_html_e('Location details', 'mc-leads-engine'); ?></th>
-                            <th><?php esc_html_e('Client Contact', 'mc-leads-engine'); ?></th>
-                            <th><?php esc_html_e('Lead Score', 'mc-leads-engine'); ?></th>
-                            <th><?php esc_html_e('Google Calendar Link', 'mc-leads-engine'); ?></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    <?php if (empty($bookings)) : ?>
-                        <tr>
-                            <td colspan="7" style="text-align: center; font-style: italic; color:#94a3b8; padding: 30px;">
-                                <?php esc_html_e('No bookings matched your filters.', 'mc-leads-engine'); ?>
-                            </td>
-                        </tr>
-                    <?php else : ?>
-                        <?php foreach ($bookings as $row) : 
-                            $lead_id = (int)$row['lead_id'];
-                            $name = mc_leads_engine_leads_repository()->find_client_name($lead_id);
-                            $email = mc_leads_engine_leads_repository()->find_client_email($lead_id);
-                            $phone = mc_leads_engine_leads_repository()->find_client_phone($lead_id);
+            <!-- Table Panel -->
+            <div class="panel">
+                <div class="panel-header" style="display:flex; justify-content:space-between; align-items:baseline; padding: 15px 20px;">
+                    <div class="panel-title"><?php esc_html_e('Scheduled meetings', 'mc-leads-engine'); ?></div>
+                    <div class="panel-sub"><?php echo esc_html(sprintf(_n('%d booking', '%d bookings', count($bookings), 'mc-leads-engine'), count($bookings))); ?></div>
+                </div>
 
-                            $type_labels = array(
-                                'online' => __('Online Call', 'mc-leads-engine'),
-                                'coffee' => __('Coffee Meeting', 'mc-leads-engine'),
-                                'office' => __('Office Visit', 'mc-leads-engine'),
-                                'host'   => __('Our Studio', 'mc-leads-engine'),
-                            );
-                            $type_lbl = $type_labels[$row['meeting_type']] ?? $row['meeting_type'];
+                <?php
+                $sort_id_url = add_query_arg(array(
+                    'orderby' => 'id',
+                    'order'   => ($orderby === 'id' && $order === 'DESC') ? 'ASC' : 'DESC',
+                ));
+                $sort_date_url = add_query_arg(array(
+                    'orderby' => 'date',
+                    'order'   => ($orderby === 'date' && $order === 'DESC') ? 'ASC' : 'DESC',
+                ));
+                ?>
 
-                            // Check status
-                            $meeting_dt = strtotime($row['meeting_date'] . ' ' . $row['meeting_time']);
-                            $is_past = $meeting_dt < current_time('timestamp');
-                            $status_class = $is_past ? 'badge-draft' : 'badge-active';
-                            $status_lbl = $is_past ? __('Past', 'mc-leads-engine') : __('Upcoming', 'mc-leads-engine');
-                        ?>
+                <div class="table-wrap">
+                    <table class="book-table">
+                        <thead>
                             <tr>
-                                <td>#<?php echo esc_html($row['id']); ?></td>
-                                <td>
-                                    <strong><?php echo esc_html(wp_date('F j, Y', $meeting_dt)); ?></strong><br>
-                                    <span><?php echo esc_html(wp_date('g:i A', $meeting_dt)); ?></span><br>
-                                    <span class="survey-badge <?php echo esc_attr($status_class); ?>" style="font-size:10px; padding: 1px 6px; margin-top:3px; display:inline-block;"><?php echo esc_html($status_lbl); ?></span>
-                                </td>
-                                <td>
-                                    <strong><?php echo esc_html($type_lbl); ?></strong>
-                                </td>
-                                <td>
-                                    <?php if (!empty($row['location_name'])) : ?>
-                                        <strong><?php echo esc_html($row['location_name']); ?></strong><br>
-                                    <?php endif; ?>
-                                    <span class="description"><?php echo esc_html($row['location_address'] ?: '-'); ?></span>
-                                </td>
-                                <td>
-                                    <?php if ($name) : ?><strong><?php esc_html_e('Name:', 'mc-leads-engine'); ?></strong> <?php echo esc_html($name); ?><br><?php endif; ?>
-                                    <?php if ($email) : ?><strong><?php esc_html_e('Email:', 'mc-leads-engine'); ?></strong> <?php echo esc_html($email); ?><br><?php endif; ?>
-                                    <?php if ($phone) : ?><strong><?php esc_html_e('Phone:', 'mc-leads-engine'); ?></strong> <?php echo esc_html($phone); ?><?php endif; ?>
-                                    <?php if (!$name && !$email && !$phone) : ?>
-                                        <span class="description">-</span>
-                                    <?php endif; ?>
-                                    <div style="margin-top: 6px;">
-                                        <a class="mc-db-view-btn" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-leads', 'lead_id' => $lead_id), admin_url('admin.php'))); ?>">
-                                            <?php esc_html_e('View Lead', 'mc-leads-engine'); ?>
-                                        </a>
-                                    </div>
-                                </td>
-                                <td>
-                                    <strong style="color:var(--mc-brand);"><?php echo esc_html($row['lead_score'] ?? '0'); ?></strong>
-                                </td>
-                                <td>
-                                    <?php if (!empty($row['calendar_event_id'])) : ?>
-                                        <span class="dashicons dashicons-yes" style="color: #16a34a; font-size:18px; margin-right:3px;"></span>
-                                        <code style="font-size: 10px;"><?php echo esc_html(substr($row['calendar_event_id'], 0, 12)); ?>...</code>
-                                    <?php else : ?>
-                                        <span class="description"><?php esc_html_e('Not Sync\'d', 'mc-leads-engine'); ?></span>
-                                    <?php endif; ?>
+                                <th><a href="<?php echo esc_url($sort_id_url); ?>" style="text-decoration:none; color:inherit;">
+                                    <?php esc_html_e('ID', 'mc-leads-engine'); ?>
+                                    <?php if ($orderby === 'id') : ?><span class="dashicons dashicons-arrow-<?php echo $order === 'ASC' ? 'up' : 'down'; ?>-alt2" style="font-size:12px; width:12px; height:12px; vertical-align:middle;"></span><?php endif; ?>
+                                </a></th>
+                                <th><a href="<?php echo esc_url($sort_date_url); ?>" style="text-decoration:none; color:inherit;">
+                                    <?php esc_html_e('Date & time', 'mc-leads-engine'); ?>
+                                    <?php if ($orderby === 'date') : ?><span class="dashicons dashicons-arrow-<?php echo $order === 'ASC' ? 'up' : 'down'; ?>-alt2" style="font-size:12px; width:12px; height:12px; vertical-align:middle;"></span><?php endif; ?>
+                                </a></th>
+                                <th><?php esc_html_e('Format', 'mc-leads-engine'); ?></th>
+                                <th><?php esc_html_e('Location', 'mc-leads-engine'); ?></th>
+                                <th><?php esc_html_e('Client', 'mc-leads-engine'); ?></th>
+                                <th><?php esc_html_e('Score', 'mc-leads-engine'); ?></th>
+                                <th><?php esc_html_e('Calendar sync', 'mc-leads-engine'); ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php if (empty($bookings)) : ?>
+                            <tr>
+                                <td colspan="7" style="text-align: center; font-style: italic; color: var(--mc-muted); padding: 30px;">
+                                    <?php esc_html_e('No bookings matched your filters.', 'mc-leads-engine'); ?>
                                 </td>
                             </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                    </tbody>
-                </table>
+                        <?php else : ?>
+                            <?php foreach ($bookings as $row) : 
+                                $lead_id = (int)$row['lead_id'];
+                                $name = mc_leads_engine_leads_repository()->find_client_name($lead_id);
+                                $email = mc_leads_engine_leads_repository()->find_client_email($lead_id);
+                                $phone = mc_leads_engine_leads_repository()->find_client_phone($lead_id);
+
+                                $type_labels = array(
+                                    'online' => __('Online Call', 'mc-leads-engine'),
+                                    'coffee' => __('Coffee Meeting', 'mc-leads-engine'),
+                                    'office' => __('Office Visit', 'mc-leads-engine'),
+                                    'host'   => __('Our Studio', 'mc-leads-engine'),
+                                );
+                                $type_lbl = $type_labels[$row['meeting_type']] ?? $row['meeting_type'];
+                                
+                                $emojis = array(
+                                    'online' => '💻',
+                                    'coffee' => '☕',
+                                    'office' => '🏢',
+                                    'host'   => '🎨',
+                                );
+                                $emoji = $emojis[$row['meeting_type']] ?? '📅';
+
+                                // Check status
+                                $meeting_dt = strtotime($row['meeting_date'] . ' ' . $row['meeting_time']);
+                                $is_past = $meeting_dt < current_time('timestamp');
+                                $pill_class = $is_past ? 'past' : 'upcoming';
+                                $pill_lbl = $is_past ? __('Past', 'mc-leads-engine') : __('Upcoming', 'mc-leads-engine');
+                                
+                                // Score band
+                                $score = $row['lead_score'] !== null ? (int)$row['lead_score'] : 0;
+                                $score_class = $score >= 80 ? 'score-hot' : 'score-cold';
+                            ?>
+                                <tr>
+                                    <td><span class="book-id">#<?php echo esc_html($row['id']); ?></span></td>
+                                    <td>
+                                        <div class="dt-date"><?php echo esc_html(wp_date('M j, Y', $meeting_dt)); ?></div>
+                                        <div class="dt-time"><?php echo esc_html(wp_date('g:i A', $meeting_dt)); ?></div>
+                                        <span class="time-pill <?php echo esc_attr($pill_class); ?>"><?php echo esc_html($pill_lbl); ?></span>
+                                    </td>
+                                    <td><span class="meeting-type"><span class="type-emoji"><?php echo esc_html($emoji); ?></span> <?php echo esc_html($type_lbl); ?></span></td>
+                                    <td>
+                                        <div class="location-name"><?php echo esc_html($row['location_name'] ?: __('No location name', 'mc-leads-engine')); ?></div>
+                                        <div class="location-sub"><?php echo esc_html($row['location_address'] ?: '—'); ?></div>
+                                    </td>
+                                    <td>
+                                        <div class="client-name"><?php echo esc_html($name ?: __('(No name)', 'mc-leads-engine')); ?></div>
+                                        <?php if ($email) : ?><div class="client-line"><?php echo esc_html($email); ?></div><?php endif; ?>
+                                        <?php if ($phone) : ?><div class="client-line"><?php echo esc_html($phone); ?></div><?php endif; ?>
+                                        <a class="view-lead-link" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-leads', 'lead_id' => $lead_id), admin_url('admin.php'))); ?>"><?php esc_html_e('View lead', 'mc-leads-engine'); ?></a>
+                                    </td>
+                                    <td><span class="score-badge <?php echo esc_attr($score_class); ?>"><?php echo esc_html($score); ?></span></td>
+                                    <td>
+                                        <?php if (!empty($row['calendar_event_id'])) : ?>
+                                            <div class="cal-sync"><span class="cal-check">✓</span> <?php esc_html_e('Synced', 'mc-leads-engine'); ?></div>
+                                            <code style="font-size: 10px;"><?php echo esc_html(substr($row['calendar_event_id'], 0, 12)); ?>...</code>
+                                        <?php else : ?>
+                                            <span class="description" style="color:var(--mc-muted);"><?php esc_html_e('Not Synced', 'mc-leads-engine'); ?></span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
