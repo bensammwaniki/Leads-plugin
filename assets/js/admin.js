@@ -599,11 +599,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ── Shortcode chip copy ────────────────────────────────────  */
-  document.querySelectorAll('.sv-shortcode-chip').forEach((chip) => {
+  document.querySelectorAll('.shortcode-chip').forEach((chip) => {
     chip.addEventListener('click', async () => {
       const text = chip.dataset.shortcode || chip.querySelector('code')?.textContent || '';
       if (!text) return;
-      const hint = chip.querySelector('.sv-copy-hint');
+      const hint = chip.querySelector('.copy');
       const originalHint = hint ? hint.textContent : '';
       try {
         await navigator.clipboard.writeText(text);
