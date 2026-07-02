@@ -301,10 +301,11 @@ function mc_leads_engine_render_bookings_page() {
                                     <?php if (!$name && !$email && !$phone) : ?>
                                         <span class="description">-</span>
                                     <?php endif; ?>
-                                    <br>
-                                    <a style="font-size:11px;" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-leads', 'lead_id' => $lead_id), admin_url('admin.php'))); ?>">
-                                        <?php printf(esc_html__('View Lead Details #%d &rarr;', 'mc-leads-engine'), $lead_id); ?>
-                                    </a>
+                                    <div style="margin-top: 6px;">
+                                        <a class="mc-db-view-btn" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-leads', 'lead_id' => $lead_id), admin_url('admin.php'))); ?>">
+                                            <?php esc_html_e('View Lead', 'mc-leads-engine'); ?>
+                                        </a>
+                                    </div>
                                 </td>
                                 <td>
                                     <strong style="color:var(--mc-brand);"><?php echo esc_html($row['lead_score'] ?? '0'); ?></strong>

@@ -813,34 +813,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                             </div>
                         </div>
 
-                        <div class="chart-row">
-                            <div class="card">
-                                <div class="card-title"><?php esc_html_e('Leads over time', 'mc-leads-engine'); ?> <span><?php esc_html_e('Last 30 days', 'mc-leads-engine'); ?></span></div>
-                                <?php echo mc_leads_engine_admin_render_chart_bars($lead_daily_values, 'mini-bars'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-                            </div>
-                            <div class="card">
-                                <div class="card-title"><?php esc_html_e('Revenue trend', 'mc-leads-engine'); ?> <span><?php esc_html_e('Last 30 days', 'mc-leads-engine'); ?></span></div>
-                                <?php echo mc_leads_engine_admin_render_chart_bars($revenue_daily_values, 'mini-bars', 'hi'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-                            </div>
-                        </div>
-
-                        <div class="card" style="margin-top:12px">
-                            <div class="card-title"><?php esc_html_e('Survey performance', 'mc-leads-engine'); ?></div>
-                            <div class="survey-performance-list">
-                                <?php foreach ($survey_summaries as $survey_summary) : ?>
-                                    <div class="performance-row">
-                                        <div class="performance-head">
-                                            <span><?php echo esc_html($survey_summary['title']); ?></span>
-                                            <strong><?php echo esc_html($survey_summary['leads']); ?></strong>
-                                        </div>
-                                        <div class="performance-bar-track">
-                                            <div class="performance-bar-fill" style="width: <?php echo esc_attr(min(100, max(8, $survey_summary['leads'] ? ($survey_summary['leads'] / $survey_peak_leads * 100) : 0))); ?>%"></div>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-
+                        <!-- Step Drop-off -->
                         <div class="card" style="margin-top:12px">
                             <div class="card-title"><?php esc_html_e('Step Drop-off', 'mc-leads-engine'); ?> <span><?php esc_html_e('By survey', 'mc-leads-engine'); ?></span></div>
                             <?php if (empty($step_progress)) : ?>
@@ -915,7 +888,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                             <div class="lead-score <?php echo esc_attr($score_class); ?>"><?php echo esc_html(sprintf(__('Score %d', 'mc-leads-engine'), (int) $lead['lead_score'])); ?></div>
                                         </div>
                                         <div class="survey-actions">
-                                            <a class="icon-btn" href="<?php echo esc_url(admin_url('admin.php?page=mc-leads-engine-leads&lead_id=' . $lead['id'])); ?>"><span class="dashicons dashicons-visibility"></span></a>
+                                            <a class="mc-db-view-btn" href="<?php echo esc_url(admin_url('admin.php?page=mc-leads-engine-leads&lead_id=' . $lead['id'])); ?>"><?php esc_html_e('View', 'mc-leads-engine'); ?></a>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>

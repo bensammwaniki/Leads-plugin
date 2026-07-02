@@ -400,6 +400,7 @@ function mc_leads_engine_render_leads_page() {
                             <?php esc_html_e('Date', 'mc-leads-engine'); ?>
                             <?php if ($orderby === 'created_at') : ?><span class="dashicons dashicons-arrow-<?php echo $order === 'ASC' ? 'up' : 'down'; ?>-alt2" style="font-size:16px;width:16px;height:16px;vertical-align:middle"></span><?php endif; ?>
                         </a></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -443,6 +444,7 @@ function mc_leads_engine_render_leads_page() {
                         <td><?php echo esc_html(number_format_i18n((float) $row['total_price'], 2)); ?></td>
                         <td><?php echo mc_leads_score_badge($row['lead_score']); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
                         <td><?php echo esc_html($row['created_at']); ?></td>
+                        <td><a href="<?php echo esc_url($detail_url); ?>" class="mc-db-view-btn"><?php esc_html_e('View', 'mc-leads-engine'); ?></a></td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
