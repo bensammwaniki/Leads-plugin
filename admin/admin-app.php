@@ -246,7 +246,9 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
     $analytics_data = $analytics['analytics'];
     $surveys = mc_leads_engine_survey_repository()->get_surveys(array('limit' => 100));
     $leads = mc_leads_engine_leads_repository()->get_leads(array('limit' => 100));
-    $daily_stats = mc_leads_engine_leads_repository()->get_daily_lead_stats(30);
+    $daily_stats     = mc_leads_engine_leads_repository()->get_daily_lead_stats(30);
+    $pipeline_counts = mc_leads_engine_leads_repository()->get_pipeline_counts();
+    $recent_leads    = mc_leads_engine_leads_repository()->get_leads(array('limit' => 5, 'orderby' => 'created_at', 'order' => 'DESC'));
 
     $selected_survey_id = isset($_GET['survey_id']) ? absint($_GET['survey_id']) : 0;
     if ($panel !== 'surveys' && !$selected_survey_id && !empty($surveys)) {
@@ -336,51 +338,114 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
 
                 <div class="mc-admin-content">
                     <section class="panel<?php echo $panel === 'dashboard' ? ' active' : ''; ?>" id="panel-dashboard" data-panel="dashboard">
+
+                        <?php
+                        $hot_threshold  = (int) ($settings['score_hot_threshold']  ?? 80);
+                        $warm_threshold = (int) ($settings['score_warm_threshold'] ?? 50);
+                        $hot_count      = count(array_filter($leads, fn($l) => (int)($l['lead_score'] ?? 0) >= $hot_threshold));
+                        $total_pipeline = $analytics['total_leads'];
+                        $pipeline_statuses = mc_leads_get_statuses();
+                        ?>
+
+                        <!-- KPI Cards -->
                         <div class="stat-grid">
                             <div class="stat-card">
                                 <div class="stat-label"><span class="dashicons dashicons-groups"></span> <?php esc_html_e('Total Leads', 'mc-leads-engine'); ?></div>
                                 <div class="stat-value"><?php echo esc_html(number_format_i18n($analytics['total_leads'])); ?></div>
-                                <div class="stat-delta"><?php echo esc_html(sprintf(__('↑ %s this month', 'mc-leads-engine'), number_format_i18n((float) ($analytics_data['survey_completions'] ? array_sum(array_map('intval', $analytics_data['survey_completions'])) : 0)))); ?></div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label"><span class="dashicons dashicons-analytics"></span> <?php esc_html_e('Active Surveys', 'mc-leads-engine'); ?></div>
-                                <div class="stat-value"><?php echo esc_html(count(array_filter($surveys, function ($survey) { return ($survey['status'] ?? '') === 'published'; }))); ?></div>
-                                <div class="stat-delta"><?php esc_html_e('Live and collecting leads', 'mc-leads-engine'); ?></div>
+                                <div class="stat-delta"><?php esc_html_e('All time', 'mc-leads-engine'); ?></div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-label"><span class="dashicons dashicons-money-alt"></span> <?php esc_html_e('Avg Lead Value', 'mc-leads-engine'); ?></div>
                                 <div class="stat-value"><?php echo esc_html(number_format_i18n($analytics['avg_value'], 2)); ?></div>
-                                <div class="stat-delta"><?php esc_html_e('KES avg estimate', 'mc-leads-engine'); ?></div>
+                                <div class="stat-delta"><?php esc_html_e('Estimated avg', 'mc-leads-engine'); ?></div>
                             </div>
                             <div class="stat-card">
-                                <div class="stat-label"><span class="dashicons dashicons-star-filled"></span> <?php esc_html_e('High Value', 'mc-leads-engine'); ?></div>
-                                <div class="stat-value"><?php echo esc_html(count(array_filter($leads, function ($lead) { return (int) ($lead['lead_score'] ?? 0) >= 80; }))); ?></div>
-                                <div class="stat-delta"><?php esc_html_e('Score ≥ 80', 'mc-leads-engine'); ?></div>
+                                <div class="stat-label"><span class="dashicons dashicons-star-filled"></span> <?php esc_html_e('Hot Leads', 'mc-leads-engine'); ?></div>
+                                <div class="stat-value"><?php echo esc_html($hot_count); ?></div>
+                                <div class="stat-delta"><?php echo esc_html(sprintf(__('Score ≥ %d', 'mc-leads-engine'), $hot_threshold)); ?></div>
                             </div>
-                        </div>
-
-                        <div class="chart-row">
-                            <div class="card">
-                                <div class="card-title"><?php esc_html_e('Leads over time', 'mc-leads-engine'); ?> <span><?php esc_html_e('Last 30 days', 'mc-leads-engine'); ?></span></div>
-                                <?php echo mc_leads_engine_admin_render_chart_bars($lead_daily_values, 'mini-bars'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-                            </div>
-                            <div class="card">
-                                <div class="card-title"><?php esc_html_e('Survey performance', 'mc-leads-engine'); ?></div>
-                                <div class="survey-performance-list">
-                                    <?php foreach (array_slice($survey_summaries, 0, 4) as $survey_summary) : ?>
-                                        <div class="performance-row">
-                                            <div class="performance-head">
-                                                <span><?php echo esc_html($survey_summary['title']); ?></span>
-                                                <strong><?php echo esc_html($survey_summary['leads']); ?></strong>
-                                            </div>
-                                            <div class="performance-bar-track">
-                                                <div class="performance-bar-fill" style="width: <?php echo esc_attr(min(100, max(8, $survey_summary['leads'] ? ($survey_summary['leads'] / $survey_peak_leads * 100) : 0))); ?>%"></div>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
+                            <div class="stat-card">
+                                <div class="stat-label"><span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e('Won', 'mc-leads-engine'); ?></div>
+                                <div class="stat-value"><?php echo esc_html(number_format_i18n($pipeline_counts['won'])); ?></div>
+                                <div class="stat-delta">
+                                    <?php
+                                    $win_rate = $total_pipeline ? round($pipeline_counts['won'] / $total_pipeline * 100) : 0;
+                                    echo esc_html($win_rate . '% ' . __('win rate', 'mc-leads-engine'));
+                                    ?>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Pipeline Strip -->
+                        <div class="mc-db-pipeline-strip">
+                            <?php foreach ($pipeline_statuses as $slug => $label) :
+                                $cnt = $pipeline_counts[$slug] ?? 0;
+                            ?>
+                            <a class="mc-db-pipeline-stage" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine', 'mc_panel' => 'leads', 'status' => $slug), admin_url('admin.php'))); ?>">
+                                <span class="mc-db-stage-count"><?php echo esc_html(number_format_i18n($cnt)); ?></span>
+                                <span class="mc-db-stage-label mc-status-pill mc-status-<?php echo esc_attr($slug); ?>"><?php echo esc_html($label); ?></span>
+                            </a>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <!-- Chart + Recent Leads -->
+                        <div class="mc-db-lower-row">
+
+                            <!-- 30-day sparkline -->
+                            <div class="card mc-db-chart-card">
+                                <div class="card-title"><?php esc_html_e('Leads — last 30 days', 'mc-leads-engine'); ?></div>
+                                <?php echo mc_leads_engine_admin_render_chart_bars($lead_daily_values, 'mini-bars'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                            </div>
+
+                            <!-- Recent leads -->
+                            <div class="card mc-db-recent-card">
+                                <div class="card-title">
+                                    <?php esc_html_e('Recent Leads', 'mc-leads-engine'); ?>
+                                    <a href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine', 'mc_panel' => 'leads'), admin_url('admin.php'))); ?>" class="mc-db-view-all"><?php esc_html_e('View all →', 'mc-leads-engine'); ?></a>
+                                </div>
+                                <?php if (empty($recent_leads)) : ?>
+                                    <p class="mc-db-empty"><?php esc_html_e('No leads yet.', 'mc-leads-engine'); ?></p>
+                                <?php else : ?>
+                                <table class="mc-db-recent-table">
+                                    <thead>
+                                        <tr>
+                                            <th><?php esc_html_e('Lead', 'mc-leads-engine'); ?></th>
+                                            <th><?php esc_html_e('Score', 'mc-leads-engine'); ?></th>
+                                            <th><?php esc_html_e('Value', 'mc-leads-engine'); ?></th>
+                                            <th><?php esc_html_e('Status', 'mc-leads-engine'); ?></th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach ($recent_leads as $rl) :
+                                        $rl_score = (int) ($rl['lead_score'] ?? 0);
+                                        $rl_band  = mc_leads_score_band($rl_score);
+                                        $rl_status = sanitize_key($rl['status'] ?? 'new');
+                                        $rl_name  = trim(($rl['name'] ?? '') ?: ($rl['email'] ?? ''));
+                                        if (!$rl_name) $rl_name = '#' . $rl['id'];
+                                        $rl_url = add_query_arg(array('page' => 'mc-leads-engine', 'mc_panel' => 'leads', 'lead_id' => $rl['id']), admin_url('admin.php'));
+                                    ?>
+                                    <tr>
+                                        <td class="mc-db-lead-name"><?php echo esc_html($rl_name); ?></td>
+                                        <td><span class="mc-score-badge mc-score-<?php echo esc_attr($rl_band); ?>"><?php echo esc_html($rl_score); ?></span></td>
+                                        <td class="mc-db-lead-value"><?php echo esc_html(number_format_i18n((float)($rl['total_price'] ?? 0), 2)); ?></td>
+                                        <td><span class="mc-status-pill mc-status-<?php echo esc_attr($rl_status); ?>"><?php echo esc_html(mc_leads_status_label($rl_status)); ?></span></td>
+                                        <td><a href="<?php echo esc_url($rl_url); ?>" class="mc-db-view-btn"><?php esc_html_e('View', 'mc-leads-engine'); ?></a></td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                                <?php endif; ?>
+                                <div class="mc-db-view-all-btn-wrap">
+                                    <a href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine', 'mc_panel' => 'leads'), admin_url('admin.php'))); ?>" class="btn mc-db-view-all-btn">
+                                        <span class="dashicons dashicons-groups"></span>
+                                        <?php esc_html_e('View All Leads', 'mc-leads-engine'); ?>
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div>
+
                     </section>
 
                     <section class="panel<?php echo $panel === 'surveys' ? ' active' : ''; ?>" id="panel-surveys" data-panel="surveys">

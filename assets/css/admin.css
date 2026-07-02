@@ -2900,3 +2900,169 @@ select.field-input,
   font-weight: 600;
   color: #1e293b;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Dashboard Command-Centre — v1.4.0
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Pipeline Strip ───────────────────────────────────────────────────── */
+.mc-db-pipeline-strip {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+  padding: 16px 20px;
+  background: var(--mc-surface);
+  border: 1px solid var(--mc-border);
+  border-radius: 12px;
+}
+.mc-db-pipeline-stage {
+  flex: 1 1 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 10px;
+  border-radius: 10px;
+  background: var(--mc-surface-soft, #f8fbff);
+  border: 1px solid var(--mc-border);
+  text-decoration: none;
+  transition: box-shadow .15s, transform .1s;
+  cursor: pointer;
+}
+.mc-db-pipeline-stage:hover {
+  box-shadow: 0 4px 14px rgba(37,99,235,.10);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+.mc-db-stage-count {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--mc-text);
+  line-height: 1;
+}
+.mc-db-stage-label {
+  font-size: 11px;
+}
+
+/* ── Lower Row (chart + recent) ───────────────────────────────────────── */
+.mc-db-lower-row {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 20px;
+  margin-top: 20px;
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .mc-db-lower-row { grid-template-columns: 1fr; }
+}
+.mc-db-chart-card,
+.mc-db-recent-card { height: 100%; }
+
+/* ── Card-title with "View all" link ─────────────────────────────────── */
+.card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mc-db-view-all {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mc-brand);
+  text-decoration: none;
+}
+.mc-db-view-all:hover { text-decoration: underline; }
+
+/* ── Recent Leads mini-table ─────────────────────────────────────────── */
+.mc-db-recent-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.mc-db-recent-table th {
+  padding: 6px 8px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--mc-muted);
+  border-bottom: 1px solid var(--mc-border);
+}
+.mc-db-recent-table td {
+  padding: 8px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  color: var(--mc-text);
+}
+.mc-db-recent-table tr:last-child td { border-bottom: none; }
+.mc-db-recent-table tr:hover td { background: #f8fafc; }
+.mc-db-lead-name {
+  font-weight: 600;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mc-db-lead-value { color: #166534; font-weight: 600; }
+.mc-db-profile-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  background: var(--mc-brand-soft, #eaf2ff);
+  border-radius: 6px;
+  color: var(--mc-brand);
+  text-decoration: none;
+  transition: background .12s;
+}
+.mc-db-profile-link:hover { background: var(--mc-brand); color: #fff; }
+.mc-db-profile-link .dashicons { font-size: 16px; width: 16px; height: 16px; margin: 0; }
+.mc-db-empty { color: var(--mc-muted); font-size: 13px; padding: 12px 0; }
+
+/* ── View All Leads button ────────────────────────────────────────────── */
+.mc-db-view-all-btn-wrap {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--mc-border);
+}
+.mc-db-view-all-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 9px 0;
+  border-radius: 8px;
+  background: var(--mc-brand-soft, #eaf2ff);
+  color: var(--mc-brand) !important;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: background .15s, color .15s;
+}
+.mc-db-view-all-btn:hover {
+  background: var(--mc-brand);
+  color: #fff !important;
+}
+.mc-db-view-all-btn .dashicons {
+  font-size: 16px; width: 16px; height: 16px;
+}
+
+/* ── Per-row View button ──────────────────────────────────────────────── */
+.mc-db-view-btn {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--mc-brand-soft, #eaf2ff);
+  color: var(--mc-brand) !important;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none !important;
+  white-space: nowrap;
+  transition: background .13s, color .13s;
+}
+.mc-db-view-btn:hover {
+  background: var(--mc-brand);
+  color: #fff !important;
+}

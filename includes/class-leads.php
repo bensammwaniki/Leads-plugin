@@ -402,6 +402,45 @@ class MC_Leads_Engine_Leads {
         );
     }
 
+    /**
+     * Returns a count of leads per pipeline status in one query.
+     * Result is cached for 5 minutes — cheap enough for a dashboard.
+     *
+     * @return array  e.g. ['new' => 12, 'contacted' => 5, 'won' => 3, ...]
+     */
+    public function get_pipeline_counts() {
+        $cached = get_transient('mc_leads_pipeline_counts');
+        if ($cached !== false) {
+            return $cached;
+        }
+
+        global $wpdb;
+        $rows = $wpdb->get_results(
+            "SELECT COALESCE(status, 'new') AS status, COUNT(*) AS cnt
+             FROM " . mc_leads_engine_table('leads') . "
+             GROUP BY status",
+            ARRAY_A
+        );
+
+        $counts = array(
+            'new'           => 0,
+            'contacted'     => 0,
+            'qualified'     => 0,
+            'proposal_sent' => 0,
+            'won'           => 0,
+            'lost'          => 0,
+        );
+        foreach ((array) $rows as $row) {
+            $s = sanitize_key($row['status'] ?? 'new');
+            if (isset($counts[$s])) {
+                $counts[$s] = (int) $row['cnt'];
+            }
+        }
+
+        set_transient('mc_leads_pipeline_counts', $counts, 5 * MINUTE_IN_SECONDS);
+        return $counts;
+    }
+
     public function record_survey_start($survey_id) {
         global $wpdb;
 
