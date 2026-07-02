@@ -64,6 +64,11 @@ function mc_leads_engine_handle_settings_save() {
         'booking_score_office'       => isset($_POST['booking_score_office']) ? (int) $_POST['booking_score_office'] : (int) ($current_settings['booking_score_office'] ?? 30),
         'booking_score_host'         => isset($_POST['booking_score_host']) ? (int) $_POST['booking_score_host'] : (int) ($current_settings['booking_score_host'] ?? 20),
         
+        // Lead Scoring & Digest
+        'score_hot_threshold'        => isset($_POST['score_hot_threshold']) ? absint($_POST['score_hot_threshold']) : (int) ($current_settings['score_hot_threshold'] ?? 80),
+        'score_warm_threshold'       => isset($_POST['score_warm_threshold']) ? absint($_POST['score_warm_threshold']) : (int) ($current_settings['score_warm_threshold'] ?? 50),
+        'digest_email_enable'        => isset($_POST['digest_email_enable']) ? 1 : 0,
+
         // Consent & Tracking Settings variables
         'cookie_banner_enable'       => isset($_POST['cookie_banner_enable']) ? 1 : 0,
         'cookie_banner_title'        => sanitize_text_field(wp_unslash($_POST['cookie_banner_title'] ?? $current_settings['cookie_banner_title'] ?? '')),
@@ -281,6 +286,35 @@ function mc_leads_engine_render_settings_page() {
                                 <label class="field-label"><?php esc_html_e('Thank You Redirect URL', 'mc-leads-engine'); ?></label>
                                 <input class="field-input" type="url" name="thank_you_url" value="<?php echo esc_attr($settings['thank_you_url']); ?>">
                                 <span class="field-desc"><?php esc_html_e('Fallback URL redirect destination after a lead is submitted.', 'mc-leads-engine'); ?></span>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-top:20px;">
+                            <div class="card-title"><?php esc_html_e('Lead Scoring Thresholds', 'mc-leads-engine'); ?></div>
+                            <p class="field-desc-top"><?php esc_html_e('Set the score cutoffs that determine whether a lead is classified as Hot, Warm, or Cold. These control the colour badges shown in the Leads and Analytics tables.', 'mc-leads-engine'); ?></p>
+                            <div class="settings-row">
+                                <div class="settings-field">
+                                    <label class="field-label"><?php esc_html_e('Hot Lead Threshold (≥)', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="number" name="score_hot_threshold" min="0" max="1000" value="<?php echo esc_attr($settings['score_hot_threshold'] ?? 80); ?>">
+                                    <span class="field-desc"><?php esc_html_e('Leads scoring this value or above are marked Hot (red badge).', 'mc-leads-engine'); ?></span>
+                                </div>
+                                <div class="settings-field">
+                                    <label class="field-label"><?php esc_html_e('Warm Lead Threshold (≥)', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="number" name="score_warm_threshold" min="0" max="1000" value="<?php echo esc_attr($settings['score_warm_threshold'] ?? 50); ?>">
+                                    <span class="field-desc"><?php esc_html_e('Leads scoring this value or above (but below Hot) are marked Warm (yellow badge).', 'mc-leads-engine'); ?></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-top:20px;">
+                            <div class="card-title"><?php esc_html_e('Weekly Digest Email', 'mc-leads-engine'); ?></div>
+                            <p class="field-desc-top"><?php esc_html_e('Receive an automated weekly summary email with new lead counts, pipeline value, and hot lead highlights.', 'mc-leads-engine'); ?></p>
+                            <div class="settings-field">
+                                <label style="display:flex; align-items:center; gap:10px; font-weight:600; cursor:pointer;">
+                                    <input type="checkbox" name="digest_email_enable" value="1" <?php checked(!empty($settings['digest_email_enable'])); ?>>
+                                    <?php esc_html_e('Enable weekly digest email to admin notification address', 'mc-leads-engine'); ?>
+                                </label>
+                                <span class="field-desc" style="margin-top:6px;"><?php esc_html_e('Runs every Monday morning via WP-Cron. Uses the Admin Notification Email address above.', 'mc-leads-engine'); ?></span>
                             </div>
                         </div>
                     </div>
