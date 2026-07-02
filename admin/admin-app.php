@@ -325,6 +325,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
     <div class="wrap mc-admin-shell-wrap">
         <div class="mc-admin-app">
             <main class="mc-admin-main">
+                <?php if ($panel !== 'surveys') : ?>
                 <div class="mc-admin-topbar">
                     <div>
                         <div class="topbar-title" id="topbar-title"><?php echo esc_html(mc_leads_engine_admin_panel_title($panel)); ?></div>
@@ -335,6 +336,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                         <a class="btn primary" href="<?php echo esc_url($surveys_url); ?>"><span class="dashicons dashicons-plus"></span> <?php esc_html_e('New Survey', 'mc-leads-engine'); ?></a>
                     </div>
                 </div>
+                <?php endif; ?>
 
                 <div class="mc-admin-content">
                     <section class="panel<?php echo $panel === 'dashboard' ? ' active' : ''; ?>" id="panel-dashboard" data-panel="dashboard">
@@ -809,10 +811,12 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                     <div class="sv-settings-col">
                                         <div class="field-group">
                                             <label class="field-label"><?php esc_html_e('Survey title', 'mc-leads-engine'); ?></label>
+                                            <div class="field-hint" style="margin-top:0; margin-bottom:6px;"><?php esc_html_e('The name of this survey used for internal organization.', 'mc-leads-engine'); ?></div>
                                             <input class="field-input" type="text" name="title" value="<?php echo esc_attr($selected_survey['title'] ?? ''); ?>">
                                         </div>
                                         <div class="field-group">
                                             <label class="field-label"><?php esc_html_e('Status', 'mc-leads-engine'); ?></label>
+                                            <div class="field-hint" style="margin-top:0; margin-bottom:6px;"><?php esc_html_e('Draft surveys are only visible to admins. Published surveys are live.', 'mc-leads-engine'); ?></div>
                                             <select class="field-input" name="status">
                                                 <option value="draft" <?php selected(($selected_survey['status'] ?? 'draft'), 'draft'); ?>><?php esc_html_e('Draft (not live)', 'mc-leads-engine'); ?></option>
                                                 <option value="published" <?php selected(($selected_survey['status'] ?? ''), 'published'); ?>><?php esc_html_e('Published (live)', 'mc-leads-engine'); ?></option>
@@ -820,40 +824,52 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                         </div>
                                         <div class="field-group">
                                             <label class="field-label"><?php esc_html_e('Final step title', 'mc-leads-engine'); ?></label>
+                                            <div class="field-hint" style="margin-top:0; margin-bottom:6px;"><?php esc_html_e('The headline shown on the last screen after submission.', 'mc-leads-engine'); ?></div>
                                             <input class="field-input" type="text" name="final_step_title" value="<?php echo esc_attr($survey_settings['final_step_title'] ?? ''); ?>">
                                         </div>
                                         <div class="field-group">
                                             <label class="field-label"><?php esc_html_e('Submit button text', 'mc-leads-engine'); ?></label>
+                                            <div class="field-hint" style="margin-top:0; margin-bottom:6px;"><?php esc_html_e('The text displayed on the final submit button.', 'mc-leads-engine'); ?></div>
                                             <input class="field-input" type="text" name="final_button_text" value="<?php echo esc_attr($survey_settings['final_button_text'] ?? ''); ?>">
                                         </div>
                                         <div class="sv-settings-toggles">
-                                            <div class="sv-toggle-group">
-                                                <label class="switch">
-                                                    <input type="checkbox" id="svs-show-price" name="show_final_price" value="1" <?php checked(!empty($survey_settings['show_final_price'])); ?>>
-                                                    <span class="track"></span>
-                                                </label>
-                                                <label for="svs-show-price" class="sv-toggle-text"><?php esc_html_e('Show estimated price on final step', 'mc-leads-engine'); ?></label>
+                                            <div class="sv-toggle-group" style="display:flex; flex-direction:column; align-items:flex-start; gap:4px; margin-bottom:12px;">
+                                                <div style="display:flex; align-items:center; gap:10px;">
+                                                    <label class="switch">
+                                                        <input type="checkbox" id="svs-show-price" name="show_final_price" value="1" <?php checked(!empty($survey_settings['show_final_price'])); ?>>
+                                                        <span class="track"></span>
+                                                    </label>
+                                                    <label for="svs-show-price" class="sv-toggle-text" style="font-weight:600;"><?php esc_html_e('Show estimated price on final step', 'mc-leads-engine'); ?></label>
+                                                </div>
+                                                <div class="field-hint" style="margin-left:44px; margin-top:0;"><?php esc_html_e('If enabled, the computed price estimate will be shown to the user.', 'mc-leads-engine'); ?></div>
                                             </div>
-                                            <div class="sv-toggle-group">
-                                                <label class="switch">
-                                                    <input type="checkbox" id="svs-show-score" name="show_final_score" value="1" <?php checked(!empty($survey_settings['show_final_score'])); ?>>
-                                                    <span class="track"></span>
-                                                </label>
-                                                <label for="svs-show-score" class="sv-toggle-text"><?php esc_html_e('Show lead score on final step', 'mc-leads-engine'); ?></label>
+                                            <div class="sv-toggle-group" style="display:flex; flex-direction:column; align-items:flex-start; gap:4px;">
+                                                <div style="display:flex; align-items:center; gap:10px;">
+                                                    <label class="switch">
+                                                        <input type="checkbox" id="svs-show-score" name="show_final_score" value="1" <?php checked(!empty($survey_settings['show_final_score'])); ?>>
+                                                        <span class="track"></span>
+                                                    </label>
+                                                    <label for="svs-show-score" class="sv-toggle-text" style="font-weight:600;"><?php esc_html_e('Show lead score on final step', 'mc-leads-engine'); ?></label>
+                                                </div>
+                                                <div class="field-hint" style="margin-left:44px; margin-top:0;"><?php esc_html_e('If enabled, the total lead score will be shown to the user.', 'mc-leads-engine'); ?></div>
                                             </div>
                                         </div>
-                                        <button class="btn primary" type="submit" style="width:100%;"><?php esc_html_e('Save survey settings', 'mc-leads-engine'); ?></button>
                                     </div>
                                     <div class="sv-settings-col">
                                         <div class="field-group">
                                             <label class="field-label"><?php esc_html_e('Description (internal)', 'mc-leads-engine'); ?></label>
+                                            <div class="field-hint" style="margin-top:0; margin-bottom:6px;"><?php esc_html_e('Private notes about this survey, visible only to admin users.', 'mc-leads-engine'); ?></div>
                                             <textarea class="field-input" rows="6" name="description" style="min-height:120px;resize:vertical;"><?php echo esc_textarea($selected_survey['description'] ?? ''); ?></textarea>
                                         </div>
                                         <div class="field-group">
                                             <label class="field-label"><?php esc_html_e('Final step message', 'mc-leads-engine'); ?></label>
+                                            <div class="field-hint" style="margin-top:0; margin-bottom:6px;"><?php esc_html_e('HTML and text shown to users on completion. Supports shortcodes.', 'mc-leads-engine'); ?></div>
                                             <textarea class="field-input" rows="6" name="final_message" style="min-height:120px;resize:vertical;" placeholder="<?php esc_attr_e('e.g. Thanks! Review your answers below.', 'mc-leads-engine'); ?>"><?php echo esc_textarea($survey_settings['final_message'] ?? ''); ?></textarea>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="sv-settings-actions">
+                                    <button class="btn primary" type="submit"><?php esc_html_e('Save survey settings', 'mc-leads-engine'); ?></button>
                                 </div>
                             </form>
                         </div><!-- /.sv-tab-pane[settings] -->

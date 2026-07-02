@@ -3217,11 +3217,19 @@ select.field-input,
   display: inline-block;
 }
 
+/* ============ TAB PANES ============ */
+#panel-surveys .sv-tab-pane {
+  display: none;
+}
+#panel-surveys .sv-tab-pane.active {
+  display: block;
+}
+
 /* ============ BUILDER GRID ============ */
 #panel-surveys .builder-grid {
   display: grid;
-  grid-template-columns: 240px 300px 1fr;
-  gap: 16px;
+  grid-template-columns: 200px 270px 1fr;
+  gap: 12px;
   align-items: start;
 }
 
@@ -3692,8 +3700,8 @@ select.field-input,
 }
 #panel-surveys .opt-cols {
   display: grid;
-  grid-template-columns: 1.7fr 96px 92px 92px 60px 30px;
-  gap: 8px;
+  grid-template-columns: 1.5fr 80px 60px 80px 48px 26px;
+  gap: 6px;
   padding: 9px 12px;
   background: var(--paper);
   border-bottom: 1px solid var(--line);
@@ -3711,8 +3719,8 @@ select.field-input,
 
 #panel-surveys .opt-row {
   display: grid;
-  grid-template-columns: 1.7fr 96px 92px 92px 60px 30px;
-  gap: 8px;
+  grid-template-columns: 1.5fr 80px 60px 80px 48px 26px;
+  gap: 6px;
   padding: 8px 12px;
   align-items: center;
   border-bottom: 1px solid var(--line-soft);
@@ -3834,8 +3842,8 @@ select.field-input,
 }
 #panel-surveys .sv-settings-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  grid-template-columns: 556px 1fr;
+  gap: 16px;
   padding: 14px;
   background: var(--surface);
   border: 1px solid var(--line);
@@ -3860,6 +3868,16 @@ select.field-input,
   font-size: 12px;
   color: var(--text);
   cursor: pointer;
+}
+#panel-surveys .sv-settings-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+#panel-surveys .sv-settings-actions .btn {
+  padding: 0 24px;
+  height: 40px;
+  font-size: 13.5px;
 }
 
 /* ============ EMPTY STATES ============ */
@@ -3918,7 +3936,7 @@ select.field-input,
   flex: 1;
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1240px) {
   #panel-surveys .builder-grid {
     grid-template-columns: 1fr;
   }
