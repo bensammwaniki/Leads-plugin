@@ -351,35 +351,43 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
 
                         <!-- KPI Cards -->
                         <div class="kpi-grid">
-                            <div class="kpi-card">
-                                <span class="kicon">☰</span>
-                                <div class="kpi-value"><?php echo esc_html(number_format_i18n($analytics['total_leads'])); ?></div>
-                                <div class="kpi-label"><?php esc_html_e('Total leads', 'mc-leads-engine'); ?></div>
-                                <div class="kpi-delta"><?php esc_html_e('All time', 'mc-leads-engine'); ?></div>
-                            </div>
-                            <div class="kpi-card money">
-                                <span class="kicon">KES</span>
-                                <div class="kpi-value"><?php echo esc_html(number_format_i18n($analytics['avg_value'], 2)); ?></div>
-                                <div class="kpi-label"><?php esc_html_e('Avg lead value', 'mc-leads-engine'); ?></div>
-                                <div class="kpi-delta"><?php esc_html_e('Estimated avg', 'mc-leads-engine'); ?></div>
-                            </div>
-                            <div class="kpi-card accent">
-                                <span class="kicon">🔥</span>
-                                <div class="kpi-value"><?php echo esc_html($hot_count); ?></div>
-                                <div class="kpi-label"><?php esc_html_e('Hot leads', 'mc-leads-engine'); ?></div>
-                                <div class="kpi-delta"><?php echo esc_html(sprintf(__('Score ≥ %d', 'mc-leads-engine'), $hot_threshold)); ?></div>
-                            </div>
-                            <div class="kpi-card <?php echo $pipeline_counts['won'] === 0 ? 'zero' : ''; ?>">
-                                <span class="kicon">✓</span>
-                                <div class="kpi-value"><?php echo esc_html(number_format_i18n($pipeline_counts['won'])); ?></div>
-                                <div class="kpi-label"><?php esc_html_e('Won', 'mc-leads-engine'); ?></div>
-                                <div class="kpi-delta">
-                                    <?php
-                                    $win_rate = $total_pipeline ? round($pipeline_counts['won'] / $total_pipeline * 100) : 0;
-                                    echo esc_html(sprintf(__('%d%% win rate', 'mc-leads-engine'), $win_rate));
-                                    ?>
+                            <a href="<?php echo esc_url(add_query_arg('page', 'mc-leads-engine-analytics', admin_url('admin.php'))); ?>" style="text-decoration:none; color:inherit; display:block;">
+                                <div class="kpi-card" style="cursor:pointer; height:100%;">
+                                    <span class="kicon">☰</span>
+                                    <div class="kpi-value"><?php echo esc_html(number_format_i18n($analytics['total_leads'])); ?></div>
+                                    <div class="kpi-label"><?php esc_html_e('Total leads', 'mc-leads-engine'); ?></div>
+                                    <div class="kpi-delta"><?php esc_html_e('All time', 'mc-leads-engine'); ?></div>
                                 </div>
-                            </div>
+                            </a>
+                            <a href="<?php echo esc_url(add_query_arg('page', 'mc-leads-engine-analytics', admin_url('admin.php'))); ?>" style="text-decoration:none; color:inherit; display:block;">
+                                <div class="kpi-card money" style="cursor:pointer; height:100%;">
+                                    <span class="kicon">KES</span>
+                                    <div class="kpi-value"><?php echo esc_html(number_format_i18n($analytics['avg_value'], 2)); ?></div>
+                                    <div class="kpi-label"><?php esc_html_e('Avg lead value', 'mc-leads-engine'); ?></div>
+                                    <div class="kpi-delta"><?php esc_html_e('Estimated avg', 'mc-leads-engine'); ?></div>
+                                </div>
+                            </a>
+                            <a href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-analytics', 'min_score' => $hot_threshold), admin_url('admin.php'))); ?>" style="text-decoration:none; color:inherit; display:block;">
+                                <div class="kpi-card accent" style="cursor:pointer; height:100%;">
+                                    <span class="kicon">🔥</span>
+                                    <div class="kpi-value"><?php echo esc_html($hot_count); ?></div>
+                                    <div class="kpi-label"><?php esc_html_e('Hot leads', 'mc-leads-engine'); ?></div>
+                                    <div class="kpi-delta"><?php echo esc_html(sprintf(__('Score ≥ %d', 'mc-leads-engine'), $hot_threshold)); ?></div>
+                                </div>
+                            </a>
+                            <a href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-analytics', 'status' => 'won'), admin_url('admin.php'))); ?>" style="text-decoration:none; color:inherit; display:block;">
+                                <div class="kpi-card <?php echo $pipeline_counts['won'] === 0 ? 'zero' : ''; ?>" style="cursor:pointer; height:100%;">
+                                    <span class="kicon">✓</span>
+                                    <div class="kpi-value"><?php echo esc_html(number_format_i18n($pipeline_counts['won'])); ?></div>
+                                    <div class="kpi-label"><?php esc_html_e('Won', 'mc-leads-engine'); ?></div>
+                                    <div class="kpi-delta">
+                                        <?php
+                                        $win_rate = $total_pipeline ? round($pipeline_counts['won'] / $total_pipeline * 100) : 0;
+                                        echo esc_html(sprintf(__('%d%% win rate', 'mc-leads-engine'), $win_rate));
+                                        ?>
+                                    </div>
+                                </div>
+                            </a>
                         </div>
 
                         <!-- Pipeline Strip -->
@@ -387,7 +395,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                             <?php foreach ($pipeline_statuses as $slug => $label) :
                                 $cnt = $pipeline_counts[$slug] ?? 0;
                                 $cnt_class = $cnt === 0 ? 'zero' : '';
-                                $stage_url = add_query_arg(array('page' => 'mc-leads-engine-leads', 'status' => $slug), admin_url('admin.php'));
+                                $stage_url = add_query_arg(array('page' => 'mc-leads-engine-analytics', 'status' => $slug), admin_url('admin.php'));
                             ?>
                             <a class="stage-link" href="<?php echo esc_url($stage_url); ?>">
                                 <div class="stage-cell">
@@ -431,7 +439,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                             <div class="panel">
                                 <div class="panel-header" style="display:flex; justify-content:space-between; align-items:baseline; padding: 14px 18px 2px;">
                                     <div class="panel-title"><?php esc_html_e('Recent leads', 'mc-leads-engine'); ?></div>
-                                    <a href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-leads'), admin_url('admin.php'))); ?>" style="font-size:11px; font-weight:700; color:var(--coral); text-decoration:none;"><?php esc_html_e('View all →', 'mc-leads-engine'); ?></a>
+                                    <a href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-analytics'), admin_url('admin.php'))); ?>" style="font-size:11px; font-weight:700; color:var(--coral); text-decoration:none;"><?php esc_html_e('View all →', 'mc-leads-engine'); ?></a>
                                 </div>
                                 <div class="mini-table-wrap">
                                     <?php if (empty($recent_leads)) : ?>
@@ -468,7 +476,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                     </table>
                                     <?php endif; ?>
                                 </div>
-                                <a class="panel-foot-link" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-leads'), admin_url('admin.php'))); ?>">☰ <?php esc_html_e('View all leads', 'mc-leads-engine'); ?></a>
+                                <a class="panel-foot-link" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-analytics'), admin_url('admin.php'))); ?>">☰ <?php esc_html_e('View all leads', 'mc-leads-engine'); ?></a>
                             </div>
 
                         </div>

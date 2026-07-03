@@ -2246,3 +2246,212 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── MC LEADS ENGINE ADMIN BOOKINGS STYLING ── */
+
+.mc-leads-engine-admin .stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.mc-leads-engine-admin .stat-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.mc-leads-engine-admin .stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.mc-leads-engine-admin .stat-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.mc-leads-engine-admin .stat-label .dashicons {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: var(--coral);
+}
+
+.mc-leads-engine-admin .stat-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 8px 0 4px;
+  line-height: 1.2;
+}
+
+.mc-leads-engine-admin .stat-delta {
+  font-size: 10.5px;
+  color: var(--muted-2);
+}
+
+.mc-leads-engine-admin .book-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.mc-leads-engine-admin .book-table th,
+.mc-leads-engine-admin .book-table td {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line-soft);
+  vertical-align: middle;
+}
+
+.mc-leads-engine-admin .book-table th {
+  background: var(--paper);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.mc-leads-engine-admin .book-id {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.mc-leads-engine-admin .dt-date {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.mc-leads-engine-admin .dt-time {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.mc-leads-engine-admin .time-pill {
+  display: inline-block;
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 6px;
+}
+
+.mc-leads-engine-admin .time-pill.upcoming {
+  background: var(--green-tint);
+  color: var(--green);
+}
+
+.mc-leads-engine-admin .time-pill.past {
+  background: #f1f2f4;
+  color: var(--muted);
+}
+
+.mc-leads-engine-admin .meeting-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  background: var(--paper);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.mc-leads-engine-admin .location-name {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.mc-leads-engine-admin .location-sub {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.mc-leads-engine-admin .view-lead-link {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--coral);
+  text-decoration: none;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.mc-leads-engine-admin .view-lead-link:hover {
+  text-decoration: underline;
+  color: var(--coral-dark);
+}
+
+.mc-leads-engine-admin .cal-sync {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+  color: var(--green);
+  font-size: 11.5px;
+}
+
+.mc-leads-engine-admin .cal-check {
+  font-family: var(--sans);
+}
+
+.mc-leads-engine-admin .mc-analytics-answers-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.mc-leads-engine-admin .mc-analytics-answers-list li {
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+.mc-leads-engine-admin .mc-analytics-answers-list li strong {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* ── PANEL COMPONENTS ── */
+.mc-leads-engine-admin .panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.mc-leads-engine-admin .panel-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.mc-leads-engine-admin .panel-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0;
+}
+
+.mc-leads-engine-admin .panel-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+}

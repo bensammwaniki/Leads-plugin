@@ -51,6 +51,8 @@ function mc_leads_engine_render_analytics_page() {
     $metrics   = mc_leads_engine_leads_repository()->get_dashboard_metrics();
     $settings  = mc_leads_engine_get_settings();
     $survey_id = absint($_GET['survey_id'] ?? 0);
+    $status    = sanitize_key($_GET['status'] ?? 'all');
+    $min_score = isset($_GET['min_score']) ? absint($_GET['min_score']) : 0;
     $orderby   = sanitize_key($_GET['orderby'] ?? 'created_at');
     $order     = strtoupper($_GET['order'] ?? 'DESC') === 'ASC' ? 'ASC' : 'DESC';
     $paged     = max(1, absint($_GET['paged'] ?? 1));
@@ -65,25 +67,27 @@ function mc_leads_engine_render_analytics_page() {
         $orderby = 'created_at';
     }
 
+    global $wpdb;
+    $questions_rows = $wpdb->get_results("SELECT id, question_text FROM " . mc_leads_engine_table('survey_questions'), ARRAY_A);
+    $questions_map  = array();
+    if (is_array($questions_rows)) {
+        foreach ($questions_rows as $q) {
+            $questions_map[(int) $q['id']] = $q['question_text'];
+        }
+    }
+
     // Handle Excel Export
     if (!empty($_GET['export_analytics'])) {
         check_admin_referer('mc_leads_engine_export_analytics');
         
         $export_leads = mc_leads_engine_leads_repository()->export_rows(array(
             'survey_id' => $survey_id,
+            'status'    => $status,
+            'min_score' => $min_score,
             'orderby'   => $orderby,
             'order'     => $order,
             'limit'     => 10000,
         ));
-
-        global $wpdb;
-        $questions_rows = $wpdb->get_results("SELECT id, question_text FROM " . mc_leads_engine_table('survey_questions'), ARRAY_A);
-        $questions_map  = array();
-        if (is_array($questions_rows)) {
-            foreach ($questions_rows as $q) {
-                $questions_map[(int) $q['id']] = $q['question_text'];
-            }
-        }
 
         $headers = array(
             __('Lead ID', 'mc-leads-engine'),
@@ -138,37 +142,43 @@ function mc_leads_engine_render_analytics_page() {
 
     $all_leads   = mc_leads_engine_leads_repository()->get_leads(array(
         'survey_id' => $survey_id,
+        'status'    => $status,
+        'min_score' => $min_score,
         'orderby'   => $orderby,
         'order'     => $order,
         'limit'     => $per_page,
         'offset'    => $offset,
     ));
-    $total_leads  = mc_leads_engine_leads_repository()->count_leads(array('survey_id' => $survey_id));
+    $total_leads  = mc_leads_engine_leads_repository()->count_leads(array(
+        'survey_id' => $survey_id,
+        'status'    => $status,
+        'min_score' => $min_score,
+    ));
     $total_pages  = (int) ceil($total_leads / $per_page);
     $daily_stats  = mc_leads_engine_leads_repository()->get_daily_lead_stats($days);
     $utm_data     = mc_leads_engine_leads_repository()->get_utm_attribution($days);
     $answer_freq  = $survey_id ? mc_leads_engine_leads_repository()->get_answer_frequency($survey_id) : array();
-
-    global $wpdb;
-    $questions_rows = $wpdb->get_results("SELECT id, question_text FROM " . mc_leads_engine_table('survey_questions'), ARRAY_A);
-    $questions_map  = array();
-    if (is_array($questions_rows)) {
-        foreach ($questions_rows as $q) {
-            $questions_map[(int) $q['id']] = $q['question_text'];
-        }
-    }
     ?>
     <div class="wrap mc-leads-engine-admin">
         <!-- Topbar Toolbar -->
         <div class="topbar" style="margin-bottom:20px; border-radius:10px; border:1px solid var(--line); box-shadow:var(--shadow-sm); padding:18px 28px; background:var(--surface); display:flex; justify-content:space-between; align-items:center;">
             <div>
                 <div class="topbar-title" style="font-size:19px; font-weight:800; letter-spacing:-.3px; color:var(--text);"><?php esc_html_e('Analytics & Leads', 'mc-leads-engine'); ?></div>
-                <div class="topbar-sub" style="font-size:12px; color:var(--muted); margin-top:3px;"><?php esc_html_e('Performance, conversion rates and recent lead entries', 'mc-leads-engine'); ?></div>
+                <div class="topbar-sub" style="font-size:12px; color:var(--muted); margin-top:3px;">
+                    <?php if ($status !== 'all' || $min_score > 0) : ?>
+                        <span style="color:var(--coral); font-weight:700;"><?php esc_html_e('Filters active', 'mc-leads-engine'); ?></span> · 
+                        <a href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-analytics'), admin_url('admin.php'))); ?>" style="color:var(--muted); text-decoration:underline;"><?php esc_html_e('Clear all filters', 'mc-leads-engine'); ?></a>
+                    <?php else : ?>
+                        <?php esc_html_e('Performance, conversion rates and recent lead entries', 'mc-leads-engine'); ?>
+                    <?php endif; ?>
+                </div>
             </div>
             <?php
             $export_url = add_query_arg(array(
                 'page'             => 'mc-leads-engine-analytics',
                 'survey_id'        => $survey_id,
+                'status'           => $status,
+                'min_score'        => $min_score,
                 'orderby'          => $orderby,
                 'order'            => $order,
                 'export_analytics' => 1,
@@ -209,6 +219,10 @@ function mc_leads_engine_render_analytics_page() {
             <input type="hidden" name="page" value="mc-leads-engine-analytics">
             <input type="hidden" name="paged" value="1">
 
+            <?php if ($min_score) : ?>
+                <input type="hidden" name="min_score" value="<?php echo esc_attr($min_score); ?>">
+            <?php endif; ?>
+
             <div class="filter-field">
                 <label><?php esc_html_e('Survey', 'mc-leads-engine'); ?></label>
                 <select class="filter-select" name="survey_id">
@@ -221,6 +235,19 @@ function mc_leads_engine_render_analytics_page() {
                             <?php echo esc_html($survey['title']); ?>
                         </option>
                     <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label><?php esc_html_e('Status', 'mc-leads-engine'); ?></label>
+                <select class="filter-select" name="status">
+                    <option value="all" <?php selected($status, 'all'); ?>><?php esc_html_e('All statuses', 'mc-leads-engine'); ?></option>
+                    <option value="new" <?php selected($status, 'new'); ?>><?php esc_html_e('New', 'mc-leads-engine'); ?></option>
+                    <option value="contacted" <?php selected($status, 'contacted'); ?>><?php esc_html_e('Contacted', 'mc-leads-engine'); ?></option>
+                    <option value="qualified" <?php selected($status, 'qualified'); ?>><?php esc_html_e('Qualified', 'mc-leads-engine'); ?></option>
+                    <option value="proposal_sent" <?php selected($status, 'proposal_sent'); ?>><?php esc_html_e('Proposal Sent', 'mc-leads-engine'); ?></option>
+                    <option value="won" <?php selected($status, 'won'); ?>><?php esc_html_e('Won', 'mc-leads-engine'); ?></option>
+                    <option value="lost" <?php selected($status, 'lost'); ?>><?php esc_html_e('Lost', 'mc-leads-engine'); ?></option>
                 </select>
             </div>
 
@@ -512,6 +539,8 @@ function mc_leads_engine_render_analytics_page() {
             <div class="panel-foot">
                 <div>
                     <?php 
+                    $start_entry = $offset + 1;
+                    $end_entry   = min($offset + $per_page, $total_leads);
                     if ($total_leads > 0) {
                         printf(esc_html__('Showing %d–%d of %d entries', 'mc-leads-engine'), $start_entry, $end_entry, $total_leads);
                     } else {

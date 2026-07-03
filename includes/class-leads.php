@@ -202,6 +202,7 @@ class MC_Leads_Engine_Leads {
 
         $defaults = array(
             'survey_id' => 0,
+            'status'    => '',
             'min_score' => 0,
             'search'    => '',
             'limit'     => 50,
@@ -217,6 +218,11 @@ class MC_Leads_Engine_Leads {
         if (!empty($args['survey_id'])) {
             $where   .= ' AND survey_id = %d';
             $params[] = absint($args['survey_id']);
+        }
+
+        if (!empty($args['status']) && $args['status'] !== 'all') {
+            $where   .= ' AND status = %s';
+            $params[] = sanitize_key($args['status']);
         }
 
         if (!empty($args['min_score'])) {
@@ -260,6 +266,7 @@ class MC_Leads_Engine_Leads {
 
         $defaults = array(
             'survey_id' => 0,
+            'status'    => '',
             'min_score' => 0,
             'search'    => '',
         );
@@ -271,6 +278,11 @@ class MC_Leads_Engine_Leads {
         if (!empty($args['survey_id'])) {
             $where   .= ' AND survey_id = %d';
             $params[] = absint($args['survey_id']);
+        }
+
+        if (!empty($args['status']) && $args['status'] !== 'all') {
+            $where   .= ' AND status = %s';
+            $params[] = sanitize_key($args['status']);
         }
 
         if (!empty($args['min_score'])) {
@@ -607,20 +619,13 @@ class MC_Leads_Engine_Leads {
                     if (empty($val) || in_array($key, $skip_keys, true)) {
                         continue;
                     }
-                    $is_booking_key = (strpos($key, 'mc_booking_') === 0 || $key === 'mc_leads_session_id');
-                    $lkey = strtolower($key);
-                    $is_contact = strpos($lkey, 'name') !== false
-                               || strpos($lkey, 'email') !== false
-                               || strpos($lkey, 'phone') !== false
-                               || strpos($lkey, 'tel') !== false
-                               || strpos($lkey, 'whatsapp') !== false;
-
-                    if (!$is_booking_key && !$is_contact) {
-                        $val_str = is_array($val) ? implode(', ', $val) : (string) $val;
-                        $list_items[] = $is_html
-                            ? '<strong>' . esc_html($key) . ':</strong> ' . esc_html($val_str)
-                            : esc_html($key) . ': ' . esc_html($val_str);
+                    if ($key === 'mc_leads_session_id' || $key === 'mc_session_id') {
+                        continue;
                     }
+                    $val_str = is_array($val) ? implode(', ', $val) : (string) $val;
+                    $list_items[] = $is_html
+                        ? '<strong>' . esc_html($key) . ':</strong> ' . esc_html($val_str)
+                        : esc_html($key) . ': ' . esc_html($val_str);
                 }
             }
         }

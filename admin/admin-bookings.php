@@ -143,10 +143,10 @@ function mc_leads_engine_render_bookings_page() {
     <div class="wrap mc-leads-engine-admin">
         <!-- Top Bar -->
         <div class="main" style="background: transparent; box-shadow: none; border-radius: 0;">
-            <div class="topbar" style="padding: 14px 0; background: transparent; border-bottom: 1px solid var(--mc-border); margin-bottom: 20px;">
+            <div class="topbar" style="padding: 14px 0; background: transparent; border-bottom: 1px solid var(--line); margin-bottom: 20px;">
                 <div>
                     <div class="topbar-title" style="font-size: 20px; font-weight: 800;"><?php esc_html_e('Bookings', 'mc-leads-engine'); ?></div>
-                    <div class="topbar-sub" style="font-size: 11px; color: var(--mc-muted);"><?php esc_html_e('Scheduled meetings · synced with Google Calendar', 'mc-leads-engine'); ?></div>
+                    <div class="topbar-sub" style="font-size: 11px; color: var(--muted);"><?php esc_html_e('Scheduled meetings · synced with Google Calendar', 'mc-leads-engine'); ?></div>
                 </div>
                 <?php 
                 $export_url = add_query_arg(array(
@@ -264,7 +264,7 @@ function mc_leads_engine_render_bookings_page() {
                         <tbody>
                         <?php if (empty($bookings)) : ?>
                             <tr>
-                                <td colspan="7" style="text-align: center; font-style: italic; color: var(--mc-muted); padding: 30px;">
+                                <td colspan="7" style="text-align: center; font-style: italic; color: var(--muted); padding: 30px;">
                                     <?php esc_html_e('No bookings matched your filters.', 'mc-leads-engine'); ?>
                                 </td>
                             </tr>
@@ -325,7 +325,7 @@ function mc_leads_engine_render_bookings_page() {
                                             <div class="cal-sync"><span class="cal-check">✓</span> <?php esc_html_e('Synced', 'mc-leads-engine'); ?></div>
                                             <code style="font-size: 10px;"><?php echo esc_html(substr($row['calendar_event_id'], 0, 12)); ?>...</code>
                                         <?php else : ?>
-                                            <span class="description" style="color:var(--mc-muted);"><?php esc_html_e('Not Synced', 'mc-leads-engine'); ?></span>
+                                            <span class="description" style="color:var(--muted);"><?php esc_html_e('Not Synced', 'mc-leads-engine'); ?></span>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
