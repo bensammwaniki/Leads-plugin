@@ -49,6 +49,7 @@ function mc_leads_engine_render_analytics_page() {
     }
 
     $metrics   = mc_leads_engine_leads_repository()->get_dashboard_metrics();
+    $settings  = mc_leads_engine_get_settings();
     $survey_id = absint($_GET['survey_id'] ?? 0);
     $orderby   = sanitize_key($_GET['orderby'] ?? 'created_at');
     $order     = strtoupper($_GET['order'] ?? 'DESC') === 'ASC' ? 'ASC' : 'DESC';

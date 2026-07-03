@@ -245,7 +245,7 @@ class MC_Leads_Engine_Leads {
             $sql = $wpdb->prepare($sql, $params);
         }
 
-        return $wpdb->get_results($sql, ARRAY_A);
+        return $wpdb->get_results($sql, ARRAY_A) ?: array();
     }
 
     /**
@@ -525,11 +525,13 @@ class MC_Leads_Engine_Leads {
         $rows   = $wpdb->get_results($sql, ARRAY_A);
         $result = array();
 
-        foreach ($rows as $row) {
-            $sid  = (int) $row['survey_id'];
-            $stp  = (int) $row['step'];
-            $cnt  = (int) $row['cnt'];
-            $result[$sid][$stp] = $cnt;
+        if (is_array($rows)) {
+            foreach ($rows as $row) {
+                $sid  = (int) $row['survey_id'];
+                $stp  = (int) $row['step'];
+                $cnt  = (int) $row['cnt'];
+                $result[$sid][$stp] = $cnt;
+            }
         }
 
         return $result;
@@ -658,14 +660,16 @@ class MC_Leads_Engine_Leads {
             );
         }
 
-        foreach ($results as $row) {
-            $day_key = $row['day'];
-            if (!isset($series[$day_key])) {
-                continue;
-            }
+        if (is_array($results)) {
+            foreach ($results as $row) {
+                $day_key = $row['day'];
+                if (!isset($series[$day_key])) {
+                    continue;
+                }
 
-            $series[$day_key]['lead_count'] = (int) $row['lead_count'];
-            $series[$day_key]['revenue'] = (float) $row['revenue'];
+                $series[$day_key]['lead_count'] = (int) $row['lead_count'];
+                $series[$day_key]['revenue'] = (float) $row['revenue'];
+            }
         }
 
         return array_values($series);

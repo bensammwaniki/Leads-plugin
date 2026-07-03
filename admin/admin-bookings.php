@@ -60,7 +60,7 @@ function mc_leads_engine_render_bookings_page() {
             $sql = $wpdb->prepare($sql, $params);
         }
 
-        $bookings_rows = $wpdb->get_results($sql, ARRAY_A);
+        $bookings_rows = $wpdb->get_results($sql, ARRAY_A) ?: array();
 
         $headers = array(
             __('Booking ID', 'mc-leads-engine'),
@@ -137,7 +137,7 @@ function mc_leads_engine_render_bookings_page() {
         $sql = $wpdb->prepare($sql, $params);
     }
 
-    $bookings = $wpdb->get_results($sql, ARRAY_A);
+    $bookings = $wpdb->get_results($sql, ARRAY_A) ?: array();
 
     ?>
     <div class="wrap mc-leads-engine-admin">

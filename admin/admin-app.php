@@ -323,7 +323,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
 
     ?>
     <div class="wrap mc-admin-shell-wrap">
-        <div class="mc-admin-app">
+        <div class="mc-admin-app mc-leads-engine-admin">
             <main class="mc-admin-main">
                 <?php if ($panel !== 'surveys') : ?>
                 <div class="mc-admin-topbar">
