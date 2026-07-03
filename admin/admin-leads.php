@@ -119,7 +119,11 @@ function mc_leads_engine_render_leads_page() {
 
     // ─── Sort URL helpers ─────────────────────────────────────────────────────
     $sort_id_url    = add_query_arg(array('orderby' => 'id',         'order' => ($orderby === 'id'         && $order === 'DESC') ? 'ASC' : 'DESC', 'paged' => 1));
-    $sort_price_url = add_query_arg(array('orderby' => 'total_price','order' => ($orderby === 'total_price' && $order === 'DESC') ?    <div class="wrap mc-leads-engine-admin">
+    $sort_price_url = add_query_arg(array('orderby' => 'total_price','order' => ($orderby === 'total_price' && $order === 'DESC') ? 'ASC' : 'DESC', 'paged' => 1));
+    $sort_score_url = add_query_arg(array('orderby' => 'lead_score', 'order' => ($orderby === 'lead_score'  && $order === 'DESC') ? 'ASC' : 'DESC', 'paged' => 1));
+    $sort_date_url  = add_query_arg(array('orderby' => 'created_at', 'order' => ($orderby === 'created_at'  && $order === 'DESC') ? 'ASC' : 'DESC', 'paged' => 1));
+    ?>
+    <div class="wrap mc-leads-engine-admin">
         <h1 class="wp-heading-inline"><?php esc_html_e('Leads', 'mc-leads-engine'); ?></h1>
         <hr class="wp-header-end">
 
