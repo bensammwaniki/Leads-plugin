@@ -225,9 +225,6 @@ function mc_leads_engine_render_settings_page() {
     }
     ?>
     <div class="wrap mc-leads-engine-admin">
-        <h1 class="wp-heading-inline"><?php esc_html_e('Settings', 'mc-leads-engine'); ?></h1>
-        <hr class="wp-header-end">
-        
         <?php if (!empty($_GET['updated'])) : ?>
             <div class="notice notice-success is-dismissible"><p><?php esc_html_e('Settings saved.', 'mc-leads-engine'); ?></p></div>
         <?php endif; ?>
@@ -239,291 +236,345 @@ function mc_leads_engine_render_settings_page() {
             <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
             <input type="hidden" name="mc_leads_engine_action" value="save_settings">
             
-            <div class="settings-container">
+            <div class="topbar" style="margin-bottom:20px; border-radius:10px; border:1px solid var(--line); box-shadow:var(--shadow-sm); padding:18px 28px; background:var(--surface); display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div class="topbar-title" style="font-size:19px; font-weight:800; letter-spacing:-.3px; color:var(--text);"><?php esc_html_e('Settings', 'mc-leads-engine'); ?></div>
+                    <div class="topbar-sub" style="font-size:12px; color:var(--muted); margin-top:3px;"><?php esc_html_e('Notifications, scoring, integrations & data', 'mc-leads-engine'); ?></div>
+                </div>
+                <button class="btn primary" type="submit"><?php esc_html_e('Save changes', 'mc-leads-engine'); ?></button>
+            </div>
+
+            <div class="settings-shell">
                 <!-- Left Sidebar Tabs -->
-                <div class="settings-sidebar">
+                <div class="settings-tabs">
                     <button type="button" class="settings-tab-btn active" data-tab="general">
-                        <span class="dashicons dashicons-admin-generic"></span> <?php esc_html_e('General Settings', 'mc-leads-engine'); ?>
+                        <span class="ic">⚙</span> <?php esc_html_e('General', 'mc-leads-engine'); ?>
                     </button>
                     <button type="button" class="settings-tab-btn" data-tab="user-email">
-                        <span class="dashicons dashicons-email-alt"></span> <?php esc_html_e('User Email Notification', 'mc-leads-engine'); ?>
+                        <span class="ic">✉</span> <?php esc_html_e('User email', 'mc-leads-engine'); ?>
                     </button>
                     <button type="button" class="settings-tab-btn" data-tab="admin-email">
-                        <span class="dashicons dashicons-email-alt2"></span> <?php esc_html_e('Admin Email Notification', 'mc-leads-engine'); ?>
+                        <span class="ic">📩</span> <?php esc_html_e('Admin email', 'mc-leads-engine'); ?>
                     </button>
                     <button type="button" class="settings-tab-btn" data-tab="whatsapp">
-                        <span class="dashicons dashicons-whatsapp"></span> <?php esc_html_e('WhatsApp Notifications', 'mc-leads-engine'); ?>
+                        <span class="ic">💬</span> <?php esc_html_e('WhatsApp', 'mc-leads-engine'); ?>
                     </button>
                     <button type="button" class="settings-tab-btn" data-tab="booking">
-                        <span class="dashicons dashicons-calendar-alt"></span> <?php esc_html_e('Booking Settings', 'mc-leads-engine'); ?>
+                        <span class="ic">📅</span> <?php esc_html_e('Booking', 'mc-leads-engine'); ?>
                     </button>
                     <button type="button" class="settings-tab-btn" data-tab="consent">
-                        <span class="dashicons dashicons-shield"></span> <?php esc_html_e('Consent & Tracking', 'mc-leads-engine'); ?>
+                        <span class="ic">🛡</span> <?php esc_html_e('Consent & tracking', 'mc-leads-engine'); ?>
                     </button>
                     <button type="button" class="settings-tab-btn" data-tab="placeholders">
-                        <span class="dashicons dashicons-editor-code"></span> <?php esc_html_e('Placeholder Guide', 'mc-leads-engine'); ?>
+                        <span class="ic">{ }</span> <?php esc_html_e('Placeholders', 'mc-leads-engine'); ?>
                     </button>
                     <button type="button" class="settings-tab-btn" data-tab="pricing">
-                        <span class="dashicons dashicons-money-alt"></span> <?php esc_html_e('Pricing Rules', 'mc-leads-engine'); ?>
+                        <span class="ic">💰</span> <?php esc_html_e('Pricing rules', 'mc-leads-engine'); ?>
                     </button>
                     <button type="button" class="settings-tab-btn" data-tab="purging">
-                        <span class="dashicons dashicons-trash"></span> <?php esc_html_e('Data Maintenance', 'mc-leads-engine'); ?>
+                        <span class="ic">🗑</span> <?php esc_html_e('Data maintenance', 'mc-leads-engine'); ?> <span class="danger-dot"></span>
                     </button>
                 </div>
                 
-                <!-- Right Pane -->
-                <div class="settings-content">
-                    <!-- General Tab -->
+                <!-- Right Content Panes -->
+                <div class="settings-content" id="panes">
+                    
+                    <!-- GENERAL PANE -->
                     <div class="settings-section-pane active" data-pane="general">
                         <div class="card">
-                            <div class="card-title"><?php esc_html_e('General Settings', 'mc-leads-engine'); ?></div>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Admin Notification Email', 'mc-leads-engine'); ?></label>
+                            <div class="card-title"><?php esc_html_e('General settings', 'mc-leads-engine'); ?></div>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Admin notification email', 'mc-leads-engine'); ?></label>
                                 <input class="field-input" type="email" name="notification_email" value="<?php echo esc_attr($settings['notification_email']); ?>">
-                                <span class="field-desc"><?php esc_html_e('Where admin submission notifications are sent.', 'mc-leads-engine'); ?></span>
+                                <div class="field-hint"><?php esc_html_e('Where admin submission notifications are sent.', 'mc-leads-engine'); ?></div>
                             </div>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Thank You Redirect URL', 'mc-leads-engine'); ?></label>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Thank-you redirect URL', 'mc-leads-engine'); ?></label>
                                 <input class="field-input" type="url" name="thank_you_url" value="<?php echo esc_attr($settings['thank_you_url']); ?>">
-                                <span class="field-desc"><?php esc_html_e('Fallback URL redirect destination after a lead is submitted.', 'mc-leads-engine'); ?></span>
+                                <div class="field-hint"><?php esc_html_e('Fallback redirect destination after a lead is submitted.', 'mc-leads-engine'); ?></div>
                             </div>
                         </div>
 
-                        <div class="card" style="margin-top:20px;">
-                            <div class="card-title"><?php esc_html_e('Lead Scoring Thresholds', 'mc-leads-engine'); ?></div>
-                            <p class="field-desc-top"><?php esc_html_e('Set the score cutoffs that determine whether a lead is classified as Hot, Warm, or Cold. These control the colour badges shown in the Leads and Analytics tables.', 'mc-leads-engine'); ?></p>
-                            <div class="settings-row">
-                                <div class="settings-field">
-                                    <label class="field-label"><?php esc_html_e('Hot Lead Threshold (≥)', 'mc-leads-engine'); ?></label>
+                        <div class="card">
+                            <div class="card-title"><?php esc_html_e('Lead scoring thresholds', 'mc-leads-engine'); ?></div>
+                            <div class="card-desc"><?php esc_html_e('These cutoffs decide the Hot / Warm / Cold badge shown across Leads, Analytics, and Bookings.', 'mc-leads-engine'); ?></div>
+                            <div class="field-row">
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Hot threshold (≥)', 'mc-leads-engine'); ?></label>
                                     <input class="field-input" type="number" name="score_hot_threshold" min="0" max="1000" value="<?php echo esc_attr($settings['score_hot_threshold'] ?? 80); ?>">
-                                    <span class="field-desc"><?php esc_html_e('Leads scoring this value or above are marked Hot (red badge).', 'mc-leads-engine'); ?></span>
                                 </div>
-                                <div class="settings-field">
-                                    <label class="field-label"><?php esc_html_e('Warm Lead Threshold (≥)', 'mc-leads-engine'); ?></label>
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Warm threshold (≥)', 'mc-leads-engine'); ?></label>
                                     <input class="field-input" type="number" name="score_warm_threshold" min="0" max="1000" value="<?php echo esc_attr($settings['score_warm_threshold'] ?? 50); ?>">
-                                    <span class="field-desc"><?php esc_html_e('Leads scoring this value or above (but below Hot) are marked Warm (yellow badge).', 'mc-leads-engine'); ?></span>
+                                </div>
+                            </div>
+                            <div class="threshold-viz">
+                                <div class="threshold-track"></div>
+                                <div class="threshold-marks"><span>0</span><span>50</span><span>80</span><span>200+</span></div>
+                                <div class="threshold-legend">
+                                    <span><i class="leg-dot" style="background:#d8dade"></i> <?php esc_html_e('Cold · 0–49', 'mc-leads-engine'); ?></span>
+                                    <span><i class="leg-dot" style="background:var(--amber)"></i> <?php esc_html_e('Warm · 50–79', 'mc-leads-engine'); ?></span>
+                                    <span><i class="leg-dot" style="background:var(--coral)"></i> <?php esc_html_e('Hot · 80+', 'mc-leads-engine'); ?></span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="card" style="margin-top:20px;">
-                            <div class="card-title"><?php esc_html_e('Weekly Digest Email', 'mc-leads-engine'); ?></div>
-                            <p class="field-desc-top"><?php esc_html_e('Receive an automated weekly summary email with new lead counts, pipeline value, and hot lead highlights.', 'mc-leads-engine'); ?></p>
-                            <div class="settings-field">
-                                <label style="display:flex; align-items:center; gap:10px; font-weight:600; cursor:pointer;">
+                        <div class="card">
+                            <div class="card-title"><?php esc_html_e('Weekly digest email', 'mc-leads-engine'); ?></div>
+                            <div class="card-desc"><?php esc_html_e('An automated summary of new lead counts, pipeline value, and hot-lead highlights, sent every Monday morning.', 'mc-leads-engine'); ?></div>
+                            <div class="toggle-row">
+                                <div>
+                                    <div class="tlabel"><?php esc_html_e('Send weekly digest to admin notification address', 'mc-leads-engine'); ?></div>
+                                    <div class="tdesc"><?php esc_html_e('Runs via WP-Cron · uses the address set above', 'mc-leads-engine'); ?></div>
+                                </div>
+                                <label class="switch">
                                     <input type="checkbox" name="digest_email_enable" value="1" <?php checked(!empty($settings['digest_email_enable'])); ?>>
-                                    <?php esc_html_e('Enable weekly digest email to admin notification address', 'mc-leads-engine'); ?>
+                                    <span class="track"></span>
                                 </label>
-                                <span class="field-desc" style="margin-top:6px;"><?php esc_html_e('Runs every Monday morning via WP-Cron. Uses the Admin Notification Email address above.', 'mc-leads-engine'); ?></span>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- User Email Tab -->
+                    <!-- USER EMAIL PANE -->
                     <div class="settings-section-pane" data-pane="user-email">
                         <div class="card">
-                            <div class="card-title"><?php esc_html_e('User Email Notification Template', 'mc-leads-engine'); ?></div>
-                            <p class="field-desc-top"><?php esc_html_e('Configure the HTML email sent to clients who submit a survey. Use inline CSS to style the markup.', 'mc-leads-engine'); ?></p>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Email Subject', 'mc-leads-engine'); ?></label>
+                            <div class="card-title"><?php esc_html_e('User email — Survey submission', 'mc-leads-engine'); ?></div>
+                            <div class="card-desc"><?php esc_html_e('Sent to the client automatically after they complete a survey.', 'mc-leads-engine'); ?></div>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Email subject', 'mc-leads-engine'); ?></label>
                                 <input class="field-input" type="text" name="user_email_subject" value="<?php echo esc_attr($settings['user_email_subject']); ?>">
                             </div>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('HTML Body Template', 'mc-leads-engine'); ?></label>
-                                <textarea class="field-input code-font" rows="14" name="user_email_body"><?php echo esc_textarea($settings['user_email_body']); ?></textarea>
-                                <span class="field-desc"><?php esc_html_e('Enter raw HTML with inline CSS. Dynamic bracket variables like [your-name] will be replaced with form values.', 'mc-leads-engine'); ?></span>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('HTML body template', 'mc-leads-engine'); ?></label>
+                                <div class="code-box">
+                                    <div class="code-box-head">
+                                        <span>user_email_body.html</span>
+                                        <span class="tag"><?php esc_html_e('inline CSS', 'mc-leads-engine'); ?></span>
+                                    </div>
+                                    <textarea class="code-editor" rows="12" name="user_email_body"><?php echo esc_textarea($settings['user_email_body']); ?></textarea>
+                                </div>
+                                <div class="field-hint"><?php esc_html_e('Bracket variables like [full-name] and [total_price] are replaced automatically.', 'mc-leads-engine'); ?></div>
                             </div>
                         </div>
-                        <div class="card" style="margin-top: 20px;">
-                            <div class="card-title"><?php esc_html_e('Booking User Email Notification Template', 'mc-leads-engine'); ?></div>
-                            <p class="field-desc-top"><?php esc_html_e('Configure the HTML email sent to clients who schedule a booking. Use inline CSS to style the markup.', 'mc-leads-engine'); ?></p>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Email Subject', 'mc-leads-engine'); ?></label>
+
+                        <div class="card">
+                            <div class="card-title"><?php esc_html_e('User email — Booking confirmation', 'mc-leads-engine'); ?></div>
+                            <div class="card-desc"><?php esc_html_e('Sent to the client after they schedule a meeting.', 'mc-leads-engine'); ?></div>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Email subject', 'mc-leads-engine'); ?></label>
                                 <input class="field-input" type="text" name="booking_user_email_subject" value="<?php echo esc_attr($settings['booking_user_email_subject'] ?? ''); ?>">
                             </div>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('HTML Body Template', 'mc-leads-engine'); ?></label>
-                                <textarea class="field-input code-font" rows="14" name="booking_user_email_body"><?php echo esc_textarea($settings['booking_user_email_body'] ?? ''); ?></textarea>
-                                <span class="field-desc"><?php esc_html_e('Enter raw HTML with inline CSS. Dynamic bracket variables like [booking_type], [booking_date], [booking_time], [booking_location] will be replaced.', 'mc-leads-engine'); ?></span>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('HTML body template', 'mc-leads-engine'); ?></label>
+                                <div class="code-box">
+                                    <div class="code-box-head">
+                                        <span>booking_user_email_body.html</span>
+                                        <span class="tag"><?php esc_html_e('inline CSS', 'mc-leads-engine'); ?></span>
+                                    </div>
+                                    <textarea class="code-editor" rows="12" name="booking_user_email_body"><?php echo esc_textarea($settings['booking_user_email_body'] ?? ''); ?></textarea>
+                                </div>
+                                <div class="field-hint"><?php esc_html_e('Bracket variables like [booking_type], [booking_date], [booking_time], [booking_location] are replaced.', 'mc-leads-engine'); ?></div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Admin Email Tab -->
+                    <!-- ADMIN EMAIL PANE -->
                     <div class="settings-section-pane" data-pane="admin-email">
                         <div class="card">
-                            <div class="card-title"><?php esc_html_e('Admin Email Notification Template', 'mc-leads-engine'); ?></div>
-                            <p class="field-desc-top"><?php esc_html_e('Configure the HTML notification email sent to the site admin upon submission.', 'mc-leads-engine'); ?></p>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Email Subject', 'mc-leads-engine'); ?></label>
+                            <div class="card-title"><?php esc_html_e('Admin email — New lead alert', 'mc-leads-engine'); ?></div>
+                            <div class="card-desc"><?php esc_html_e('Sent to your notification address whenever a survey is submitted.', 'mc-leads-engine'); ?></div>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Email subject', 'mc-leads-engine'); ?></label>
                                 <input class="field-input" type="text" name="admin_email_subject" value="<?php echo esc_attr($settings['admin_email_subject']); ?>">
                             </div>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('HTML Body Template', 'mc-leads-engine'); ?></label>
-                                <textarea class="field-input code-font" rows="14" name="admin_email_body"><?php echo esc_textarea($settings['admin_email_body']); ?></textarea>
-                                <span class="field-desc"><?php esc_html_e('Sent to your Notification Email address. Use [all_answers] to print a structured log of all survey inputs.', 'mc-leads-engine'); ?></span>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('HTML body template', 'mc-leads-engine'); ?></label>
+                                <div class="code-box">
+                                    <div class="code-box-head">
+                                        <span>admin_email_body.html</span>
+                                        <span class="tag"><?php esc_html_e('inline CSS', 'mc-leads-engine'); ?></span>
+                                    </div>
+                                    <textarea class="code-editor" rows="12" name="admin_email_body"><?php echo esc_textarea($settings['admin_email_body']); ?></textarea>
+                                </div>
+                                <div class="field-hint"><?php echo sprintf(__('Use %s to print every survey field as a formatted block.', 'mc-leads-engine'), '<code class="ph-tag">[all_answers]</code>'); ?></div>
                             </div>
                         </div>
-                        <div class="card" style="margin-top: 20px;">
-                            <div class="card-title"><?php esc_html_e('Booking Admin Email Notification Template', 'mc-leads-engine'); ?></div>
-                            <p class="field-desc-top"><?php esc_html_e('Configure the HTML notification email sent to the site admin when a booking is scheduled.', 'mc-leads-engine'); ?></p>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Email Subject', 'mc-leads-engine'); ?></label>
+
+                        <div class="card">
+                            <div class="card-title"><?php esc_html_e('Admin email — New booking alert', 'mc-leads-engine'); ?></div>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Email subject', 'mc-leads-engine'); ?></label>
                                 <input class="field-input" type="text" name="booking_admin_email_subject" value="<?php echo esc_attr($settings['booking_admin_email_subject'] ?? ''); ?>">
                             </div>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('HTML Body Template', 'mc-leads-engine'); ?></label>
-                                <textarea class="field-input code-font" rows="14" name="booking_admin_email_body"><?php echo esc_textarea($settings['booking_admin_email_body'] ?? ''); ?></textarea>
-                                <span class="field-desc"><?php esc_html_e('Sent to your Notification Email address.', 'mc-leads-engine'); ?></span>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('HTML body template', 'mc-leads-engine'); ?></label>
+                                <div class="code-box">
+                                    <div class="code-box-head">
+                                        <span>booking_admin_email_body.html</span>
+                                        <span class="tag"><?php esc_html_e('inline CSS', 'mc-leads-engine'); ?></span>
+                                    </div>
+                                    <textarea class="code-editor" rows="10" name="booking_admin_email_body"><?php echo esc_textarea($settings['booking_admin_email_body'] ?? ''); ?></textarea>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- WhatsApp Tab -->
+                    <!-- WHATSAPP PANE -->
                     <div class="settings-section-pane" data-pane="whatsapp">
                         <div class="card">
-                            <div class="card-title"><?php esc_html_e('WhatsApp Notification Settings', 'mc-leads-engine'); ?></div>
-                            
-                            <h3 style="margin-top: 15px; border-bottom: 1px solid var(--mc-border); padding-bottom: 5px; color: var(--mc-text);"><?php esc_html_e('Gateway API Settings', 'mc-leads-engine'); ?></h3>
-                            
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('WhatsApp Gateway API Provider', 'mc-leads-engine'); ?></label>
+                            <div class="card-title"><?php esc_html_e('Gateway API settings', 'mc-leads-engine'); ?></div>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Gateway provider', 'mc-leads-engine'); ?></label>
                                 <select class="field-input" name="whatsapp_gateway" id="mc-whatsapp-gateway">
-                                    <option value="ultramsg" <?php selected($settings['whatsapp_gateway'], 'ultramsg'); ?>>UltraMsg (Recommended)</option>
+                                    <option value="ultramsg" <?php selected($settings['whatsapp_gateway'], 'ultramsg'); ?>>UltraMsg (recommended)</option>
                                     <option value="twilio" <?php selected($settings['whatsapp_gateway'], 'twilio'); ?>>Twilio SMS/WhatsApp</option>
                                     <option value="cloud_api" <?php selected($settings['whatsapp_gateway'], 'cloud_api'); ?>>WhatsApp Business Cloud API (Meta)</option>
-                                    <option value="custom" <?php selected($settings['whatsapp_gateway'], 'custom'); ?>>Custom Webhook Gateway</option>
+                                    <option value="custom" <?php selected($settings['whatsapp_gateway'], 'custom'); ?>>Custom webhook gateway</option>
                                 </select>
                             </div>
-                            <div class="settings-field">
-                                <label class="field-label" id="mc-whatsapp-api-key-label"><?php esc_html_e('WhatsApp API Key / Access Token', 'mc-leads-engine'); ?></label>
-                                <input class="field-input" type="text" name="whatsapp_api_key" value="<?php echo esc_attr($settings['whatsapp_api_key']); ?>">
+                            <div class="field-row">
+                                <div class="field">
+                                    <label class="field-label" id="mc-whatsapp-api-key-label"><?php esc_html_e('WhatsApp API Key / Access Token', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="password" name="whatsapp_api_key" value="<?php echo esc_attr($settings['whatsapp_api_key']); ?>">
+                                </div>
+                                <div class="field" id="mc-whatsapp-instance-id-field">
+                                    <label class="field-label" id="mc-whatsapp-instance-id-label"><?php esc_html_e('Instance ID / Account SID / Webhook URL', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="text" name="whatsapp_instance_id" value="<?php echo esc_attr($settings['whatsapp_instance_id']); ?>">
+                                </div>
                             </div>
-                            <div class="settings-field" id="mc-whatsapp-instance-id-field">
-                                <label class="field-label" id="mc-whatsapp-instance-id-label"><?php esc_html_e('Instance ID / Account SID / Webhook URL', 'mc-leads-engine'); ?></label>
-                                <input class="field-input" type="text" name="whatsapp_instance_id" value="<?php echo esc_attr($settings['whatsapp_instance_id']); ?>">
-                            </div>
-                            <div class="settings-field" id="mc-whatsapp-sender-field">
+                            <div class="field" id="mc-whatsapp-sender-field">
                                 <label class="field-label"><?php esc_html_e('Sender Number / ID / Phone Number ID', 'mc-leads-engine'); ?></label>
                                 <input class="field-input" type="text" name="whatsapp_sender" value="<?php echo esc_attr($settings['whatsapp_sender']); ?>" placeholder="e.g. +14155238886">
                             </div>
+                        </div>
 
-                            <h3 style="margin-top: 25px; border-bottom: 1px solid var(--mc-border); padding-bottom: 5px; color: var(--mc-text);"><?php esc_html_e('Admin Alert Settings', 'mc-leads-engine'); ?></h3>
-                            
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Admin Recipient WhatsApp Phone Number', 'mc-leads-engine'); ?></label>
+                        <div class="card">
+                            <div class="card-title"><?php esc_html_e('Admin alerts', 'mc-leads-engine'); ?></div>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Admin WhatsApp number', 'mc-leads-engine'); ?></label>
                                 <input class="field-input" type="text" name="admin_whatsapp_phone" value="<?php echo esc_attr($settings['admin_whatsapp_phone']); ?>" placeholder="e.g. +254712345678">
-                                <span class="field-desc"><?php esc_html_e('The administrator phone number in international format.', 'mc-leads-engine'); ?></span>
                             </div>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Leads Admin Alert Message Template', 'mc-leads-engine'); ?></label>
-                                <textarea class="field-input" rows="6" name="admin_whatsapp_body"><?php echo esc_textarea($settings['admin_whatsapp_body']); ?></textarea>
-                                <span class="field-desc"><?php esc_html_e('Plain text alert sent to the admin phone number for leads.', 'mc-leads-engine'); ?></span>
+                            <div class="field-row">
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Lead alert message', 'mc-leads-engine'); ?></label>
+                                    <textarea class="field-input" rows="5" name="admin_whatsapp_body"><?php echo esc_textarea($settings['admin_whatsapp_body']); ?></textarea>
+                                </div>
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Booking alert message', 'mc-leads-engine'); ?></label>
+                                    <textarea class="field-input" rows="5" name="booking_admin_whatsapp_body"><?php echo esc_textarea($settings['booking_admin_whatsapp_body'] ?? ''); ?></textarea>
+                                </div>
                             </div>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Booking Admin Alert Message Template', 'mc-leads-engine'); ?></label>
-                                <textarea class="field-input" rows="6" name="booking_admin_whatsapp_body"><?php echo esc_textarea($settings['booking_admin_whatsapp_body'] ?? ''); ?></textarea>
-                                <span class="field-desc"><?php esc_html_e('Plain text alert sent to the admin phone number for bookings.', 'mc-leads-engine'); ?></span>
-                            </div>
+                        </div>
 
-                            <h3 style="margin-top: 25px; border-bottom: 1px solid var(--mc-border); padding-bottom: 5px; color: var(--mc-text);"><?php esc_html_e('User Alert Settings', 'mc-leads-engine'); ?></h3>
-
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Leads User Alert Message Template', 'mc-leads-engine'); ?></label>
-                                <textarea class="field-input" rows="6" name="user_whatsapp_body"><?php echo esc_textarea($settings['user_whatsapp_body']); ?></textarea>
-                                <span class="field-desc"><?php esc_html_e('Plain text notification sent directly to the client\'s phone number for leads.', 'mc-leads-engine'); ?></span>
-                            </div>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Booking User Alert Message Template', 'mc-leads-engine'); ?></label>
-                                <textarea class="field-input" rows="6" name="booking_user_whatsapp_body"><?php echo esc_textarea($settings['booking_user_whatsapp_body'] ?? ''); ?></textarea>
-                                <span class="field-desc"><?php esc_html_e('Plain text notification sent directly to the client\'s phone number for bookings.', 'mc-leads-engine'); ?></span>
+                        <div class="card">
+                            <div class="card-title"><?php esc_html_e('Client alerts', 'mc-leads-engine'); ?></div>
+                            <div class="field-row">
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Lead confirmation message', 'mc-leads-engine'); ?></label>
+                                    <textarea class="field-input" rows="5" name="user_whatsapp_body"><?php echo esc_textarea($settings['user_whatsapp_body']); ?></textarea>
+                                </div>
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Booking confirmation message', 'mc-leads-engine'); ?></label>
+                                    <textarea class="field-input" rows="5" name="booking_user_whatsapp_body"><?php echo esc_textarea($settings['booking_user_whatsapp_body'] ?? ''); ?></textarea>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Booking Settings Tab -->
+                    
+                    <!-- BOOKING PANE -->
                     <div class="settings-section-pane" data-pane="booking">
                         <div class="card">
-                            <div class="card-title"><?php esc_html_e('Google Calendar Integration', 'mc-leads-engine'); ?></div>
-                            <p class="field-desc-top"><?php esc_html_e('Connect the booking system to your Google Calendar to sync availability in real time and prevent double booking.', 'mc-leads-engine'); ?></p>
+                            <div class="card-title"><?php esc_html_e('Google Calendar integration', 'mc-leads-engine'); ?></div>
+                            <div class="card-desc"><?php esc_html_e('Syncs availability in real time to prevent double booking.', 'mc-leads-engine'); ?></div>
                             
                             <?php if (!empty($_GET['gcal_auth_success'])) : ?>
                                 <div class="notice notice-success inline" style="margin-bottom:15px;"><p><?php esc_html_e('Successfully authorized with Google Calendar!', 'mc-leads-engine'); ?></p></div>
                             <?php endif; ?>
 
-                            <div class="settings-row">
-                                <div class="settings-field">
-                                    <label class="field-label"><?php esc_html_e('Google Client ID', 'mc-leads-engine'); ?></label>
-                                    <input class="field-input" type="text" name="gcal_client_id" value="<?php echo esc_attr($settings['gcal_client_id'] ?? ''); ?>">
+                            <div class="conn-card">
+                                <div class="conn-left">
+                                    <span class="conn-dot" style="background:<?php echo !empty($settings['gcal_access_token']) ? '#22c55e' : '#ef4444'; ?>;"></span>
+                                    <div>
+                                        <div class="conn-title">
+                                            <?php 
+                                            if (!empty($settings['gcal_access_token'])) {
+                                                esc_html_e('Connected', 'mc-leads-engine');
+                                            } else {
+                                                esc_html_e('Not Connected', 'mc-leads-engine');
+                                            }
+                                            ?>
+                                        </div>
+                                        <div class="conn-sub">
+                                            <?php 
+                                            if (!empty($settings['gcal_access_token'])) {
+                                                $expires_in = (int)($settings['gcal_token_expires'] ?? 0) - time();
+                                                if ($expires_in > 0) {
+                                                    printf(esc_html__('Access Token Active — Expires in %d min', 'mc-leads-engine'), round($expires_in / 60));
+                                                } else {
+                                                    esc_html_e('Access Token Expired — Auto refresh active', 'mc-leads-engine');
+                                                }
+                                            } else {
+                                                esc_html_e('Google Account authorization is required to sync calendar slots.', 'mc-leads-engine');
+                                            }
+                                            ?>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="settings-field">
-                                    <label class="field-label"><?php esc_html_e('Google Client Secret', 'mc-leads-engine'); ?></label>
-                                    <input class="field-input" type="text" name="gcal_client_secret" value="<?php echo esc_attr($settings['gcal_client_secret'] ?? ''); ?>">
-                                </div>
-                            </div>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Google Calendar ID', 'mc-leads-engine'); ?></label>
-                                <input class="field-input" type="text" name="gcal_calendar_id" value="<?php echo esc_attr($settings['gcal_calendar_id'] ?? 'primary'); ?>">
-                                <span class="field-desc"><?php esc_html_e('Primary is default. Or use specific calendar resource ID.', 'mc-leads-engine'); ?></span>
-                            </div>
-
-                            <div class="settings-field" style="background:#f8fafc; border:1px solid #e2e8f0; padding:15px; border-radius:8px;">
-                                <label class="field-label" style="margin-bottom:5px;"><?php esc_html_e('Google Calendar Authorization Status', 'mc-leads-engine'); ?></label>
-                                <p style="margin:0 0 10px 0; font-weight:600; font-size:13px; color: <?php echo !empty($settings['gcal_access_token']) ? '#16a34a' : '#dc2626'; ?>;">
-                                    <?php 
-                                    if (!empty($settings['gcal_access_token'])) {
-                                        $expires_in = (int)($settings['gcal_token_expires'] ?? 0) - time();
-                                        if ($expires_in > 0) {
-                                            printf(esc_html__('Connected (Access Token Active - Expires in %d min)', 'mc-leads-engine'), round($expires_in / 60));
-                                        } else {
-                                            esc_html_e('Connected (Access Token Expired - Auto refresh active)', 'mc-leads-engine');
-                                        }
-                                    } else {
-                                        esc_html_e('Not Authorized / Connected', 'mc-leads-engine');
-                                    }
-                                    ?>
-                                </p>
                                 <?php
                                 if (!empty($settings['gcal_client_id']) && !empty($settings['gcal_client_secret'])) {
                                     $auth_url = mc_leads_engine_booking()->get_gcal_client_auth_url();
-                                    printf('<a class="button button-primary" href="%s">%s</a>', esc_url($auth_url), esc_html__('Authorize Calendar Access', 'mc-leads-engine'));
+                                    printf('<a class="btn" href="%s">%s</a>', esc_url($auth_url), esc_html__('Re-authorize', 'mc-leads-engine'));
                                 } else {
-                                    echo '<p class="description" style="color:#ef4444; margin:0;">' . esc_html__('Save Client ID & Secret above first, then click Save Settings to show Authorization button.', 'mc-leads-engine') . '</p>';
+                                    echo '<span class="description" style="color:#ef4444;">' . esc_html__('Save Credentials First', 'mc-leads-engine') . '</span>';
                                 }
                                 ?>
                             </div>
-                        </div>
 
-                        <div class="card" style="margin-top:20px;">
-                            <div class="card-title"><?php esc_html_e('Google Maps Integration & Predefined Locations', 'mc-leads-engine'); ?></div>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Google Maps API Key', 'mc-leads-engine'); ?></label>
-                                <input class="field-input" type="text" name="gmaps_api_key" value="<?php echo esc_attr($settings['gmaps_api_key'] ?? ''); ?>">
-                                <span class="field-desc"><?php esc_html_e('Used for address geocoding and autocomplete inside the office custom location details.', 'mc-leads-engine'); ?></span>
-                            </div>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Predefined Meeting Locations (Separated by |)', 'mc-leads-engine'); ?></label>
-                                <textarea class="field-input" rows="4" name="booking_predefined_locations"><?php echo esc_textarea($settings['booking_predefined_locations'] ?? ''); ?></textarea>
-                                <span class="field-desc"><?php esc_html_e('Suggested Cafes or Public meeting spaces, separated by the vertical bar (|). E.g. Java House, Westlands|Nairobi Garage, Kilimani', 'mc-leads-engine'); ?></span>
-                            </div>
-                        </div>
-
-                        <div class="card" style="margin-top:20px;">
-                            <div class="card-title"><?php esc_html_e('Working Hours & Availability Rules', 'mc-leads-engine'); ?></div>
-                            <div class="settings-row">
-                                <div class="settings-field">
-                                    <label class="field-label"><?php esc_html_e('Daily Start Time', 'mc-leads-engine'); ?></label>
-                                    <input class="field-input" type="text" name="booking_hours_start" value="<?php echo esc_attr($settings['booking_hours_start'] ?? '09:00'); ?>" placeholder="e.g. 09:00">
+                            <div class="field-row">
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Google client ID', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="text" name="gcal_client_id" value="<?php echo esc_attr($settings['gcal_client_id'] ?? ''); ?>">
                                 </div>
-                                <div class="settings-field">
-                                    <label class="field-label"><?php esc_html_e('Daily End Time', 'mc-leads-engine'); ?></label>
-                                    <input class="field-input" type="text" name="booking_hours_end" value="<?php echo esc_attr($settings['booking_hours_end'] ?? '17:00'); ?>" placeholder="e.g. 17:00">
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Google client secret', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="password" name="gcal_client_secret" value="<?php echo esc_attr($settings['gcal_client_secret'] ?? ''); ?>">
                                 </div>
                             </div>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Calendar ID', 'mc-leads-engine'); ?></label>
+                                <input class="field-input" type="text" name="gcal_calendar_id" value="<?php echo esc_attr($settings['gcal_calendar_id'] ?? 'primary'); ?>">
+                                <div class="field-hint"><?php esc_html_e('Leave as "primary" to use the default calendar, or paste a specific calendar resource ID.', 'mc-leads-engine'); ?></div>
+                            </div>
+                        </div>
 
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Working Days', 'mc-leads-engine'); ?></label>
-                                <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:5px;">
+                        <div class="card">
+                            <div class="card-title"><?php esc_html_e('Maps &amp; predefined meeting locations', 'mc-leads-engine'); ?></div>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Google Maps API key', 'mc-leads-engine'); ?></label>
+                                <input class="field-input" type="password" name="gmaps_api_key" value="<?php echo esc_attr($settings['gmaps_api_key'] ?? ''); ?>">
+                            </div>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Predefined locations', 'mc-leads-engine'); ?></label>
+                                <textarea class="field-input" rows="4" name="booking_predefined_locations" placeholder="Java House, Westlands|Nairobi Garage, Kilimani"><?php echo esc_textarea($settings['booking_predefined_locations'] ?? ''); ?></textarea>
+                                <div class="field-hint"><?php esc_html_e('Predefined spots separated by | (vertical bar). E.g. Java House, Westlands|Nairobi Garage, Kilimani', 'mc-leads-engine'); ?></div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title"><?php esc_html_e('Working hours &amp; availability', 'mc-leads-engine'); ?></div>
+                            <div class="field-row">
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Daily start', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="text" name="booking_hours_start" value="<?php echo esc_attr($settings['booking_hours_start'] ?? '09:00'); ?>">
+                                </div>
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Daily end', 'mc-leads-engine'); ?></label>
+                                    <input class="field-input" type="text" name="booking_hours_end" value="<?php echo esc_attr($settings['booking_hours_end'] ?? '17:00'); ?>">
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Working days', 'mc-leads-engine'); ?></label>
+                                <div class="days-row">
                                     <?php 
                                     $saved_days = $settings['booking_days'] ?? array('1','2','3','4','5');
                                     $days_list = array(
@@ -536,366 +587,309 @@ function mc_leads_engine_render_settings_page() {
                                         '7' => __('Sun', 'mc-leads-engine'),
                                     );
                                     foreach ($days_list as $num => $lbl) :
+                                        $is_on = in_array((string)$num, $saved_days, true);
                                     ?>
-                                        <label style="font-weight:normal;"><input type="checkbox" name="booking_days[]" value="<?php echo esc_attr($num); ?>" <?php checked(in_array((string)$num, $saved_days, true)); ?>> <?php echo esc_html($lbl); ?></label>
+                                        <label class="day-chip<?php echo $is_on ? ' on' : ''; ?>">
+                                            <input type="checkbox" name="booking_days[]" value="<?php echo esc_attr($num); ?>" <?php checked($is_on); ?> onchange="this.parentElement.classList.toggle('on', this.checked);">
+                                            <?php echo esc_html($lbl); ?>
+                                        </label>
                                     <?php endforeach; ?>
                                 </div>
                             </div>
-
-                            <div class="settings-row">
-                                <div class="settings-field">
-                                    <label class="field-label"><?php esc_html_e('Slot Duration (minutes)', 'mc-leads-engine'); ?></label>
+                            <div class="field-row">
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Slot duration (min)', 'mc-leads-engine'); ?></label>
                                     <input class="field-input" type="number" name="booking_duration" value="<?php echo esc_attr($settings['booking_duration'] ?? 30); ?>">
                                 </div>
-                                <div class="settings-field">
-                                    <label class="field-label"><?php esc_html_e('Buffer Between Slots (minutes)', 'mc-leads-engine'); ?></label>
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Buffer between slots (min)', 'mc-leads-engine'); ?></label>
                                     <input class="field-input" type="number" name="booking_buffer" value="<?php echo esc_attr($settings['booking_buffer'] ?? 15); ?>">
                                 </div>
                             </div>
                         </div>
 
-                        <div class="card" style="margin-top:20px;">
-                            <div class="card-title"><?php esc_html_e('Default Contact Form 7 Configuration', 'mc-leads-engine'); ?></div>
-                            <p class="field-desc-top"><?php esc_html_e('Select the default Contact Form 7 form used to capture client contact details in Step 4 of the [mc_booking] shortcode.', 'mc-leads-engine'); ?></p>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Default Booking CF7 Form', 'mc-leads-engine'); ?></label>
-                                <?php 
-                                $cf7_forms = array();
-                                if (post_type_exists('wpcf7_contact_form')) {
-                                    $cf7_posts = get_posts(array(
-                                        'post_type' => 'wpcf7_contact_form',
-                                        'numberposts' => -1,
-                                    ));
-                                    if (is_array($cf7_posts)) {
-                                        foreach ($cf7_posts as $post) {
-                                            $cf7_forms[$post->ID] = $post->post_title;
-                                        }
-                                    }
-                                }
-                                
-                                if (!empty($cf7_forms)) : 
-                                ?>
-                                    <select class="field-input" name="booking_default_cf7">
-                                        <option value="0"><?php esc_html_e('-- Select a form --', 'mc-leads-engine'); ?></option>
-                                        <?php foreach ($cf7_forms as $id => $title) : ?>
-                                            <option value="<?php echo esc_attr($id); ?>" <?php selected(($settings['booking_default_cf7'] ?? 0), $id); ?>><?php echo esc_html($title); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                <?php else : ?>
-                                    <input class="field-input" type="number" name="booking_default_cf7" value="<?php echo esc_attr($settings['booking_default_cf7'] ?? ''); ?>" placeholder="<?php esc_attr_e('Enter Contact Form 7 Form ID', 'mc-leads-engine'); ?>">
-                                    <span class="field-desc" style="color:#ef4444;"><?php esc_html_e('Contact Form 7 is either not active or you have no forms. Please input form ID manually.', 'mc-leads-engine'); ?></span>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-
-                        <div class="card" style="margin-top:20px;">
-                            <div class="card-title"><?php esc_html_e('Lead Scoring Rules for Booking Selection', 'mc-leads-engine'); ?></div>
-                            <p class="field-desc-top"><?php esc_html_e('Configure score points to add to the lead quality when they select a specific booking type.', 'mc-leads-engine'); ?></p>
-                            <div class="settings-row">
-                                <div class="settings-field">
-                                    <label class="field-label"><?php esc_html_e('Online Video Call Score', 'mc-leads-engine'); ?></label>
+                        <div class="card">
+                            <div class="card-title"><?php esc_html_e('Lead scoring by meeting type', 'mc-leads-engine'); ?></div>
+                            <div class="card-desc"><?php esc_html_e('Points added to a lead\'s score based on which booking format they choose — a coffee meeting signals more intent than a quick call.', 'mc-leads-engine'); ?></div>
+                            <div class="field-row">
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Online video call', 'mc-leads-engine'); ?></label>
                                     <input class="field-input" type="number" name="booking_score_online" value="<?php echo esc_attr($settings['booking_score_online'] ?? 10); ?>">
                                 </div>
-                                <div class="settings-field">
-                                    <label class="field-label"><?php esc_html_e('Coffee Meeting Score', 'mc-leads-engine'); ?></label>
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Coffee meeting', 'mc-leads-engine'); ?></label>
                                     <input class="field-input" type="number" name="booking_score_coffee" value="<?php echo esc_attr($settings['booking_score_coffee'] ?? 20); ?>">
                                 </div>
                             </div>
-                            <div class="settings-row">
-                                <div class="settings-field">
-                                    <label class="field-label"><?php esc_html_e('Office Visit Score', 'mc-leads-engine'); ?></label>
+                            <div class="field-row">
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Office visit', 'mc-leads-engine'); ?></label>
                                     <input class="field-input" type="number" name="booking_score_office" value="<?php echo esc_attr($settings['booking_score_office'] ?? 30); ?>">
                                 </div>
-                                <div class="settings-field">
-                                    <label class="field-label"><?php esc_html_e('Predefined Host Location Score', 'mc-leads-engine'); ?></label>
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Predefined host location', 'mc-leads-engine'); ?></label>
                                     <input class="field-input" type="number" name="booking_score_host" value="<?php echo esc_attr($settings['booking_score_host'] ?? 20); ?>">
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Consent & Tracking Tab -->
+                    <!-- CONSENT & TRACKING PANE -->
                     <div class="settings-section-pane" data-pane="consent">
                         <div class="card">
-                            <div class="card-title"><?php esc_html_e('Cookie Consent Banner', 'mc-leads-engine'); ?></div>
-                            <p class="field-desc-top"><?php esc_html_e('Configure a premium, floating cookie banner to get consent for passive tracking. Core functionality is never blocked.', 'mc-leads-engine'); ?></p>
-                            
-                            <div class="settings-field">
-                                <label class="field-label" style="font-weight:600; display: flex; align-items: center; gap: 8px;">
+                            <div class="card-title"><?php esc_html_e('Cookie consent banner', 'mc-leads-engine'); ?></div>
+                            <div class="toggle-row" style="margin-bottom:14px;">
+                                <div class="tlabel"><?php esc_html_e('Enable cookie consent banner', 'mc-leads-engine'); ?></div>
+                                <label class="switch">
                                     <input type="checkbox" name="cookie_banner_enable" value="1" <?php checked($settings['cookie_banner_enable'] ?? 0, 1); ?>>
-                                    <?php esc_html_e('Enable Cookie Consent Banner', 'mc-leads-engine'); ?>
+                                    <span class="track"></span>
                                 </label>
                             </div>
-                            
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Banner Heading Title', 'mc-leads-engine'); ?></label>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Banner heading', 'mc-leads-engine'); ?></label>
                                 <input class="field-input" type="text" name="cookie_banner_title" value="<?php echo esc_attr($settings['cookie_banner_title'] ?? ''); ?>">
                             </div>
-                            
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Banner Body Message', 'mc-leads-engine'); ?></label>
-                                <textarea class="field-input" rows="4" name="cookie_banner_message"><?php echo esc_textarea($settings['cookie_banner_message'] ?? ''); ?></textarea>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Banner message', 'mc-leads-engine'); ?></label>
+                                <textarea class="field-input" rows="3" name="cookie_banner_message"><?php echo esc_textarea($settings['cookie_banner_message'] ?? ''); ?></textarea>
                             </div>
-                            
-                            <div class="settings-row">
-                                <div class="settings-field">
-                                    <label class="field-label"><?php esc_html_e('Accept Button Text', 'mc-leads-engine'); ?></label>
+                            <div class="field-row3">
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Accept text', 'mc-leads-engine'); ?></label>
                                     <input class="field-input" type="text" name="cookie_banner_btn_accept" value="<?php echo esc_attr($settings['cookie_banner_btn_accept'] ?? ''); ?>">
                                 </div>
-                                <div class="settings-field">
-                                    <label class="field-label"><?php esc_html_e('Reject Button Text', 'mc-leads-engine'); ?></label>
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Reject text', 'mc-leads-engine'); ?></label>
                                     <input class="field-input" type="text" name="cookie_banner_btn_reject" value="<?php echo esc_attr($settings['cookie_banner_btn_reject'] ?? ''); ?>">
                                 </div>
-                                <div class="settings-field">
-                                    <label class="field-label"><?php esc_html_e('Customize Button Text', 'mc-leads-engine'); ?></label>
+                                <div class="field">
+                                    <label class="field-label"><?php esc_html_e('Customize text', 'mc-leads-engine'); ?></label>
                                     <input class="field-input" type="text" name="cookie_banner_btn_settings" value="<?php echo esc_attr($settings['cookie_banner_btn_settings'] ?? ''); ?>">
                                 </div>
                             </div>
-
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Visual Design Theme', 'mc-leads-engine'); ?></label>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Visual theme', 'mc-leads-engine'); ?></label>
                                 <select class="field-input" name="cookie_banner_theme">
-                                    <option value="glassmorphism" <?php selected($settings['cookie_banner_theme'] ?? '', 'glassmorphism'); ?>>Glassmorphism (Premium)</option>
-                                    <option value="light" <?php selected($settings['cookie_banner_theme'] ?? '', 'light'); ?>>Sleek Light</option>
-                                    <option value="dark" <?php selected($settings['cookie_banner_theme'] ?? '', 'dark'); ?>>Modern Dark</option>
+                                    <option value="glassmorphism" <?php selected($settings['cookie_banner_theme'] ?? '', 'glassmorphism'); ?>><?php esc_html_e('Glassmorphism (premium)', 'mc-leads-engine'); ?></option>
+                                    <option value="light" <?php selected($settings['cookie_banner_theme'] ?? '', 'light'); ?>><?php esc_html_e('Sleek light', 'mc-leads-engine'); ?></option>
+                                    <option value="dark" <?php selected($settings['cookie_banner_theme'] ?? '', 'dark'); ?>><?php esc_html_e('Modern dark', 'mc-leads-engine'); ?></option>
                                 </select>
                             </div>
                         </div>
 
-                        <div class="card" style="margin-top:20px;">
-                            <div class="card-title"><?php esc_html_e('Google Analytics (gtag.js)', 'mc-leads-engine'); ?></div>
-                            <div class="settings-field">
-                                <label class="field-label" style="font-weight:600; display: flex; align-items: center; gap: 8px;">
+                        <div class="card">
+                            <div class="card-title"><?php esc_html_e('Google Analytics', 'mc-leads-engine'); ?></div>
+                            <div class="toggle-row" style="margin-bottom:14px;">
+                                <div class="tlabel"><?php esc_html_e('Enable Google Analytics tracking', 'mc-leads-engine'); ?></div>
+                                <label class="switch">
                                     <input type="checkbox" name="tracking_ga_enable" value="1" <?php checked($settings['tracking_ga_enable'] ?? 0, 1); ?>>
-                                    <?php esc_html_e('Enable Google Analytics Tracking', 'mc-leads-engine'); ?>
+                                    <span class="track"></span>
                                 </label>
                             </div>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Google Analytics Measurement ID', 'mc-leads-engine'); ?></label>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Measurement ID', 'mc-leads-engine'); ?></label>
                                 <input class="field-input" type="text" name="tracking_ga_id" value="<?php echo esc_attr($settings['tracking_ga_id'] ?? ''); ?>" placeholder="G-XXXXXXXXXX">
                             </div>
                         </div>
 
-                        <div class="card" style="margin-top:20px;">
-                            <div class="card-title"><?php esc_html_e('Meta Pixel (Facebook Pixel)', 'mc-leads-engine'); ?></div>
-                            <div class="settings-field">
-                                <label class="field-label" style="font-weight:600; display: flex; align-items: center; gap: 8px;">
+                        <div class="card">
+                            <div class="card-title"><?php esc_html_e('Meta Pixel', 'mc-leads-engine'); ?></div>
+                            <div class="toggle-row" style="margin-bottom:14px;">
+                                <div class="tlabel"><?php esc_html_e('Enable Meta Pixel tracking', 'mc-leads-engine'); ?></div>
+                                <label class="switch">
                                     <input type="checkbox" name="tracking_pixel_enable" value="1" <?php checked($settings['tracking_pixel_enable'] ?? 0, 1); ?>>
-                                    <?php esc_html_e('Enable Meta Pixel Tracking', 'mc-leads-engine'); ?>
+                                    <span class="track"></span>
                                 </label>
                             </div>
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Meta Pixel ID', 'mc-leads-engine'); ?></label>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Pixel ID', 'mc-leads-engine'); ?></label>
                                 <input class="field-input" type="text" name="tracking_pixel_id" value="<?php echo esc_attr($settings['tracking_pixel_id'] ?? ''); ?>" placeholder="e.g. 1234567890">
                             </div>
                         </div>
 
-                        <div class="card" style="margin-top:20px;">
-                            <div class="card-title"><?php esc_html_e('WhatsApp Click Tracking', 'mc-leads-engine'); ?></div>
-                            <p class="field-desc-top"><?php esc_html_e('Track clicks to WhatsApp wa.me / api.whatsapp.com links dynamically on your site when tracking consent is granted.', 'mc-leads-engine'); ?></p>
-                            <div class="settings-field">
-                                <label class="field-label" style="font-weight:600; display: flex; align-items: center; gap: 8px;">
+                        <div class="card">
+                            <div class="card-title"><?php esc_html_e('WhatsApp click tracking', 'mc-leads-engine'); ?></div>
+                            <div class="card-desc"><?php esc_html_e('Tracks clicks on wa.me / api.whatsapp.com links as conversion events, when tracking consent is granted.', 'mc-leads-engine'); ?></div>
+                            <div class="toggle-row">
+                                <div class="tlabel"><?php esc_html_e('Enable WhatsApp click tracking', 'mc-leads-engine'); ?></div>
+                                <label class="switch">
                                     <input type="checkbox" name="tracking_whatsapp_click" value="1" <?php checked($settings['tracking_whatsapp_click'] ?? 0, 1); ?>>
-                                    <?php esc_html_e('Enable WhatsApp click events conversion tracking', 'mc-leads-engine'); ?>
+                                    <span class="track"></span>
                                 </label>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Placeholders Tab -->
+                    <!-- PLACEHOLDERS PANE -->
                     <div class="settings-section-pane" data-pane="placeholders">
                         <div class="card">
-                            <div class="card-title"><?php esc_html_e('Dynamic Placeholders Cheat Sheet', 'mc-leads-engine'); ?></div>
-                            <p><?php esc_html_e('You can use the following bracket codes in your notification subjects and message bodies. They will automatically be replaced with matching submission data.', 'mc-leads-engine'); ?></p>
-                            <table class="wp-list-table widefat striped" style="margin-top: 15px;">
+                            <div class="card-title"><?php esc_html_e('Dynamic placeholders cheat sheet', 'mc-leads-engine'); ?></div>
+                            <div class="card-desc"><?php esc_html_e('Use these tags in email subjects, bodies, or WhatsApp messages — they\'re replaced with real submission data.', 'mc-leads-engine'); ?></div>
+                            <table class="ph-table">
                                 <thead>
                                     <tr>
-                                        <th style="padding: 10px; font-weight: bold; width: 30%;"><?php esc_html_e('Bracket Tag', 'mc-leads-engine'); ?></th>
-                                        <th style="padding: 10px; font-weight: bold;"><?php esc_html_e('Replaced With', 'mc-leads-engine'); ?></th>
+                                        <th style="width:26%;"><?php esc_html_e('Tag', 'mc-leads-engine'); ?></th>
+                                        <th><?php esc_html_e('Replaced with', 'mc-leads-engine'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td><code class="mc-code-badge">[lead_id]</code></td>
-                                        <td><?php esc_html_e('The unique database record ID of the lead submission.', 'mc-leads-engine'); ?></td>
+                                        <td><code class="ph-tag">[lead_id]</code></td>
+                                        <td><?php esc_html_e('Unique database record ID of the lead.', 'mc-leads-engine'); ?></td>
                                     </tr>
                                     <tr>
-                                        <td><code class="mc-code-badge">[session_id]</code></td>
+                                        <td><code class="ph-tag">[session_id]</code></td>
                                         <td><?php esc_html_e('The visitor\'s active tracking session token.', 'mc-leads-engine'); ?></td>
                                     </tr>
                                     <tr>
-                                        <td><code class="mc-code-badge">[total_price]</code></td>
-                                        <td><?php esc_html_e('Calculated project pricing total (e.g., 25000.00).', 'mc-leads-engine'); ?></td>
+                                        <td><code class="ph-tag">[total_price]</code></td>
+                                        <td><?php esc_html_e('Calculated project pricing total, e.g. 25000.00.', 'mc-leads-engine'); ?></td>
                                     </tr>
                                     <tr>
-                                        <td><code class="mc-code-badge">[lead_score]</code></td>
-                                        <td><?php esc_html_e('Calculated project quality score based on rules (e.g. 75).', 'mc-leads-engine'); ?></td>
+                                        <td><code class="ph-tag">[lead_score]</code></td>
+                                        <td><?php esc_html_e('Calculated lead score from your pricing rules, e.g. 75.', 'mc-leads-engine'); ?></td>
                                     </tr>
                                     <tr>
-                                        <td><code class="mc-code-badge">[survey_title]</code></td>
-                                        <td><?php esc_html_e('The name/title of the survey form submitted.', 'mc-leads-engine'); ?></td>
+                                        <td><code class="ph-tag">[survey_title]</code></td>
+                                        <td><?php esc_html_e('Title of the submitted survey.', 'mc-leads-engine'); ?></td>
                                     </tr>
                                     <tr>
-                                        <td><code class="mc-code-badge">[created_at]</code></td>
-                                        <td><?php esc_html_e('Submission timestamp formatted as YYYY-MM-DD HH:MM:SS.', 'mc-leads-engine'); ?></td>
+                                        <td><code class="ph-tag">[created_at]</code></td>
+                                        <td><?php esc_html_e('Submission timestamp, YYYY-MM-DD HH:MM:SS.', 'mc-leads-engine'); ?></td>
                                     </tr>
                                     <tr>
-                                        <td><code class="mc-code-badge">[all_answers]</code></td>
-                                        <td><?php esc_html_e('A comprehensive listing of all filled fields (renders as styled HTML in emails, and neat key-value rows in WhatsApp).', 'mc-leads-engine'); ?></td>
+                                        <td><code class="ph-tag">[all_answers]</code></td>
+                                        <td><?php esc_html_e('Every filled field, rendered as styled HTML in emails or key/value rows in WhatsApp.', 'mc-leads-engine'); ?></td>
                                     </tr>
                                     <tr>
-                                        <td><code class="mc-code-badge">[slugified-question-text]</code></td>
-                                        <td>
-                                            <?php esc_html_e('Slugified question title for standard surveys. Converts characters to lowercase and replaces spaces with dashes. Examples:', 'mc-leads-engine'); ?><br>
-                                            - Question: <em>What is your business name?</em> &rarr; <code>[what-is-your-business-name]</code><br>
-                                            - Question: <em>What type of organization are you?</em> &rarr; <code>[what-type-of-organization-are-you]</code>
-                                        </td>
+                                        <td><code class="ph-tag">[slugified-question-text]</code></td>
+                                        <td><?php esc_html_e('Answer by slugified question, e.g. "What is your business name?" &rarr;', 'mc-leads-engine'); ?> <code class="ph-tag">[what-is-your-business-name]</code>.</td>
                                     </tr>
                                     <tr>
-                                        <td><code class="mc-code-badge">[q_QUESTION_ID]</code></td>
-                                        <td><?php esc_html_e('Retrieve a standard answer by the specific question ID. Useful if titles match or change, e.g. [q_12].', 'mc-leads-engine'); ?></td>
+                                        <td><code class="ph-tag">[q_QUESTION_ID]</code></td>
+                                        <td><?php esc_html_e('Answer by specific question ID — stable even if the question title changes, e.g.', 'mc-leads-engine'); ?> <code class="ph-tag">[q_12]</code>.</td>
                                     </tr>
                                     <tr>
-                                        <td><code class="mc-code-badge">[cf7-field-name]</code></td>
-                                        <td><?php esc_html_e('When integrated with Contact Form 7, retrieve form values directly by their field name slug, e.g. [your-name], [your-email], [your-message].', 'mc-leads-engine'); ?></td>
+                                        <td><code class="ph-tag">[cf7-field-name]</code></td>
+                                        <td><?php esc_html_e('Contact Form 7 field values by name, e.g. [your-name], [your-email].', 'mc-leads-engine'); ?></td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                     
-                    <!-- Purging / Data Maintenance Tab -->
-                    <div class="settings-section-pane" data-pane="purging">
-                        <div class="card">
-                            <div class="card-title"><?php esc_html_e('Data Maintenance & Purging', 'mc-leads-engine'); ?></div>
-                            <p class="field-desc-top"><?php esc_html_e('Purge lead submissions, bookings, answers, and tracking data from the database. Warning: This action is permanent and cannot be undone.', 'mc-leads-engine'); ?></p>
-                            
-                            <div class="settings-field">
-                                <label class="field-label"><?php esc_html_e('Select Time Range to Delete:', 'mc-leads-engine'); ?></label>
-                                <select class="field-input" name="purge_range" style="max-width:300px;">
-                                    <option value="past_month"><?php esc_html_e('Older than Past Month (30+ days ago)', 'mc-leads-engine'); ?></option>
-                                    <option value="last_financial_year"><?php esc_html_e('Previous Financial Year (Apr 1 - Mar 31)', 'mc-leads-engine'); ?></option>
-                                    <option value="all_time"><?php esc_html_e('All Time (Start Afresh / Wipe All)', 'mc-leads-engine'); ?></option>
-                                </select>
-                            </div>
-                            
-                            <div style="margin-top:20px;">
-                                <button name="mc_leads_engine_purge_submit" value="1" class="button button-link-delete" type="submit" style="border:1px solid #ef4444; color:#ef4444; background:none; padding:6px 16px; border-radius:4px; cursor:pointer; font-weight:600;" onclick="return confirm('<?php echo esc_js(__('Are you absolutely sure you want to delete this data? This action is permanent and cannot be undone.', 'mc-leads-engine')); ?>');">
-                                    <?php esc_html_e('Purge Selected Data', 'mc-leads-engine'); ?>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Pricing Rules Tab -->
+                    <!-- PRICING RULES PANE -->
                     <div class="settings-section-pane" data-pane="pricing" id="panel-pricing">
-                        <!-- Panel intro description & sample rule -->
-                        <div class="pricing-intro-card">
-                            <div class="pricing-intro-title">
-                                <span class="dashicons dashicons-info"></span>
-                                <?php esc_html_e('How Pricing Rules Work', 'mc-leads-engine'); ?>
-                            </div>
-                            <p class="pricing-intro-text">
-                                <?php esc_html_e('Rules calculate dynamic pricing and lead scores based on the answers selected in surveys. The engine looks for keywords matched against question texts or option values.', 'mc-leads-engine'); ?>
-                            </p>
-                            <div class="pricing-sample-rule">
-                                <strong><?php esc_html_e('Sample Rule Example:', 'mc-leads-engine'); ?></strong>
-                                <ul>
-                                    <li><strong><?php esc_html_e('Name:', 'mc-leads-engine'); ?></strong> <?php esc_html_e('SEO Addon', 'mc-leads-engine'); ?></li>
-                                    <li><strong><?php esc_html_e('Type:', 'mc-leads-engine'); ?></strong> <span class="rule-type-badge badge-option"><?php esc_html_e('Option Match', 'mc-leads-engine'); ?></span></li>
-                                    <li><strong><?php esc_html_e('Match Keyword:', 'mc-leads-engine'); ?></strong> <code>seo</code></li>
-                                    <li><strong><?php esc_html_e('Amount (KES):', 'mc-leads-engine'); ?></strong> <code>50,000</code></li>
-                                    <li><strong><?php esc_html_e('Explanation:', 'mc-leads-engine'); ?></strong> <?php esc_html_e('If the customer selects an option containing "seo" (e.g. "SEO Package"), KES 50,000 is added to their estimate.', 'mc-leads-engine'); ?></li>
-                                </ul>
+                        <div class="card">
+                            <div class="card-title"><?php esc_html_e('How pricing rules work', 'mc-leads-engine'); ?></div>
+                            <div class="card-desc"><?php esc_html_e('Rules calculate dynamic pricing and lead score from survey answers. The engine matches keywords against question text or selected option values.', 'mc-leads-engine'); ?></div>
+                            <div style="background:var(--paper); border:1px solid var(--line-soft); border-radius:9px; padding:13px 15px; font-size:12px; color:var(--text); line-height:1.7;">
+                                <b><?php esc_html_e('Sample:', 'mc-leads-engine'); ?></b> <?php esc_html_e('"SEO Addon" · Option Match · keyword', 'mc-leads-engine'); ?> <code class="ph-tag">seo</code> · <?php esc_html_e('+KES 50,000 — if the customer picks an option containing "seo", KES 50,000 is added to their estimate.', 'mc-leads-engine'); ?>
                             </div>
                         </div>
 
-                        <!-- Base price + header -->
-                        <div class="pricing-header-row">
-                            <div class="pricing-base-wrap">
-                                <label class="pricing-base-label"><?php esc_html_e('Base Price (KES)', 'mc-leads-engine'); ?></label>
-                                <input type="number" id="mc-base-price" class="pricing-base-input" value="<?php echo esc_attr((float) ($settings['default_base_price'] ?? 0)); ?>" min="0" step="1" placeholder="0">
-                                <span class="pricing-base-hint"><?php esc_html_e('Applied to every lead before rules', 'mc-leads-engine'); ?></span>
+                        <div class="card">
+                            <div class="card-title"><?php esc_html_e('Base price &amp; rules', 'mc-leads-engine'); ?></div>
+                            <div class="field-row" style="align-items:end; margin-bottom:16px;">
+                                <div class="field" style="margin-bottom:0;">
+                                    <label class="field-label"><?php esc_html_e('Base price (KES)', 'mc-leads-engine'); ?></label>
+                                    <input type="number" id="mc-base-price" class="field-input" value="<?php echo esc_attr((float) ($settings['default_base_price'] ?? 0)); ?>" min="0" step="1" placeholder="0">
+                                    <div class="field-hint"><?php esc_html_e('Applied to every lead before rules run.', 'mc-leads-engine'); ?></div>
+                                </div>
+                                <button type="button" id="mc-add-rule-btn" class="btn primary" style="justify-self:end;">＋ <?php esc_html_e('Add rule', 'mc-leads-engine'); ?></button>
                             </div>
-                            <button type="button" id="mc-add-rule-btn" class="btn">
-                                <span class="dashicons dashicons-plus-alt2"></span> <?php esc_html_e('Add Rule', 'mc-leads-engine'); ?>
-                            </button>
-                        </div>
 
-                        <!-- Inline add/edit form (hidden by default) -->
-                        <div id="mc-rule-form" class="pricing-rule-form" style="display:none">
-                            <div class="pricing-rule-form-grid">
-                                <div class="pricing-form-field">
-                                    <label><?php esc_html_e('Rule Name', 'mc-leads-engine'); ?></label>
-                                    <input type="text" id="prf-name" class="field-input" placeholder="<?php esc_attr_e('e.g. SEO Package', 'mc-leads-engine'); ?>">
+                            <!-- Inline add/edit form (hidden by default) -->
+                            <div id="mc-rule-form" class="pricing-rule-form" style="display:none; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 15px; margin-bottom: 16px;">
+                                <div class="field-row" style="grid-template-columns: 1fr 1fr; margin-bottom: 12px;">
+                                    <div class="field" style="margin-bottom:0;">
+                                        <label class="field-label"><?php esc_html_e('Rule Name', 'mc-leads-engine'); ?></label>
+                                        <input type="text" id="prf-name" class="field-input" placeholder="e.g. SEO Package">
+                                    </div>
+                                    <div class="field" style="margin-bottom:0;">
+                                        <label class="field-label"><?php esc_html_e('Type', 'mc-leads-engine'); ?></label>
+                                        <select id="prf-type" class="field-input">
+                                            <option value="fixed"><?php esc_html_e('Fixed — always adds amount', 'mc-leads-engine'); ?></option>
+                                            <option value="per_unit"><?php esc_html_e('Per Unit — amount × answer number', 'mc-leads-engine'); ?></option>
+                                            <option value="option"><?php esc_html_e('Option Match — adds amount if option selected', 'mc-leads-engine'); ?></option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="pricing-form-field">
-                                    <label><?php esc_html_e('Type', 'mc-leads-engine'); ?></label>
-                                    <select id="prf-type" class="filter-select">
-                                        <option value="fixed"><?php esc_html_e('Fixed — always adds amount', 'mc-leads-engine'); ?></option>
-                                        <option value="per_unit"><?php esc_html_e('Per Unit — amount × answer number', 'mc-leads-engine'); ?></option>
-                                        <option value="option"><?php esc_html_e('Option Match — adds amount if option selected', 'mc-leads-engine'); ?></option>
-                                    </select>
+                                <div class="field" style="margin-bottom: 12px;">
+                                    <label class="field-label"><?php esc_html_e('Match Keyword', 'mc-leads-engine'); ?></label>
+                                    <input type="text" id="prf-match" class="field-input" placeholder="e.g. seo, pages, booking">
+                                    <span class="field-hint"><?php esc_html_e('Matched against question text and selected answers', 'mc-leads-engine'); ?></span>
                                 </div>
-                                <div class="pricing-form-field">
-                                    <label><?php esc_html_e('Match Keyword', 'mc-leads-engine'); ?></label>
-                                    <input type="text" id="prf-match" class="field-input" placeholder="<?php esc_attr_e('e.g. seo, pages, booking', 'mc-leads-engine'); ?>">
-                                    <span class="pricing-field-hint"><?php esc_html_e('Matched against question text and selected answers', 'mc-leads-engine'); ?></span>
+                                <div class="field-row" style="grid-template-columns: 1fr 1fr; margin-bottom: 16px;">
+                                    <div class="field" style="margin-bottom:0;">
+                                        <label class="field-label"><?php esc_html_e('Amount (KES)', 'mc-leads-engine'); ?></label>
+                                        <input type="number" id="prf-amount" class="field-input" placeholder="0" min="0" step="1">
+                                    </div>
+                                    <div class="field" style="margin-bottom:0;">
+                                        <label class="field-label"><?php esc_html_e('Score Impact', 'mc-leads-engine'); ?></label>
+                                        <input type="number" id="prf-score" class="field-input" placeholder="0" step="1">
+                                        <span class="field-hint"><?php esc_html_e('Optional — adds to the lead score', 'mc-leads-engine'); ?></span>
+                                    </div>
                                 </div>
-                                <div class="pricing-form-field">
-                                    <label><?php esc_html_e('Amount (KES)', 'mc-leads-engine'); ?></label>
-                                    <input type="number" id="prf-amount" class="field-input" placeholder="0" min="0" step="1">
-                                </div>
-                                <div class="pricing-form-field">
-                                    <label><?php esc_html_e('Score Impact', 'mc-leads-engine'); ?></label>
-                                    <input type="number" id="prf-score" class="field-input" placeholder="0" step="1">
-                                    <span class="pricing-field-hint"><?php esc_html_e('Optional — adds to the lead score', 'mc-leads-engine'); ?></span>
+                                <div class="pricing-form-actions" style="display:flex; gap:8px; justify-content:flex-end;">
+                                    <button type="button" id="mc-rule-cancel-btn" class="btn"><?php esc_html_e('Cancel', 'mc-leads-engine'); ?></button>
+                                    <button type="button" id="mc-rule-save-btn" class="btn primary"><?php esc_html_e('Save Rule', 'mc-leads-engine'); ?></button>
                                 </div>
                             </div>
-                            <div class="pricing-form-actions">
-                                <button type="button" id="mc-rule-save-btn" class="btn"><?php esc_html_e('Save Rule', 'mc-leads-engine'); ?></button>
-                                <button type="button" id="mc-rule-cancel-btn" class="btn-ghost"><?php esc_html_e('Cancel', 'mc-leads-engine'); ?></button>
-                            </div>
-                        </div>
 
-                        <!-- Rule list -->
-                        <div id="mc-rule-list" class="rule-grid">
-                            <?php if (empty($pricing_rules)) : ?>
-                                <div class="pricing-empty" id="mc-rule-empty">
-                                    <span class="dashicons dashicons-tag"></span>
-                                    <span><?php esc_html_e('No pricing rules yet. Click "Add Rule" to get started.', 'mc-leads-engine'); ?></span>
-                                </div>
-                            <?php endif; ?>
+                            <!-- Rule list -->
+                            <div id="mc-rule-list" class="rule-grid">
+                                <?php if (empty($pricing_rules)) : ?>
+                                    <div class="rule-empty" id="mc-rule-empty">
+                                        <span class="ic">🏷</span>
+                                        <span><?php esc_html_e('No pricing rules yet — add one to start shaping estimates automatically.', 'mc-leads-engine'); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </div>
 
                         <!-- Pricing simulator -->
-                        <div class="card pricing-simulator" style="margin-top:16px">
-                            <div class="card-title"><?php esc_html_e('Pricing Simulator', 'mc-leads-engine'); ?> <span><?php esc_html_e('Test your rules', 'mc-leads-engine'); ?></span></div>
-                            <div class="pricing-sim-controls">
-                                <select id="mc-sim-survey" class="filter-select">
+                        <div class="card pricing-simulator">
+                            <div class="card-title"><?php esc_html_e('Pricing simulator', 'mc-leads-engine'); ?> <span style="font-size:11px;color:var(--muted-2);font-weight:600;margin-left:8px;"><?php esc_html_e('Test your rules', 'mc-leads-engine'); ?></span></div>
+                            <div style="display:flex; gap:8px;">
+                                <select id="mc-sim-survey" class="field-input" style="max-width:260px;">
                                     <option value="0"><?php esc_html_e('Select a survey…', 'mc-leads-engine'); ?></option>
                                     <?php foreach ($surveys as $survey) : ?>
                                         <option value="<?php echo esc_attr($survey['id']); ?>"><?php echo esc_html($survey['title']); ?></option>
                                     <?php endforeach; ?>
                                 </select>
-                                <button type="button" id="mc-sim-run" class="btn">
-                                    <span class="dashicons dashicons-controls-play"></span> <?php esc_html_e('Simulate', 'mc-leads-engine'); ?>
-                                </button>
+                                <button type="button" id="mc-sim-run" class="btn">▶ <?php esc_html_e('Simulate', 'mc-leads-engine'); ?></button>
                             </div>
-                            <div id="mc-sim-result" class="pricing-sim-result" style="display:none"></div>
+                            <div id="mc-sim-result" class="pricing-sim-result" style="display:none; margin-top:14px; padding:12px; background:var(--paper); border:1px solid var(--line); border-radius:8px;"></div>
                         </div>
 
                         <!-- Hidden data bridge: initial rules from PHP → JS -->
                         <textarea id="mc-pricing-rules-data" style="display:none"><?php echo esc_textarea(wp_json_encode($pricing_rules, JSON_UNESCAPED_UNICODE)); ?></textarea>
                         <input type="hidden" id="mc-pricing-nonce" value="<?php echo esc_attr(wp_create_nonce('mc_leads_engine_nonce')); ?>">
                     </div>
+                    
+                    <!-- DATA MAINTENANCE PANE -->
+                    <div class="settings-section-pane" data-pane="purging">
+                        <div class="danger-zone">
+                            <div class="card-title"><?php esc_html_e('Data maintenance & purging', 'mc-leads-engine'); ?></div>
+                            <div class="card-desc" style="color:#8a3d3a;"><?php esc_html_e('Permanently delete lead submissions, bookings, answers, and tracking data. This cannot be undone.', 'mc-leads-engine'); ?></div>
+                            <div class="field">
+                                <label class="field-label"><?php esc_html_e('Time range to delete', 'mc-leads-engine'); ?></label>
+                                <select class="field-input" name="purge_range" style="max-width:340px;">
+                                    <option value="past_month"><?php esc_html_e('Older than past month (30+ days ago)', 'mc-leads-engine'); ?></option>
+                                    <option value="last_financial_year"><?php esc_html_e('Previous financial year (Apr 1 – Mar 31)', 'mc-leads-engine'); ?></option>
+                                    <option value="all_time"><?php esc_html_e('All time (wipe everything)', 'mc-leads-engine'); ?></option>
+                                </select>
+                            </div>
+                            <button name="mc_leads_engine_purge_submit" value="1" class="btn danger" type="submit" onclick="return confirm('<?php echo esc_js(__('Are you absolutely sure you want to delete this data? This action is permanent and cannot be undone.', 'mc-leads-engine')); ?>');">
+                                🗑 <?php esc_html_e('Purge selected data', 'mc-leads-engine'); ?>
+                            </button>
+                        </div>
+                    </div>
+                    
                 </div>
-            </div>
-            
-            <div class="settings-actions-footer">
-                <button class="button button-primary" type="submit"><?php esc_html_e('Save Notification Settings', 'mc-leads-engine'); ?></button>
             </div>
         </form>
     </div>
-    <?php
+<?php
 }
