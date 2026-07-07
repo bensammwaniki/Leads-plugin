@@ -49,8 +49,17 @@ function mc_leads_engine_register_admin_menu() {
 
     add_submenu_page(
         'mc-leads-engine',
-        __('Analytics & Leads', 'mc-leads-engine'),
-        __('Analytics & Leads', 'mc-leads-engine'),
+        __('Leads', 'mc-leads-engine'),
+        __('Leads', 'mc-leads-engine'),
+        'manage_options',
+        'mc-leads-engine-leads',
+        'mc_leads_engine_render_leads_page'
+    );
+
+    add_submenu_page(
+        'mc-leads-engine',
+        __('Analytics', 'mc-leads-engine'),
+        __('Analytics', 'mc-leads-engine'),
         'manage_options',
         'mc-leads-engine-analytics',
         'mc_leads_engine_render_analytics_page'
@@ -73,15 +82,6 @@ function mc_leads_engine_register_admin_menu() {
         'manage_options',
         'mc-leads-engine-settings',
         'mc_leads_engine_render_settings_page'
-    );
-
-    add_submenu_page(
-        null,
-        __('Leads', 'mc-leads-engine'),
-        __('Leads', 'mc-leads-engine'),
-        'manage_options',
-        'mc-leads-engine-leads',
-        'mc_leads_engine_render_leads_page'
     );
 }
 add_action('admin_menu', 'mc_leads_engine_register_admin_menu');

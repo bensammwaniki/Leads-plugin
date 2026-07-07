@@ -17,7 +17,7 @@ function mc_leads_engine_admin_panel_title($panel) {
     $titles = array(
         'dashboard' => __('Dashboard', 'mc-leads-engine'),
         'surveys' => __('Surveys', 'mc-leads-engine'),
-        'analytics' => __('Analytics & Leads', 'mc-leads-engine'),
+        'analytics' => __('Analytics', 'mc-leads-engine'),
         'settings' => __('Settings', 'mc-leads-engine'),
     );
 
