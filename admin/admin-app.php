@@ -390,21 +390,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                             </a>
                         </div>
 
-                        <!-- Pipeline Strip -->
-                        <div class="pipeline-strip">
-                            <?php foreach ($pipeline_statuses as $slug => $label) :
-                                $cnt = $pipeline_counts[$slug] ?? 0;
-                                $cnt_class = $cnt === 0 ? 'zero' : '';
-                                $stage_url = add_query_arg(array('page' => 'mc-leads-engine-analytics', 'status' => $slug), admin_url('admin.php'));
-                            ?>
-                            <a class="stage-link" href="<?php echo esc_url($stage_url); ?>">
-                                <div class="stage-cell">
-                                    <span class="stage-count <?php echo esc_attr($cnt_class); ?>"><?php echo esc_html(number_format_i18n($cnt)); ?></span>
-                                    <span class="stage-label <?php echo $slug === 'proposal_sent' ? 'proposal' : esc_attr($slug); ?>"><?php echo esc_html($label); ?></span>
-                                </div>
-                            </a>
-                            <?php endforeach; ?>
-                        </div>
+
 
                         <!-- Lower Row: chart + recent leads -->
                         <div class="lower-row">
