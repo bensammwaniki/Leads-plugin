@@ -52,31 +52,26 @@ function mc_leads_engine_get_settings() {
         'default_pricing_rules_json' => '',
         'thank_you_url'              => '',
         'user_email_subject'         => __('Thank you for your submission!', 'mc-leads-engine'),
-        'user_email_body'            => '<div style="font-family: sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc;">
-  <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px; margin-top: 0;">We received your submission!</h2>
-  <p style="color: #334155; line-height: 1.6;">Hello [your-name],</p>
-  <p style="color: #334155; line-height: 1.6;">Thank you for completing the <strong>[survey_title]</strong> survey. Here is a summary of your estimate:</p>
-  <div style="background-color: #ffffff; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #2563eb; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-    <p style="margin: 5px 0; color: #0f172a;"><strong>Lead ID:</strong> #[lead_id]</p>
-    <p style="margin: 5px 0; color: #0f172a;"><strong>Estimated Total:</strong> KES [total_price]</p>
-    <p style="margin: 5px 0; color: #0f172a;"><strong>Lead Score:</strong> [lead_score]</p>
-  </div>
-  <p style="color: #334155; line-height: 1.6;">We will review your details and get in touch with you shortly.</p>
-  <p style="color: #64748b; font-size: 12px; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 10px;">This is an automated notification. Please do not reply directly to this email.</p>
+        'user_email_body'            => '<div>
+  <p>Hi [your-name],</p>
+  <p>Thanks for your submission for <strong>[survey_title]</strong>.</p>
+  <p>
+    Lead ID: #[lead_id]<br>
+    Estimated Total: KES [total_price]<br>
+    Lead Score: [lead_score]
+  </p>
+  <p>We will review it and get back to you shortly.</p>
 </div>',
         'admin_email_subject'        => __('New Lead Submission #[lead_id] - [survey_title]', 'mc-leads-engine'),
-        'admin_email_body'           => '<div style="font-family: sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff;">
-  <h2 style="color: #ef4444; border-bottom: 2px solid #ef4444; padding-bottom: 10px; margin-top: 0;">New Lead Submitted</h2>
-  <p style="color: #0f172a;">A new lead has been generated through the survey: <strong>[survey_title]</strong>.</p>
-  <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
-    <tr style="background-color: #f8fafc;"><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; color: #334155;">Lead ID</td><td style="padding: 8px; border: 1px solid #e2e8f0; color: #0f172a;">#[lead_id]</td></tr>
-    <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; color: #334155;">Session ID</td><td style="padding: 8px; border: 1px solid #e2e8f0; color: #0f172a;">[session_id]</td></tr>
-    <tr style="background-color: #f8fafc;"><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; color: #334155;">Total Price</td><td style="padding: 8px; border: 1px solid #e2e8f0; color: #0f172a;">KES [total_price]</td></tr>
-    <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; color: #334155;">Lead Score</td><td style="padding: 8px; border: 1px solid #e2e8f0; color: #0f172a;">[lead_score]</td></tr>
-    <tr style="background-color: #f8fafc;"><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; color: #334155;">Date/Time</td><td style="padding: 8px; border: 1px solid #e2e8f0; color: #0f172a;">[created_at]</td></tr>
-  </table>
-  <h3 style="color: #0f172a; margin-top: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">Submitted Answers</h3>
-  <div style="background-color: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; color: #334155;">[all_answers]</div>
+        'admin_email_body'           => '<div>
+  <p>A new lead was submitted for <strong>[survey_title]</strong>.</p>
+  <p>
+    Lead ID: #[lead_id]<br>
+    Session ID: [session_id]<br>
+    Total Price: KES [total_price]<br>
+    Lead Score: [lead_score]<br>
+    Date/Time: [created_at]
+  </p>
 </div>',
         'admin_whatsapp_phone'       => '',
         'admin_whatsapp_body'        => __("New Lead Submission #[lead_id] for \"[survey_title]\"\nPrice: KES [total_price]\nScore: [lead_score]\nClient: [your-name] ([email-address])", 'mc-leads-engine'),
@@ -84,32 +79,21 @@ function mc_leads_engine_get_settings() {
         
         // Booking Notifications templates
         'booking_user_email_subject' => __('Meeting Confirmation: [booking_type] scheduled', 'mc-leads-engine'),
-        'booking_user_email_body'    => '<div style="font-family: sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc;">
-  <h2 style="color: #F15D61; border-bottom: 2px solid #F15D61; padding-bottom: 10px; margin-top: 0;">Your Meeting is Scheduled!</h2>
-  <p style="color: #334155; line-height: 1.6;">Hello [full-name],</p>
-  <p style="color: #334155; line-height: 1.6;">Your meeting has been successfully booked. Here are your details:</p>
-  <div style="background-color: #ffffff; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #F15D61; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-    <p style="margin: 5px 0; color: #0f172a;"><strong>Meeting Type:</strong> [booking_type]</p>
-    <p style="margin: 5px 0; color: #0f172a;"><strong>Date & Time:</strong> [booking_date] @ [booking_time]</p>
-    <p style="margin: 5px 0; color: #0f172a;"><strong>Location:</strong> [booking_location]</p>
-  </div>
-  <p style="color: #334155; line-height: 1.6;">If you need to reschedule or have any questions, please get in touch with us.</p>
-  <p style="color: #64748b; font-size: 12px; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 10px;">This is an automated confirmation of your booking.</p>
+        'booking_user_email_body'    => '<div>
+  <p>Hi [full-name],</p>
+  <p>Your [booking_type] is confirmed for [booking_date] at [booking_time].</p>
+  <p>Location: [booking_location]</p>
 </div>',
         'booking_admin_email_subject'=> __('New Booking scheduled: [booking_type] - [full-name]', 'mc-leads-engine'),
-        'booking_admin_email_body'   => '<div style="font-family: sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff;">
-  <h2 style="color: #F15D61; border-bottom: 2px solid #F15D61; padding-bottom: 10px; margin-top: 0;">New Meeting Booked</h2>
-  <p style="color: #0f172a;">A new meeting has been scheduled by a client.</p>
-  <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
-    <tr style="background-color: #f8fafc;"><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; color: #334155;">Client Name</td><td style="padding: 8px; border: 1px solid #e2e8f0; color: #0f172a;">[full-name]</td></tr>
-    <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; color: #334155;">Client Email</td><td style="padding: 8px; border: 1px solid #e2e8f0; color: #0f172a;">[email]</td></tr>
-    <tr style="background-color: #f8fafc;"><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; color: #334155;">Client Phone</td><td style="padding: 8px; border: 1px solid #e2e8f0; color: #0f172a;">[phone]</td></tr>
-    <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; color: #334155;">Meeting Type</td><td style="padding: 8px; border: 1px solid #e2e8f0; color: #0f172a;">[booking_type]</td></tr>
-    <tr style="background-color: #f8fafc;"><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; color: #334155;">Date & Time</td><td style="padding: 8px; border: 1px solid #e2e8f0; color: #0f172a;">[booking_date] @ [booking_time]</td></tr>
-    <tr><td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: bold; color: #334155;">Location</td><td style="padding: 8px; border: 1px solid #e2e8f0; color: #0f172a;">[booking_location]</td></tr>
-  </table>
-  <h3 style="color: #0f172a; margin-top: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">Client Message</h3>
-  <div style="background-color: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; color: #334155;">[message]</div>
+        'booking_admin_email_body'   => '<div>
+  <p>A new meeting was booked by <strong>[full-name]</strong>.</p>
+  <p>
+    Client Email: [email]<br>
+    Client Phone: [phone]<br>
+    Meeting Type: [booking_type]<br>
+    Date & Time: [booking_date] @ [booking_time]<br>
+    Location: [booking_location]
+  </p>
 </div>',
         'booking_admin_whatsapp_body'=> __("New Booking Scheduled!\nClient: [full-name]\nMeeting Type: [booking_type]\nDate & Time: [booking_date] @ [booking_time]\nLocation: [booking_location]", 'mc-leads-engine'),
         'booking_user_whatsapp_body' => __("Hello [full-name],\nYour [booking_type] has been scheduled for [booking_date] at [booking_time].\nLocation: [booking_location]\n\nThank you for booking with us!", 'mc-leads-engine'),

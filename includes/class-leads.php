@@ -599,8 +599,17 @@ class MC_Leads_Engine_Leads {
         $answers = json_decode($lead['answers_json'] ?? '[]', true);
         if (is_array($answers)) {
             foreach ($answers as $q_id => $val) {
-                $q_text  = $questions_map[(int) $q_id] ?? sprintf(__('Question #%d', 'mc-leads-engine'), $q_id);
-                $val_str = is_array($val) ? implode(', ', $val) : (string) $val;
+                if (is_numeric($q_id)) {
+                    $q_text = $questions_map[(int) $q_id] ?? sprintf(__('Question #%d', 'mc-leads-engine'), $q_id);
+                } else {
+                    $q_text = ucwords(str_replace(array('-', '_'), ' ', (string) $q_id));
+                }
+
+                $vals = is_array($val) ? array_values(array_filter(array_map('strval', $val), static function ($item) {
+                    return trim($item) !== '';
+                })) : array((string) $val);
+                $val_str = implode(', ', $vals);
+
                 if ($val_str !== '') {
                     $list_items[] = $is_html
                         ? '<strong>' . esc_html($q_text) . ':</strong> ' . esc_html($val_str)
@@ -611,21 +620,28 @@ class MC_Leads_Engine_Leads {
 
         // 2. CF7 non-contact fields
         $cf7_rows = isset($lead['cf7']) ? $lead['cf7'] : $this->get_cf7_data($lead['id']);
-        if (!empty($cf7_rows)) {
-            $cf7_data = json_decode($cf7_rows[0]['data_json'] ?? '{}', true);
+        foreach ((array) $cf7_rows as $cf7_row) {
+            $cf7_data = json_decode($cf7_row['data_json'] ?? '{}', true);
             if (is_array($cf7_data)) {
-                $skip_keys = array('cf7_form_id', 'mc_session_id', 'mc_survey_id', 'survey_data', 'pricing');
+                $skip_keys = array('cf7_form_id', 'mc_session_id', 'mc_leads_session_id', 'mc_survey_id', 'survey_data', 'pricing', '_wpcf7', '_wpcf7_version', '_wpcf7_locale', '_wpcf7_unit_tag', '_wpcf7_container_post');
                 foreach ($cf7_data as $key => $val) {
-                    if (empty($val) || in_array($key, $skip_keys, true)) {
+                    if (in_array($key, $skip_keys, true)) {
                         continue;
                     }
-                    if ($key === 'mc_leads_session_id' || $key === 'mc_session_id') {
+
+                    $vals = is_array($val) ? array_values(array_filter(array_map('strval', $val), static function ($item) {
+                        return trim($item) !== '';
+                    })) : array((string) $val);
+                    $val_str = implode(', ', $vals);
+
+                    if ($val_str === '') {
                         continue;
                     }
-                    $val_str = is_array($val) ? implode(', ', $val) : (string) $val;
+
+                    $label = ucwords(str_replace(array('-', '_'), ' ', (string) $key));
                     $list_items[] = $is_html
-                        ? '<strong>' . esc_html($key) . ':</strong> ' . esc_html($val_str)
-                        : esc_html($key) . ': ' . esc_html($val_str);
+                        ? '<strong>' . esc_html($label) . ':</strong> ' . esc_html($val_str)
+                        : esc_html($label) . ': ' . esc_html($val_str);
                 }
             }
         }

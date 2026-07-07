@@ -4,6 +4,13 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+function mc_leads_engine_pct_class($value, $min = 0) {
+    $pct = max((int) $min, min(100, (int) round((float) $value)));
+    $pct = (int) (round($pct / 10) * 10);
+
+    return 'mcle-pct-' . max(0, min(100, $pct));
+}
+
 function mc_leads_engine_render_metric_chart($series, $metric_key, $title, $accent = '#2563eb', $formatter = null) {
     $series = is_array($series) ? $series : array();
     $formatter = is_callable($formatter) ? $formatter : null;
@@ -24,12 +31,12 @@ function mc_leads_engine_render_metric_chart($series, $metric_key, $title, $acce
         <div class="mc-chart">
             <?php foreach ($series as $row) : 
                 $value = (float) ($row[$metric_key] ?? 0);
-                $height = max(6, round(($value / $max_value) * 100));
+                $height = max(10, round(($value / $max_value) * 100));
                 $display_value = $formatter ? call_user_func($formatter, $value) : number_format_i18n($value, is_float($value) ? 2 : 0);
             ?>
                 <div class="mc-chart-bar">
                     <div class="mc-chart-bar-track">
-                        <div class="mc-chart-bar-fill" style="height: <?php echo esc_attr($height); ?>%; background: <?php echo esc_attr($accent); ?>;"></div>
+                        <div class="mc-chart-bar-fill <?php echo esc_attr(mc_leads_engine_pct_class($height, 10)); ?>"></div>
                     </div>
                     <div class="mc-chart-meta">
                         <strong><?php echo esc_html($display_value); ?></strong>
@@ -161,13 +168,13 @@ function mc_leads_engine_render_analytics_page() {
     ?>
     <div class="wrap mc-leads-engine-admin">
         <!-- Topbar Toolbar -->
-        <div class="topbar" style="margin-bottom:20px; border-radius:10px; border:1px solid var(--line); box-shadow:var(--shadow-sm); padding:18px 28px; background:var(--surface); display:flex; justify-content:space-between; align-items:center;">
+        <div class="topbar analytics-topbar">
             <div>
-                <div class="topbar-title" style="font-size:19px; font-weight:800; letter-spacing:-.3px; color:var(--text);"><?php esc_html_e('Analytics', 'mc-leads-engine'); ?></div>
-                <div class="topbar-sub" style="font-size:12px; color:var(--muted); margin-top:3px;">
+                <div class="topbar-title"><?php esc_html_e('Analytics', 'mc-leads-engine'); ?></div>
+                <div class="topbar-sub">
                     <?php if ($status !== 'all' || $min_score > 0) : ?>
-                        <span style="color:var(--coral); font-weight:700;"><?php esc_html_e('Filters active', 'mc-leads-engine'); ?></span> · 
-                        <a href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-analytics'), admin_url('admin.php'))); ?>" style="color:var(--muted); text-decoration:underline;"><?php esc_html_e('Clear all filters', 'mc-leads-engine'); ?></a>
+                        <span class="filter-active-label"><?php esc_html_e('Filters active', 'mc-leads-engine'); ?></span> &middot;
+                        <a class="muted-link" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-analytics'), admin_url('admin.php'))); ?>"><?php esc_html_e('Clear all filters', 'mc-leads-engine'); ?></a>
                     <?php else : ?>
                         <?php esc_html_e('Performance, conversion rates and recent lead entries', 'mc-leads-engine'); ?>
                     <?php endif; ?>
@@ -185,7 +192,7 @@ function mc_leads_engine_render_analytics_page() {
                 '_wpnonce'         => wp_create_nonce('mc_leads_engine_export_analytics'),
             ), admin_url('admin.php'));
             ?>
-            <a class="view-link" href="<?php echo esc_url($export_url); ?>" style="height:32px; padding:0 14px;">
+            <a class="view-link action-link" href="<?php echo esc_url($export_url); ?>">
                 <?php esc_html_e('Export to Excel', 'mc-leads-engine'); ?>
             </a>
         </div>
@@ -278,7 +285,7 @@ function mc_leads_engine_render_analytics_page() {
                 </select>
             </div>
 
-            <button class="view-link" type="submit" style="height:34px; margin-top:14px; font-size:12px; font-weight:700; border:none; cursor:pointer;"><?php esc_html_e('Apply filters', 'mc-leads-engine'); ?></button>
+            <button class="view-link filter-submit" type="submit"><?php esc_html_e('Apply filters', 'mc-leads-engine'); ?></button>
         </form>
 
         <!-- Drop-off Funnel Chart -->
@@ -319,7 +326,7 @@ function mc_leads_engine_render_analytics_page() {
                     ?>
                         <div class="funnel-step">
                             <div class="funnel-bar-col">
-                                <div class="funnel-bar" style="height: <?php echo esc_attr($pct); ?>%;"></div>
+                                <div class="funnel-bar <?php echo esc_attr(mc_leads_engine_pct_class($pct, 10)); ?>"></div>
                             </div>
                             <div class="funnel-count"><?php echo esc_html(number_format_i18n((int) $count)); ?></div>
                             <div class="funnel-label"><?php echo esc_html($lbl); ?></div>
@@ -355,7 +362,7 @@ function mc_leads_engine_render_analytics_page() {
                     <tbody>
                     <?php foreach ($utm_data as $utm_row) : ?>
                         <tr>
-                            <td style="font-weight:700;"><?php echo esc_html($utm_row['utm_source']); ?></td>
+                            <td class="strong-cell"><?php echo esc_html($utm_row['utm_source']); ?></td>
                             <td><?php echo esc_html($utm_row['utm_medium'] ?: '—'); ?></td>
                             <td><?php echo esc_html($utm_row['utm_campaign'] ?: '—'); ?></td>
                             <td><?php echo esc_html(number_format_i18n((int) $utm_row['lead_count'])); ?></td>
@@ -392,21 +399,21 @@ function mc_leads_engine_render_analytics_page() {
                 <h3 class="panel-title"><?php esc_html_e('Answer Insights', 'mc-leads-engine'); ?></h3>
                 <div class="panel-sub"><?php esc_html_e('Question response frequencies', 'mc-leads-engine'); ?></div>
             </div>
-            <div style="padding: 0 18px 18px;">
+            <div class="answer-insights">
                 <?php foreach ($answer_freq as $qid => $qdata) :
                     $q_max = max(array_column($qdata['options'], 'count')) ?: 1;
                     if ($q_max <= 0) $q_max = 1;
                 ?>
-                    <div style="margin-bottom: 22px; border-bottom: 1px solid var(--line-soft); padding-bottom: 18px;">
-                        <h4 style="font-size: 13px; font-weight: 700; color: var(--text); margin: 0 0 12px;"><?php echo esc_html($qdata['question_text']); ?></h4>
+                    <div class="answer-insight-group">
+                        <h4 class="answer-insight-title"><?php echo esc_html($qdata['question_text']); ?></h4>
                         <?php foreach ($qdata['options'] as $opt) :
                             $pct = round(($opt['count'] / $q_max) * 100);
                         ?>
-                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px; font-size: 11.5px;">
-                                <span style="min-width: 180px; font-weight: 600; color: var(--muted);"><?php echo esc_html($opt['label']); ?></span>
-                                <strong style="width: 32px; font-family: var(--mono); color: var(--text);"><?php echo esc_html($opt['count']); ?></strong>
-                                <div style="flex: 1; height: 8px; background: var(--line-soft); border-radius: 4px; overflow: hidden; position: relative;">
-                                    <div style="height: 100%; border-radius: 4px; background: var(--coral); width: <?php echo esc_attr($pct); ?>%;"></div>
+                            <div class="answer-insight-row">
+                                <span class="answer-insight-label"><?php echo esc_html($opt['label']); ?></span>
+                                <strong class="answer-insight-count"><?php echo esc_html($opt['count']); ?></strong>
+                                <div class="answer-insight-track">
+                                    <div class="answer-insight-fill <?php echo esc_attr(mc_leads_engine_pct_class($pct)); ?>"></div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -416,10 +423,10 @@ function mc_leads_engine_render_analytics_page() {
         </div>
         <?php endif; ?>
 
-        <!-- Recent Entries Panel -->
+        <!-- All Submitted Data Panel -->
         <div class="panel">
             <div class="panel-header">
-                <h3 class="panel-title"><?php esc_html_e('Recent leads', 'mc-leads-engine'); ?></h3>
+                <h3 class="panel-title"><?php esc_html_e('All submitted data', 'mc-leads-engine'); ?></h3>
                 <div class="panel-sub">
                     <?php 
                     $start_entry = $offset + 1;
@@ -460,7 +467,95 @@ function mc_leads_engine_render_analytics_page() {
                 <?php endforeach; ?>
             </div>
 
-            <div class="lead-card-list">
+            <div class="table-wrap">
+                <table class="leads-table submitted-data-table">
+                    <thead>
+                        <tr>
+                            <th><?php esc_html_e('Lead ID', 'mc-leads-engine'); ?></th>
+                            <th><?php esc_html_e('Date', 'mc-leads-engine'); ?></th>
+                            <th><?php esc_html_e('Status', 'mc-leads-engine'); ?></th>
+                            <th><?php esc_html_e('Client', 'mc-leads-engine'); ?></th>
+                            <th><?php esc_html_e('Survey', 'mc-leads-engine'); ?></th>
+                            <th><?php esc_html_e('Answers', 'mc-leads-engine'); ?></th>
+                            <th><?php esc_html_e('Price', 'mc-leads-engine'); ?></th>
+                            <th><?php esc_html_e('Score', 'mc-leads-engine'); ?></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($all_leads)) : ?>
+                            <tr>
+                                <td colspan="9" class="qa-empty"><?php esc_html_e('No leads match the selected criteria.', 'mc-leads-engine'); ?></td>
+                            </tr>
+                        <?php endif; ?>
+
+                        <?php foreach ($all_leads as $lead) :
+                            $is_booking   = mc_leads_is_booking($lead);
+                            $survey_row   = mc_leads_engine_survey_repository()->get_survey($lead['survey_id']);
+                            $survey_title = $is_booking ? __('Bookings', 'mc-leads-engine') : ($survey_row['title'] ?? $lead['survey_id']);
+                            $l_name       = mc_leads_engine_leads_repository()->find_client_name($lead['id']);
+                            $l_email      = mc_leads_engine_leads_repository()->find_client_email($lead['id']);
+                            $l_phone      = mc_leads_engine_leads_repository()->find_client_phone($lead['id']);
+                            $view_url     = add_query_arg(array('page' => 'mc-leads-engine-leads', 'lead_id' => $lead['id']), admin_url('admin.php'));
+
+                            $display_name = $l_name ?: ($l_email ?: sprintf(__('Lead #%d', 'mc-leads-engine'), $lead['id']));
+                            $contact_line = implode(' / ', array_filter(array($l_email, $l_phone)));
+                            $created_ts   = strtotime($lead['created_at']);
+                            $status_key   = $lead['status'] ?? 'new';
+                            $l_score      = (int) $lead['lead_score'];
+                            $band         = mc_leads_score_band($l_score);
+                            $band_label   = mc_leads_score_band_label($band);
+                            $answer_items = mc_leads_engine_leads_repository()->build_answers_summary($lead, $questions_map);
+                            $answer_title = implode("\n", $answer_items);
+                            $visible_answers = array_slice($answer_items, 0, 3);
+                            $hidden_count = max(0, count($answer_items) - count($visible_answers));
+                        ?>
+                            <tr>
+                                <td><a class="lead-id" href="<?php echo esc_url($view_url); ?>">#<?php echo esc_html($lead['id']); ?></a></td>
+                                <td class="cell-date">
+                                    <?php if ($created_ts) : ?>
+                                        <?php echo esc_html(date_i18n('Y-m-d', $created_ts)); ?><br>
+                                        <?php echo esc_html(date_i18n('H:i', $created_ts)); ?>
+                                    <?php else : ?>
+                                        <?php echo esc_html($lead['created_at']); ?>
+                                    <?php endif; ?>
+                                </td>
+                                <td><span class="status-pill status-<?php echo esc_attr($status_key); ?>"><?php echo esc_html(mc_leads_status_label($status_key)); ?></span></td>
+                                <td>
+                                    <div class="client-name"><?php echo esc_html($display_name); ?></div>
+                                    <?php if ($contact_line) : ?>
+                                        <div class="client-line"><?php echo esc_html($contact_line); ?></div>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="cell-survey"><?php echo esc_html($survey_title); ?></td>
+                                <td>
+                                    <div class="answers-chips" title="<?php echo esc_attr($answer_title); ?>">
+                                        <?php if (empty($answer_items)) : ?>
+                                            <span class="answers-empty"><?php esc_html_e('No answers', 'mc-leads-engine'); ?></span>
+                                        <?php else : ?>
+                                            <?php foreach ($visible_answers as $item) :
+                                                $parts = explode(': ', $item, 2);
+                                                $label = $parts[0] ?? '';
+                                                $value = $parts[1] ?? $item;
+                                            ?>
+                                                <span class="answer-chip"><b><?php echo esc_html($label); ?></b><?php echo esc_html($value); ?></span>
+                                            <?php endforeach; ?>
+                                            <?php if ($hidden_count > 0) : ?>
+                                                <span class="answers-more"><?php echo esc_html(sprintf(_n('+%d more', '+%d more', $hidden_count, 'mc-leads-engine'), $hidden_count)); ?></span>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                                <td class="cell-price">KES <?php echo esc_html(number_format_i18n((float) $lead['total_price'], 2)); ?></td>
+                                <td><span class="score-badge score-<?php echo esc_attr($band); ?>"><?php echo esc_html($band_label); ?> &middot; <?php echo esc_html($l_score); ?></span></td>
+                                <td><a href="<?php echo esc_url($view_url); ?>" class="view-link"><?php esc_html_e('View', 'mc-leads-engine'); ?></a></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="lead-card-list" hidden>
                 <?php if (empty($all_leads)) : ?>
                     <div class="qa-empty"><?php esc_html_e('No leads match the selected criteria.', 'mc-leads-engine'); ?></div>
                 <?php endif; ?>
@@ -563,13 +658,13 @@ function mc_leads_engine_render_analytics_page() {
                     ?>
                 </div>
                 <?php if ($total_pages > 1) : ?>
-                <div class="mc-pagination" style="display:flex; align-items:center; gap:8px;">
+                <div class="mc-pagination">
                     <?php if ($paged > 1) : ?>
-                        <a class="view-link" href="<?php echo esc_url(add_query_arg('paged', $paged - 1)); ?>" style="background:var(--paper); color:var(--text); text-decoration:none;">&laquo; <?php esc_html_e('Prev', 'mc-leads-engine'); ?></a>
+                        <a class="view-link pagination-link" href="<?php echo esc_url(add_query_arg('paged', $paged - 1)); ?>">&laquo; <?php esc_html_e('Prev', 'mc-leads-engine'); ?></a>
                     <?php endif; ?>
-                    <span style="font-family:var(--mono); font-size:11.5px;"><?php echo esc_html(sprintf(__('Page %d of %d', 'mc-leads-engine'), $paged, $total_pages)); ?></span>
+                    <span class="pagination-count"><?php echo esc_html(sprintf(__('Page %d of %d', 'mc-leads-engine'), $paged, $total_pages)); ?></span>
                     <?php if ($paged < $total_pages) : ?>
-                        <a class="view-link" href="<?php echo esc_url(add_query_arg('paged', $paged + 1)); ?>" style="background:var(--paper); color:var(--text); text-decoration:none;"><?php esc_html_e('Next', 'mc-leads-engine'); ?> &raquo;</a>
+                        <a class="view-link pagination-link" href="<?php echo esc_url(add_query_arg('paged', $paged + 1)); ?>"><?php esc_html_e('Next', 'mc-leads-engine'); ?> &raquo;</a>
                     <?php endif; ?>
                 </div>
                 <?php endif; ?>
