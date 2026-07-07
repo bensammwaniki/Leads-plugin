@@ -139,6 +139,63 @@ function mc_leads_engine_render_bookings_page() {
 
     $bookings = $wpdb->get_results($sql, ARRAY_A) ?: array();
 
+    $is_showing_demo = false;
+    if (empty($bookings) && $filter_type === 'all' && $filter_status === 'all') {
+        $is_showing_demo = true;
+        $dummy_bookings = array(
+            array(
+                'id' => 28,
+                'lead_id' => 32,
+                'meeting_date' => '2026-06-26',
+                'meeting_time' => '13:30:00',
+                'meeting_type' => 'online',
+                'location_name' => 'Google Meet / Zoom',
+                'location_address' => 'Online Call Link',
+                'calendar_event_id' => '1gk5k5e9kcjq...',
+                'lead_score' => 260,
+                'client_name' => 'bensam',
+                'client_email' => 'bensammwaniki@gmail.com',
+                'client_phone' => '743491012',
+                'is_demo' => true
+            ),
+            array(
+                'id' => 27,
+                'lead_id' => 31,
+                'meeting_date' => '2026-06-26',
+                'meeting_time' => '12:45:00',
+                'meeting_type' => 'online',
+                'location_name' => 'Google Meet / Zoom',
+                'location_address' => 'Online Call Link',
+                'calendar_event_id' => 'jdjdlf6odcff...',
+                'lead_score' => 10,
+                'client_name' => 'Bensam',
+                'client_email' => 'bensammwaniki@gmail.com',
+                'client_phone' => '743491012',
+                'is_demo' => true
+            ),
+            array(
+                'id' => 26,
+                'lead_id' => 30,
+                'meeting_date' => '2026-06-26',
+                'meeting_time' => '12:00:00',
+                'meeting_type' => 'online',
+                'location_name' => 'Google Meet / Zoom',
+                'location_address' => 'Online Call Link',
+                'calendar_event_id' => 'hbpedse5eunb...',
+                'lead_score' => 10,
+                'client_name' => 'Bensam',
+                'client_email' => 'bensammwaniki@gmail.com',
+                'client_phone' => '743491012',
+                'is_demo' => true
+            )
+        );
+        $bookings = $dummy_bookings;
+        $total_bookings = 3;
+        $online_count = 3;
+        $coffee_count = 0;
+        $office_count = 0;
+        $host_count = 0;
+    }
     ?>
     <div class="wrap mc-leads-engine-admin">
         <!-- Top Bar -->
@@ -224,6 +281,13 @@ function mc_leads_engine_render_bookings_page() {
             <button class="btn primary" type="submit"><?php esc_html_e('Apply Filters', 'mc-leads-engine'); ?></button>
         </form>
 
+        <?php if ($is_showing_demo) : ?>
+            <div style="background:#eff6ff; border:1px solid #bfdbfe; color:#1e3a8a; padding:12px 16px; margin-bottom:20px; border-radius:var(--radius); font-size:12.5px; display:flex; align-items:center; gap:8px;">
+                <span style="font-size:16px;">💡</span>
+                <span><?php esc_html_e('Showing demo bookings since no scheduled reservations have been made yet.', 'mc-leads-engine'); ?></span>
+            </div>
+        <?php endif; ?>
+
         <!-- Table Panel -->
         <div class="panel">
             <div class="panel-header">
@@ -271,9 +335,9 @@ function mc_leads_engine_render_bookings_page() {
                     <?php else : ?>
                         <?php foreach ($bookings as $row) : 
                             $lead_id = (int)$row['lead_id'];
-                            $name = mc_leads_engine_leads_repository()->find_client_name($lead_id);
-                            $email = mc_leads_engine_leads_repository()->find_client_email($lead_id);
-                            $phone = mc_leads_engine_leads_repository()->find_client_phone($lead_id);
+                            $name = !empty($row['is_demo']) ? $row['client_name']  : mc_leads_engine_leads_repository()->find_client_name($lead_id);
+                            $email = !empty($row['is_demo']) ? $row['client_email'] : mc_leads_engine_leads_repository()->find_client_email($lead_id);
+                            $phone = !empty($row['is_demo']) ? $row['client_phone'] : mc_leads_engine_leads_repository()->find_client_phone($lead_id);
 
                             $type_labels = array(
                                 'online' => __('Online Call', 'mc-leads-engine'),

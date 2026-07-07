@@ -9,121 +9,10 @@ function mc_leads_engine_render_leads_page() {
         wp_die(esc_html__('You do not have permission to access this page.', 'mc-leads-engine'));
     }
 
-    $survey_id = absint($_GET['survey_id'] ?? 0);
-    $min_score = absint($_GET['min_score'] ?? 0);
-    $lead_id   = absint($_GET['lead_id'] ?? 0);
-    $search    = sanitize_text_field($_GET['search'] ?? '');
-    $paged     = max(1, absint($_GET['paged'] ?? 1));
-    $per_page  = 50;
-    $offset    = ($paged - 1) * $per_page;
-    $orderby   = sanitize_key($_GET['orderby'] ?? 'created_at');
-    $order     = strtoupper($_GET['order'] ?? 'DESC') === 'ASC' ? 'ASC' : 'DESC';
-
-    $allowed_orderby = array('id', 'created_at', 'lead_score', 'total_price');
-    if (!in_array($orderby, $allowed_orderby, true)) {
-        $orderby = 'created_at';
-    }
-
-    // ─── XLSX Export ─────────────────────────────────────────────────────────
-    if (!empty($_GET['export'])) {
-        check_admin_referer('mc_leads_engine_export_leads');
-        $rows = mc_leads_engine_leads_repository()->export_rows(array(
-            'survey_id' => $survey_id,
-            'min_score' => $min_score,
-            'search'    => $search,
-            'limit'     => 10000,
-            'orderby'   => $orderby,
-            'order'     => $order,
-        ));
-
-        global $wpdb;
-        $questions_rows = $wpdb->get_results("SELECT id, question_text FROM " . mc_leads_engine_table('survey_questions'), ARRAY_A);
-        $questions_map  = array();
-        if (is_array($questions_rows)) {
-            foreach ($questions_rows as $q) {
-                $questions_map[(int) $q['id']] = $q['question_text'];
-            }
-        }
-
-        $headers = array(
-            __('Lead ID', 'mc-leads-engine'),
-            __('Created Date', 'mc-leads-engine'),
-            __('Status', 'mc-leads-engine'),
-            __('Survey Title', 'mc-leads-engine'),
-            __('Client Name', 'mc-leads-engine'),
-            __('Client Email', 'mc-leads-engine'),
-            __('Client Phone', 'mc-leads-engine'),
-            __('Submitted Answers', 'mc-leads-engine'),
-            __('Estimated Price', 'mc-leads-engine'),
-            __('Lead Score', 'mc-leads-engine'),
-        );
-
-        $col_types      = array('text', 'text', 'text', 'text', 'text', 'text', 'text', 'text', 'price', 'score');
-        $col_alignments = array('center', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'right', 'center');
-
-        $export_data = array();
-        foreach ($rows as $row) {
-            $survey_row   = mc_leads_engine_survey_repository()->get_survey($row['survey_id']);
-            $is_booking   = mc_leads_is_booking($row);
-            $survey_title = $is_booking ? __('Bookings', 'mc-leads-engine') : ($survey_row['title'] ?? $row['survey_id']);
-
-            $name  = mc_leads_engine_leads_repository()->find_client_name($row['id']);
-            $email = mc_leads_engine_leads_repository()->find_client_email($row['id']);
-            $phone = mc_leads_engine_leads_repository()->find_client_phone($row['id']);
-
-            $answer_items    = mc_leads_engine_leads_repository()->build_answers_summary($row, $questions_map);
-            $answers_summary = implode("\n", $answer_items);
-
-            $export_data[] = array(
-                $row['id'],
-                $row['created_at'],
-                mc_leads_status_label($row['status'] ?? 'new'),
-                $survey_title,
-                $name,
-                $email,
-                $phone,
-                $answers_summary,
-                (float) $row['total_price'],
-                (int) $row['lead_score'],
-            );
-        }
-
-        $writer = new MC_Leads_Engine_XLSX_Writer('Leads');
-        $writer->set_headers($headers);
-        $writer->set_rows($export_data);
-        $writer->set_col_types($col_types);
-        $writer->set_col_alignments($col_alignments);
-        $writer->write_to_output('mc-leads-engine-leads.xlsx');
-    }
-
-    // ─── Data ─────────────────────────────────────────────────────────────────
-    $leads   = mc_leads_engine_leads_repository()->get_leads(array(
-        'survey_id' => $survey_id,
-        'min_score' => $min_score,
-        'search'    => $search,
-        'limit'     => $per_page,
-        'offset'    => $offset,
-        'orderby'   => $orderby,
-        'order'     => $order,
-    ));
-    $total_leads = mc_leads_engine_leads_repository()->count_leads(array(
-        'survey_id' => $survey_id,
-        'min_score' => $min_score,
-        'search'    => $search,
-    ));
-    $total_pages = (int) ceil($total_leads / $per_page);
-
-    $lead        = $lead_id ? mc_leads_engine_leads_repository()->get_lead($lead_id) : null;
-    $lead_cf7    = $lead_id ? mc_leads_engine_leads_repository()->get_cf7_data($lead_id) : array();
-    $surveys     = mc_leads_engine_survey_repository()->get_surveys(array('limit' => 100));
-
-    // ─── Sort URL helpers ─────────────────────────────────────────────────────
-    $sort_id_url    = add_query_arg(array('orderby' => 'id',         'order' => ($orderby === 'id'         && $order === 'DESC') ? 'ASC' : 'DESC', 'paged' => 1));
-    $sort_price_url = add_query_arg(array('orderby' => 'total_price','order' => ($orderby === 'total_price' && $order === 'DESC') ? 'ASC' : 'DESC', 'paged' => 1));
-    $sort_score_url = add_query_arg(array('orderby' => 'lead_score', 'order' => ($orderby === 'lead_score'  && $order === 'DESC') ? 'ASC' : 'DESC', 'paged' => 1));
-    $sort_date_url  = add_query_arg(array('orderby' => 'created_at', 'order' => ($orderby === 'created_at'  && $order === 'DESC') ? 'ASC' : 'DESC', 'paged' => 1));
-
+    $lead_id = absint($_GET['lead_id'] ?? 0);
     global $wpdb;
+
+    // Load surveys & questions for name mapping
     $questions_rows = $wpdb->get_results("SELECT id, question_text FROM " . mc_leads_engine_table('survey_questions'), ARRAY_A);
     $questions_map  = array();
     if (is_array($questions_rows)) {
@@ -131,90 +20,244 @@ function mc_leads_engine_render_leads_page() {
             $questions_map[(int) $q['id']] = $q['question_text'];
         }
     }
+
+    $lead = null;
+    $lead_cf7 = array();
+    $booking_row = null;
+
+    // Dummy fallback array if database has no leads or if requested ID is a dummy lead
+    $dummy_leads = array(
+        39 => array(
+            'id' => 39,
+            'created_at' => '2026-07-02 10:15:00',
+            'survey_id' => 1,
+            'status' => 'new',
+            'lead_score' => 0,
+            'total_price' => 10000,
+            'answers_json' => json_encode(array('source' => 'estimate')),
+            'client_name' => 'bensam',
+            'client_email' => 'bensammwaniki@gmail.com',
+            'client_phone' => '743491012',
+            'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+            'is_demo' => true
+        ),
+        38 => array(
+            'id' => 38,
+            'created_at' => '2026-07-01 16:24:00',
+            'survey_id' => 1,
+            'status' => 'new',
+            'lead_score' => 80,
+            'total_price' => 62500,
+            'answers_json' => json_encode(array('org' => 'school', 'goal' => 'branding', 'size' => 'medium')),
+            'client_name' => 'bensammwaniki',
+            'client_email' => 'bensammwaniki@gmail.com',
+            'client_phone' => '',
+            'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+            'is_demo' => true
+        ),
+        37 => array(
+            'id' => 37,
+            'created_at' => '2026-06-29 11:33:00',
+            'survey_id' => 1,
+            'status' => 'contacted',
+            'lead_score' => 105,
+            'total_price' => 49000,
+            'answers_json' => json_encode(array('org' => 'Small Business', 'goal' => 'leads, branding, payments')),
+            'client_name' => 'bensam',
+            'client_email' => 'bensammwaniki@gmail.com',
+            'client_phone' => '743491012',
+            'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+            'is_demo' => true
+        ),
+        36 => array(
+            'id' => 36,
+            'created_at' => '2026-06-25 20:29:00',
+            'survey_id' => 1,
+            'status' => 'new',
+            'lead_score' => 0,
+            'total_price' => 10000,
+            'answers_json' => json_encode(array('source' => 'estimate')),
+            'client_name' => 'bensam',
+            'client_email' => 'bnm@gma.com',
+            'client_phone' => '',
+            'user_agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+            'is_demo' => true
+        ),
+        35 => array(
+            'id' => 35,
+            'created_at' => '2026-06-25 20:27:00',
+            'survey_id' => 1,
+            'status' => 'new',
+            'lead_score' => 75,
+            'total_price' => 26000,
+            'answers_json' => json_encode(array('org' => 'Startup', 'goal' => 'branding')),
+            'client_name' => 'bensam',
+            'client_email' => 'bensammwaniki@gmail.com',
+            'client_phone' => '743491012',
+            'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+            'is_demo' => true
+        ),
+        34 => array(
+            'id' => 34,
+            'created_at' => '2026-06-25 20:14:00',
+            'survey_id' => 1,
+            'status' => 'new',
+            'lead_score' => 120,
+            'total_price' => 65000,
+            'answers_json' => json_encode(array('org' => 'corporate', 'goal' => 'payments')),
+            'client_name' => 'bensammwaniki',
+            'client_email' => 'bensammwaniki@gmail.com',
+            'client_phone' => '743491012',
+            'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+            'is_demo' => true
+        ),
+        33 => array(
+            'id' => 33,
+            'created_at' => '2026-06-25 19:59:00',
+            'survey_id' => 1,
+            'status' => 'new',
+            'lead_score' => 185,
+            'total_price' => 102000,
+            'answers_json' => json_encode(array('org' => 'school, ngo', 'goal' => 'leads, branding, payments…')),
+            'client_name' => 'bensam',
+            'client_email' => 'bensammwaniki@gmail.com',
+            'client_phone' => '743491012',
+            'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+            'is_demo' => true
+        ),
+        32 => array(
+            'id' => 32,
+            'created_at' => '2026-06-25 18:38:00',
+            'survey_id' => 2,
+            'status' => 'new',
+            'lead_score' => 260,
+            'total_price' => 119500,
+            'answers_json' => json_encode(array('org' => 'school, SB, ngo', 'msg' => 'my special tool')),
+            'client_name' => 'bensam',
+            'client_email' => 'bensammwaniki@gmail.com',
+            'client_phone' => '743491012',
+            'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+            'is_demo' => true
+        ),
+        31 => array(
+            'id' => 31,
+            'created_at' => '2026-06-25 18:11:00',
+            'survey_id' => 2,
+            'status' => 'new',
+            'lead_score' => 10,
+            'total_price' => 10000,
+            'answers_json' => json_encode(array()),
+            'client_name' => 'Bensam',
+            'client_email' => 'bensammwaniki@gmail.com',
+            'client_phone' => '743491012',
+            'user_agent' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_4 like Mac OS X)',
+            'is_demo' => true
+        ),
+        30 => array(
+            'id' => 30,
+            'created_at' => '2026-06-25 17:38:00',
+            'survey_id' => 2,
+            'status' => 'new',
+            'lead_score' => 10,
+            'total_price' => 10000,
+            'answers_json' => json_encode(array('msg' => 'Would love to meet')),
+            'client_name' => 'Bensam',
+            'client_email' => 'bensammwaniki@gmail.com',
+            'client_phone' => '743491012',
+            'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+            'is_demo' => true
+        ),
+    );
+
+    if ($lead_id) {
+        $lead = mc_leads_engine_leads_repository()->get_lead($lead_id);
+        if (!$lead && isset($dummy_leads[$lead_id])) {
+            $lead = $dummy_leads[$lead_id];
+        }
+        
+        if ($lead) {
+            $lead_cf7 = empty($lead['is_demo']) ? mc_leads_engine_leads_repository()->get_cf7_data($lead_id) : array();
+            
+            if (!empty($lead['is_demo'])) {
+                if ($lead_id == 32) {
+                    $booking_row = array(
+                        'id' => 28,
+                        'meeting_date' => '2026-06-26',
+                        'meeting_time' => '13:30:00',
+                        'meeting_type' => 'online',
+                        'location_name' => 'Google Meet / Zoom',
+                        'location_address' => 'Online Call Link',
+                        'calendar_event_id' => '1gk5k5e9kcjq...',
+                    );
+                } elseif ($lead_id == 31) {
+                    $booking_row = array(
+                        'id' => 27,
+                        'meeting_date' => '2026-06-26',
+                        'meeting_time' => '12:45:00',
+                        'meeting_type' => 'online',
+                        'location_name' => 'Google Meet / Zoom',
+                        'location_address' => 'Online Call Link',
+                        'calendar_event_id' => 'jdjdlf6odcff...',
+                    );
+                } elseif ($lead_id == 30) {
+                    $booking_row = array(
+                        'id' => 26,
+                        'meeting_date' => '2026-06-26',
+                        'meeting_time' => '12:00:00',
+                        'meeting_type' => 'online',
+                        'location_name' => 'Google Meet / Zoom',
+                        'location_address' => 'Online Call Link',
+                        'calendar_event_id' => 'hbpedse5eunb...',
+                    );
+                }
+            } else {
+                $booking_row = $wpdb->get_row($wpdb->prepare(
+                    "SELECT * FROM " . mc_leads_engine_table('bookings') . " WHERE lead_id = %d LIMIT 1",
+                    $lead_id
+                ), ARRAY_A);
+            }
+        }
+    }
+
     ?>
     <div class="wrap mc-leads-engine-admin">
-
-        <!-- Filter / Search Form -->
-        <form method="get" class="filter-bar">
-            <input type="hidden" name="page"    value="mc-leads-engine-leads">
-            <input type="hidden" name="orderby" value="<?php echo esc_attr($orderby); ?>">
-            <input type="hidden" name="order"   value="<?php echo esc_attr($order); ?>">
-            <input type="hidden" name="paged"   value="1">
-
-            <div class="filter-field">
-                <label><?php esc_html_e('Survey', 'mc-leads-engine'); ?></label>
-                <select name="survey_id" class="filter-select">
-                    <option value="0"><?php esc_html_e('All Surveys', 'mc-leads-engine'); ?></option>
-                    <?php foreach ($surveys as $survey) : ?>
-                        <option value="<?php echo esc_attr($survey['id']); ?>" <?php selected($survey_id, $survey['id']); ?>>
-                            <?php echo esc_html($survey['title']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <div class="filter-field">
-                <label><?php esc_html_e('Min Score', 'mc-leads-engine'); ?></label>
-                <input type="number" name="min_score" value="<?php echo esc_attr($min_score); ?>" min="0" class="filter-select" style="width:80px; padding:0 10px;">
-            </div>
-
-            <div class="filter-field">
-                <label><?php esc_html_e('Search', 'mc-leads-engine'); ?></label>
-                <input type="text" name="search" value="<?php echo esc_attr($search); ?>"
-                       placeholder="<?php esc_attr_e('Name, email or phone…', 'mc-leads-engine'); ?>"
-                       class="filter-select" style="min-width:200px; padding:0 10px;">
-            </div>
-
-            <div class="filter-spacer"></div>
-
-            <button class="btn primary" type="submit"><?php esc_html_e('Apply Filters', 'mc-leads-engine'); ?></button>
-
-            <?php wp_nonce_field('mc_leads_engine_export_leads'); ?>
-            <a class="btn"
-               href="<?php echo esc_url(add_query_arg(array(
-                   'page'       => 'mc-leads-engine-leads',
-                   'survey_id'  => $survey_id,
-                   'min_score'  => $min_score,
-                   'search'     => $search,
-                   'orderby'    => $orderby,
-                   'order'      => $order,
-                   'export'     => 1,
-                   '_wpnonce'   => wp_create_nonce('mc_leads_engine_export_leads'),
-               ), admin_url('admin.php'))); ?>">
-                <span class="dashicons dashicons-media-spreadsheet" style="vertical-align:middle; font-size:16px; margin-right:4px;"></span>
-                <?php esc_html_e('Export', 'mc-leads-engine'); ?>
-            </a>
-        </form>
-
-        <!-- ─── Lead Profile (detail view) ──────────────────────────────────── -->
         <?php if ($lead) :
             $repo          = mc_leads_engine_leads_repository();
-            $name          = $repo->find_client_name($lead_id);
-            $email         = $repo->find_client_email($lead_id);
-            $phone         = $repo->find_client_phone($lead_id);
+            $name          = !empty($lead['is_demo']) ? $lead['client_name']  : $repo->find_client_name($lead_id);
+            $email         = !empty($lead['is_demo']) ? $lead['client_email'] : $repo->find_client_email($lead_id);
+            $phone         = !empty($lead['is_demo']) ? $lead['client_phone'] : $repo->find_client_phone($lead_id);
             $is_booking    = mc_leads_is_booking($lead);
             $survey_row    = mc_leads_engine_survey_repository()->get_survey($lead['survey_id']);
             $band          = mc_leads_score_band($lead['lead_score']);
             $device        = mc_leads_parse_device($lead['user_agent'] ?? '');
             $status        = $lead['status'] ?? 'new';
-            $activity_log  = MC_Leads_Activity::get_log($lead_id);
+
+            $activity_log = !empty($lead['is_demo']) ? array(
+                array(
+                    'activity_type' => 'creation',
+                    'created_at' => $lead['created_at'],
+                    'body' => __('Lead submission received and score analyzed.', 'mc-leads-engine'),
+                ),
+            ) : MC_Leads_Activity::get_log($lead_id);
 
             // Build clean phone for WhatsApp link
             $clean_phone = preg_replace('/[^0-9]/', '', $phone ?? '');
             $wa_link     = $clean_phone ? 'https://wa.me/' . $clean_phone : '';
-
-            $booking_row  = $wpdb->get_row($wpdb->prepare(
-                "SELECT * FROM " . mc_leads_engine_table('bookings') . " WHERE lead_id = %d LIMIT 1",
-                $lead_id
-            ), ARRAY_A);
         ?>
         <div class="mc-lead-profile" style="margin-bottom: 24px;">
 
             <!-- Back navigation / action top bar -->
             <div class="topbar">
-                <a class="back-link" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-leads', 'survey_id' => $survey_id, 'min_score' => $min_score, 'search' => $search, 'orderby' => $orderby, 'order' => $order, 'paged' => $paged), admin_url('admin.php'))); ?>">← <?php esc_html_e('Back to all leads', 'mc-leads-engine'); ?></a>
+                <a class="back-link" href="<?php echo esc_url(admin_url('admin.php?page=mc-leads-engine-analytics')); ?>">← <?php esc_html_e('Back to Analytics', 'mc-leads-engine'); ?></a>
                 <a class="btn primary" href="<?php echo esc_url($wa_link ?: ($email ? 'mailto:' . $email : '#')); ?>" target="_blank" rel="noopener"><?php esc_html_e('Contact lead', 'mc-leads-engine'); ?></a>
             </div>
+
+            <?php if (!empty($lead['is_demo'])) : ?>
+                <div style="background:#eff6ff; border:1px solid #bfdbfe; color:#1e3a8a; padding:12px 16px; margin-bottom:20px; border-radius:var(--radius); font-size:12.5px; display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:16px;">💡</span>
+                    <span><?php esc_html_e('Showing demo details for this lead.', 'mc-leads-engine'); ?></span>
+                </div>
+            <?php endif; ?>
 
             <!-- Profile header panel -->
             <div class="panel profile-header">
@@ -299,7 +342,19 @@ function mc_leads_engine_render_leads_page() {
                             $answers = json_decode($lead['answers_json'] ?? '[]', true);
                             if (is_array($answers)) {
                                 foreach ($answers as $q_id => $val) {
-                                    $q_text  = $questions_map[(int) $q_id] ?? sprintf(__('Question #%d', 'mc-leads-engine'), $q_id);
+                                    if (is_numeric($q_id)) {
+                                        $q_text  = $questions_map[(int) $q_id] ?? sprintf(__('Question #%d', 'mc-leads-engine'), $q_id);
+                                    } else {
+                                        // Humanize string keys for dummy data
+                                        $friendly_map = array(
+                                            'org' => __('Organization Type', 'mc-leads-engine'),
+                                            'goal' => __('Project Goal', 'mc-leads-engine'),
+                                            'size' => __('Project Size', 'mc-leads-engine'),
+                                            'source' => __('Lead Source', 'mc-leads-engine'),
+                                            'msg' => __('Client Message', 'mc-leads-engine'),
+                                        );
+                                        $q_text = $friendly_map[$q_id] ?? ucfirst($q_id);
+                                    }
                                     $val_str = is_array($val) ? implode(', ', $val) : (string) $val;
                                     if ($val_str !== '') {
                                         $has_answers = true;
@@ -421,14 +476,15 @@ function mc_leads_engine_render_leads_page() {
                         
                         <ul class="timeline" id="mc-activity-timeline">
                             <?php foreach ($activity_log as $entry) :
-                                $type = MC_Leads_Activity::get_type_label($entry['activity_type']);
+                                $type = MC_Leads_Activity::get_type_label($entry['activity_type'] ?? 'note');
                                 
                                 $emoji = '📝';
-                                if ($entry['activity_type'] === 'status') {
+                                $act_type = $entry['activity_type'] ?? 'note';
+                                if ($act_type === 'status') {
                                     $emoji = '🔄';
-                                } elseif ($entry['activity_type'] === 'booking') {
+                                } elseif ($act_type === 'booking') {
                                     $emoji = '📅';
-                                } elseif ($entry['activity_type'] === 'creation') {
+                                } elseif ($act_type === 'creation') {
                                     $emoji = '✨';
                                 }
                             ?>
@@ -460,131 +516,20 @@ function mc_leads_engine_render_leads_page() {
             </div>
 
         </div>
+        <?php else : ?>
+            <!-- Empty state notice when no lead is selected -->
+            <div class="panel" style="padding: 48px 32px; text-align: center; max-width: 600px; margin: 40px auto; border-radius: var(--radius);">
+                <div style="font-size: 48px; margin-bottom: 20px;">🔍</div>
+                <h3 style="font-size: 16px; font-weight: 800; color: var(--text); margin: 0 0 10px;"><?php esc_html_e('No Lead Selected', 'mc-leads-engine'); ?></h3>
+                <p style="font-size: 12.5px; color: var(--muted); line-height: 1.6; margin: 0 0 24px;">
+                    <?php esc_html_e('To view a lead details profile, please select and click "View" on any entry from either the Analytics or Bookings page.', 'mc-leads-engine'); ?>
+                </p>
+                <div style="display: flex; justify-content: center; gap: 12px;">
+                    <a href="<?php echo esc_url(admin_url('admin.php?page=mc-leads-engine-analytics')); ?>" class="btn primary"><?php esc_html_e('Go to Analytics & Leads', 'mc-leads-engine'); ?></a>
+                    <a href="<?php echo esc_url(admin_url('admin.php?page=mc-leads-engine-bookings')); ?>" class="btn"><?php esc_html_e('Go to Bookings', 'mc-leads-engine'); ?></a>
+                </div>
+            </div>
         <?php endif; ?>
-
-        <!-- ─── Leads Table ──────────────────────────────────────────────────── -->
-        <div class="panel">
-            <div class="panel-header">
-                <div class="panel-title"><?php esc_html_e('All leads', 'mc-leads-engine'); ?></div>
-                <div class="panel-sub"><?php echo esc_html(sprintf(_n('%d lead', '%d leads', $total_leads, 'mc-leads-engine'), $total_leads)); ?></div>
-            </div>
-            <div class="table-wrap">
-                <table class="dtable">
-                    <thead>
-                        <tr>
-                            <th><a href="<?php echo esc_url($sort_id_url); ?>">
-                                <?php esc_html_e('Lead ID', 'mc-leads-engine'); ?>
-                                <?php if ($orderby === 'id') : ?><span class="dashicons dashicons-arrow-<?php echo $order === 'ASC' ? 'up' : 'down'; ?>-alt2" style="font-size:16px;width:16px;height:16px;vertical-align:middle"></span><?php endif; ?>
-                            </a></th>
-                            <th><a href="<?php echo esc_url($sort_date_url); ?>">
-                                <?php esc_html_e('Date', 'mc-leads-engine'); ?>
-                                <?php if ($orderby === 'created_at') : ?><span class="dashicons dashicons-arrow-<?php echo $order === 'ASC' ? 'up' : 'down'; ?>-alt2" style="font-size:16px;width:16px;height:16px;vertical-align:middle"></span><?php endif; ?>
-                            </a></th>
-                            <th><?php esc_html_e('Survey', 'mc-leads-engine'); ?></th>
-                            <th><?php esc_html_e('Status', 'mc-leads-engine'); ?></th>
-                            <th><?php esc_html_e('Client', 'mc-leads-engine'); ?></th>
-                            <th><?php esc_html_e('Answers', 'mc-leads-engine'); ?></th>
-                            <th><a href="<?php echo esc_url($sort_price_url); ?>">
-                                <?php esc_html_e('Price', 'mc-leads-engine'); ?>
-                                <?php if ($orderby === 'total_price') : ?><span class="dashicons dashicons-arrow-<?php echo $order === 'ASC' ? 'up' : 'down'; ?>-alt2" style="font-size:16px;width:16px;height:16px;vertical-align:middle"></span><?php endif; ?>
-                            </a></th>
-                            <th><a href="<?php echo esc_url($sort_score_url); ?>">
-                                <?php esc_html_e('Score', 'mc-leads-engine'); ?>
-                                <?php if ($orderby === 'lead_score') : ?><span class="dashicons dashicons-arrow-<?php echo $order === 'ASC' ? 'up' : 'down'; ?>-alt2" style="font-size:16px;width:16px;height:16px;vertical-align:middle"></span><?php endif; ?>
-                            </a></th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    <?php if (empty($leads)) : ?>
-                        <tr><td colspan="9" style="text-align:center;padding:24px; color: var(--mc-muted);">
-                            <span class="description"><?php esc_html_e('No leads found. Try adjusting your filters.', 'mc-leads-engine'); ?></span>
-                        </td></tr>
-                    <?php endif; ?>
-                    <?php foreach ($leads as $row) :
-                        $is_booking  = mc_leads_is_booking($row);
-                        $survey_row  = mc_leads_engine_survey_repository()->get_survey($row['survey_id']);
-                        $row_name    = mc_leads_engine_leads_repository()->find_client_name($row['id']);
-                        $row_email   = mc_leads_engine_leads_repository()->find_client_email($row['id']);
-                        $row_status  = $row['status'] ?? 'new';
-                        $row_band    = mc_leads_score_band($row['lead_score']);
-                        $detail_url  = add_query_arg(array(
-                            'page'      => 'mc-leads-engine-leads',
-                            'lead_id'   => $row['id'],
-                            'survey_id' => $survey_id,
-                            'min_score' => $min_score,
-                            'search'    => $search,
-                            'orderby'   => $orderby,
-                            'order'     => $order,
-                            'paged'     => $paged,
-                        ), admin_url('admin.php'));
-
-                        // Extract answers for chips
-                        $row_answers = json_decode($row['answers_json'] ?? '[]', true);
-                        $chip_count = 0;
-                        $max_chips = 2;
-                        $chips_html = '';
-                        if (is_array($row_answers)) {
-                            foreach ($row_answers as $q_id => $val) {
-                                $q_text = $questions_map[(int) $q_id] ?? '';
-                                if (!$q_text) continue;
-                                $val_str = is_array($val) ? implode(', ', $val) : (string) $val;
-                                if ($val_str === '') continue;
-
-                                $words = explode(' ', preg_replace('/[^a-z0-9 ]/i', '', strtolower($q_text)));
-                                $label_key = !empty($words[0]) ? $words[0] : 'q';
-                                if (strlen($label_key) > 8) $label_key = substr($label_key, 0, 7) . '.';
-
-                                if ($chip_count < $max_chips) {
-                                    $chips_html .= '<span class="answer-chip"><b>' . esc_html($label_key) . '</b>' . esc_html(strlen($val_str) > 15 ? substr($val_str, 0, 13) . '...' : $val_str) . '</span>';
-                                }
-                                $chip_count++;
-                            }
-                        }
-                        if ($chip_count > $max_chips) {
-                            $chips_html .= '<span class="answers-more">+' . ($chip_count - $max_chips) . ' more</span>';
-                        }
-                    ?>
-                        <tr>
-                            <td class="mono-id"><a href="<?php echo esc_url($detail_url); ?>">#<?php echo esc_html($row['id']); ?></a></td>
-                            <td class="cell-date"><?php echo esc_html(wp_date('Y-m-d', strtotime($row['created_at']))); ?><br><?php echo esc_html(wp_date('H:i', strtotime($row['created_at']))); ?></td>
-                            <td>
-                                <span class="dashicons <?php echo $is_booking ? 'dashicons-calendar-alt' : 'dashicons-media-document'; ?>" style="font-size:14px; width:14px; height:14px; vertical-align:middle; margin-right:4px; color:var(--mc-muted);"></span>
-                                <?php echo $is_booking ? esc_html__('Bookings', 'mc-leads-engine') : esc_html($survey_row['title'] ?? $row['survey_id']); ?>
-                            </td>
-                            <td><span class="status-pill status-<?php echo esc_attr($row_status); ?>"><?php echo esc_html(mc_leads_status_label($row_status)); ?></span></td>
-                            <td>
-                                <div class="client-name"><?php echo esc_html($row_name ?: __('(No name)', 'mc-leads-engine')); ?></div>
-                                <?php if ($row_email) : ?>
-                                    <div class="client-line"><?php echo esc_html($row_email); ?></div>
-                                <?php endif; ?>
-                            </td>
-                            <td><div class="answers-chips"><?php echo $chips_html; ?></div></td>
-                            <td class="mono-val"><?php echo esc_html(number_format_i18n((float) $row['total_price'])); ?></td>
-                            <td><span class="score-badge score-<?php echo esc_attr($row_band); ?>"><?php echo esc_html(ucfirst($row_band)); ?> · <?php echo (int) $row['lead_score']; ?></span></td>
-                            <td><a href="<?php echo esc_url($detail_url); ?>" class="view-link"><?php esc_html_e('View', 'mc-leads-engine'); ?></a></td>
-                        </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            <?php if ($total_pages > 1) : ?>
-            <div class="mc-pagination" style="padding: 14px; display: flex; justify-content: space-between; align-items: center; background: var(--paper); border-top: 1px solid var(--line);">
-                <div>
-                    <?php if ($paged > 1) : ?>
-                        <a class="btn" href="<?php echo esc_url(add_query_arg('paged', $paged - 1)); ?>">&laquo; <?php esc_html_e('Previous', 'mc-leads-engine'); ?></a>
-                    <?php endif; ?>
-                </div>
-                <span style="font-weight: 600; font-size: 12px; color: var(--muted);"><?php echo esc_html(sprintf(__('Page %d of %d', 'mc-leads-engine'), $paged, $total_pages)); ?></span>
-                <div>
-                    <?php if ($paged < $total_pages) : ?>
-                        <a class="btn" href="<?php echo esc_url(add_query_arg('paged', $paged + 1)); ?>"><?php esc_html_e('Next', 'mc-leads-engine'); ?> &raquo;</a>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <?php endif; ?>
     </div>
     <?php
 }

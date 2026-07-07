@@ -229,12 +229,12 @@
   padding-top: 8px;
 }
 
-.panel {
+.mc-admin-content > .panel {
   display: none;
   animation: mcFadeIn 0.18s ease;
 }
 
-.panel.active {
+.mc-admin-content > .panel.active {
   display: block;
 }
 
@@ -1252,9 +1252,32 @@
 
 .mc-leads-engine-admin .settings-section-pane.active,
 .mc-leads-engine-admin .pane.active {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 1200px) {
+  .mc-leads-engine-admin .settings-section-pane.active,
+  .mc-leads-engine-admin .pane.active {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mc-leads-engine-admin .settings-section-pane.active .card:has(.code-box),
+.mc-leads-engine-admin .settings-section-pane.active .card:has(.code-editor),
+.mc-leads-engine-admin .settings-section-pane.active .card:has(textarea),
+.mc-leads-engine-admin .settings-section-pane.active .card:has(table),
+.mc-leads-engine-admin .settings-section-pane.active .card:has(.conn-card),
+.mc-leads-engine-admin .settings-section-pane.active .card.card-full,
+.mc-leads-engine-admin .pane.active .card:has(.code-box),
+.mc-leads-engine-admin .pane.active .card:has(.code-editor),
+.mc-leads-engine-admin .pane.active .card:has(textarea),
+.mc-leads-engine-admin .pane.active .card:has(table),
+.mc-leads-engine-admin .pane.active .card:has(.conn-card),
+.mc-leads-engine-admin .pane.active .card.card-full {
+  grid-column: 1 / -1;
 }
 
 /* Cards & Fields */
@@ -3067,9 +3090,25 @@
   display: none;
 }
 .mc-leads-engine-admin .spane.active {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 1200px) {
+  .mc-leads-engine-admin .spane.active {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mc-leads-engine-admin .spane.active .card:has(.code-box),
+.mc-leads-engine-admin .spane.active .card:has(.code-editor),
+.mc-leads-engine-admin .spane.active .card:has(textarea),
+.mc-leads-engine-admin .spane.active .card:has(table),
+.mc-leads-engine-admin .spane.active .card:has(.conn-card),
+.mc-leads-engine-admin .spane.active .card.card-full {
+  grid-column: 1 / -1;
 }
 
 /* Code box textareas */
