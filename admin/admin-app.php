@@ -362,7 +362,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                             <a href="<?php echo esc_url(add_query_arg('page', 'mc-leads-engine-analytics', admin_url('admin.php'))); ?>" style="text-decoration:none; color:inherit; display:block;">
                                 <div class="kpi-card money" style="cursor:pointer; height:100%;">
                                     <span class="kicon">KES</span>
-                                    <div class="kpi-value"><?php echo esc_html(number_format_i18n($analytics['avg_value'], 2)); ?></div>
+                                    <div class="kpi-value"><?php echo esc_html(number_format_i18n(round($analytics['avg_value']))); ?></div>
                                     <div class="kpi-label"><?php esc_html_e('Avg lead value', 'mc-leads-engine'); ?></div>
                                     <div class="kpi-delta"><?php esc_html_e('Estimated avg', 'mc-leads-engine'); ?></div>
                                 </div>
@@ -400,7 +400,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                             <a class="stage-link" href="<?php echo esc_url($stage_url); ?>">
                                 <div class="stage-cell">
                                     <span class="stage-count <?php echo esc_attr($cnt_class); ?>"><?php echo esc_html(number_format_i18n($cnt)); ?></span>
-                                    <span class="stage-label <?php echo esc_attr($slug); ?>"><?php echo esc_html($label); ?></span>
+                                    <span class="stage-label <?php echo $slug === 'proposal_sent' ? 'proposal' : esc_attr($slug); ?>"><?php echo esc_html($label); ?></span>
                                 </div>
                             </a>
                             <?php endforeach; ?>
@@ -439,13 +439,13 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                             <div class="panel">
                                 <div class="panel-header" style="display:flex; justify-content:space-between; align-items:baseline; padding: 14px 18px 2px;">
                                     <div class="panel-title"><?php esc_html_e('Recent leads', 'mc-leads-engine'); ?></div>
-                                    <a href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-analytics'), admin_url('admin.php'))); ?>" style="font-size:11px; font-weight:700; color:var(--coral); text-decoration:none;"><?php esc_html_e('View all →', 'mc-leads-engine'); ?></a>
+                                    <a href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-leads'), admin_url('admin.php'))); ?>" style="font-size:11px; font-weight:700; color:var(--coral); text-decoration:none;"><?php esc_html_e('View all →', 'mc-leads-engine'); ?></a>
                                 </div>
-                                <div class="mini-table-wrap">
+                                <div class="table-wrap">
                                     <?php if (empty($recent_leads)) : ?>
                                         <p style="text-align: center; color: var(--mc-muted); padding: 24px 0; margin: 0; font-style: italic;"><?php esc_html_e('No leads yet.', 'mc-leads-engine'); ?></p>
                                     <?php else : ?>
-                                    <table class="mini-leads">
+                                    <table class="dtable">
                                         <thead>
                                             <tr>
                                                 <th><?php esc_html_e('Lead', 'mc-leads-engine'); ?></th>
@@ -460,23 +460,21 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                                 $rl_score = (int) ($rl['lead_score'] ?? 0);
                                                 $rl_band  = mc_leads_score_band($rl_score);
                                                 $rl_status = sanitize_key($rl['status'] ?? 'new');
-                                                $rl_name  = trim(($rl['name'] ?? '') ?: ($rl['email'] ?? ''));
-                                                if (!$rl_name) $rl_name = '#' . $rl['id'];
                                                 $rl_url = add_query_arg(array('page' => 'mc-leads-engine-leads', 'lead_id' => $rl['id']), admin_url('admin.php'));
                                             ?>
                                             <tr>
-                                                <td class="lead-id-mono" style="font-weight: 600;"><?php echo esc_html($rl_name); ?></td>
-                                                <td><span class="score-chip <?php echo esc_attr($rl_band); ?>"><?php echo esc_html($rl_score); ?></span></td>
-                                                <td class="val-mono">KES <?php echo esc_html(number_format_i18n((float)($rl['total_price'] ?? 0), 2)); ?></td>
+                                                <td class="mono-id">#<?php echo esc_html($rl['id']); ?></td>
+                                                <td><span class="score-badge score-<?php echo esc_attr($rl_band); ?>"><?php echo esc_html($rl_score); ?></span></td>
+                                                <td class="mono-val"><?php echo esc_html(number_format_i18n((float)($rl['total_price'] ?? 0))); ?></td>
                                                 <td><span class="status-pill status-<?php echo esc_attr($rl_status); ?>"><?php echo esc_html(mc_leads_status_label($rl_status)); ?></span></td>
-                                                <td><a class="mini-view" href="<?php echo esc_url($rl_url); ?>"><?php esc_html_e('View', 'mc-leads-engine'); ?></a></td>
+                                                <td><a class="view-link" href="<?php echo esc_url($rl_url); ?>"><?php esc_html_e('View', 'mc-leads-engine'); ?></a></td>
                                             </tr>
                                             <?php endforeach; ?>
                                         </tbody>
                                     </table>
                                     <?php endif; ?>
                                 </div>
-                                <a class="panel-foot-link" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-analytics'), admin_url('admin.php'))); ?>">☰ <?php esc_html_e('View all leads', 'mc-leads-engine'); ?></a>
+                                <a class="panel-foot-link" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-leads'), admin_url('admin.php'))); ?>">☰ <?php esc_html_e('View all leads', 'mc-leads-engine'); ?></a>
                             </div>
 
                         </div>
@@ -1044,25 +1042,25 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                             <div class="settings-container">
                                 <!-- Left Sidebar Tabs -->
                                 <div class="settings-sidebar">
-                                    <button type="button" class="settings-tab-btn active" data-tab="general">
+                                    <button type="button" class="settings-tab-btn stab active" data-tab="general">
                                         <span class="dashicons dashicons-admin-generic"></span> <?php esc_html_e('General Settings', 'mc-leads-engine'); ?>
                                     </button>
-                                    <button type="button" class="settings-tab-btn" data-tab="user-email">
+                                    <button type="button" class="settings-tab-btn stab" data-tab="user-email">
                                         <span class="dashicons dashicons-email-alt"></span> <?php esc_html_e('User Email Notification', 'mc-leads-engine'); ?>
                                     </button>
-                                    <button type="button" class="settings-tab-btn" data-tab="admin-email">
+                                    <button type="button" class="settings-tab-btn stab" data-tab="admin-email">
                                         <span class="dashicons dashicons-email-alt2"></span> <?php esc_html_e('Admin Email Notification', 'mc-leads-engine'); ?>
                                     </button>
-                                    <button type="button" class="settings-tab-btn" data-tab="whatsapp">
+                                    <button type="button" class="settings-tab-btn stab" data-tab="whatsapp">
                                         <span class="dashicons dashicons-whatsapp"></span> <?php esc_html_e('WhatsApp Notifications', 'mc-leads-engine'); ?>
                                     </button>
-                                    <button type="button" class="settings-tab-btn" data-tab="consent">
+                                    <button type="button" class="settings-tab-btn stab" data-tab="consent">
                                         <span class="dashicons dashicons-shield"></span> <?php esc_html_e('Consent & Tracking', 'mc-leads-engine'); ?>
                                     </button>
-                                    <button type="button" class="settings-tab-btn" data-tab="placeholders">
+                                    <button type="button" class="settings-tab-btn stab" data-tab="placeholders">
                                         <span class="dashicons dashicons-editor-code"></span> <?php esc_html_e('Placeholder Guide', 'mc-leads-engine'); ?>
                                     </button>
-                                    <button type="button" class="settings-tab-btn" data-tab="pricing">
+                                    <button type="button" class="settings-tab-btn stab" data-tab="pricing">
                                         <span class="dashicons dashicons-money-alt"></span> <?php esc_html_e('Pricing Rules', 'mc-leads-engine'); ?>
                                     </button>
                                 </div>
@@ -1070,7 +1068,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                 <!-- Right Pane -->
                                 <div class="settings-content">
                                     <!-- General Tab -->
-                                    <div class="settings-section-pane active" data-pane="general">
+                                    <div class="settings-section-pane spane active" data-pane="general">
                                         <div class="card">
                                             <div class="card-title"><?php esc_html_e('General Settings', 'mc-leads-engine'); ?></div>
                                             <div class="settings-field">
@@ -1087,7 +1085,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                     </div>
                                     
                                     <!-- User Email Tab -->
-                                    <div class="settings-section-pane" data-pane="user-email">
+                                    <div class="settings-section-pane spane" data-pane="user-email">
                                         <div class="card">
                                             <div class="card-title"><?php esc_html_e('User Email Notification Template', 'mc-leads-engine'); ?></div>
                                             <p class="field-desc-top"><?php esc_html_e('Configure the HTML email sent to clients who submit a survey. Use inline CSS to style the markup.', 'mc-leads-engine'); ?></p>
@@ -1117,7 +1115,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                     </div>
                                     
                                     <!-- Admin Email Tab -->
-                                    <div class="settings-section-pane" data-pane="admin-email">
+                                    <div class="settings-section-pane spane" data-pane="admin-email">
                                         <div class="card">
                                             <div class="card-title"><?php esc_html_e('Admin Email Notification Template', 'mc-leads-engine'); ?></div>
                                             <p class="field-desc-top"><?php esc_html_e('Configure the HTML notification email sent to the site admin upon submission.', 'mc-leads-engine'); ?></p>
@@ -1147,7 +1145,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                     </div>
                                     
                                     <!-- WhatsApp Tab -->
-                                    <div class="settings-section-pane" data-pane="whatsapp">
+                                    <div class="settings-section-pane spane" data-pane="whatsapp">
                                         <div class="card">
                                             <div class="card-title"><?php esc_html_e('WhatsApp Notification Settings', 'mc-leads-engine'); ?></div>
                                             
@@ -1209,7 +1207,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                     </div>
                                     
                                     <!-- Consent & Tracking Tab -->
-                                    <div class="settings-section-pane" data-pane="consent">
+                                    <div class="settings-section-pane spane" data-pane="consent">
                                         <div class="card">
                                             <div class="card-title"><?php esc_html_e('Cookie Consent Banner', 'mc-leads-engine'); ?></div>
                                             <p class="field-desc-top"><?php esc_html_e('Configure a premium, floating cookie banner to get consent for passive tracking. Core functionality is never blocked.', 'mc-leads-engine'); ?></p>
@@ -1297,7 +1295,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                     </div>
                                     
                                     <!-- Placeholders Tab -->
-                                    <div class="settings-section-pane" data-pane="placeholders">
+                                    <div class="settings-section-pane spane" data-pane="placeholders">
                                         <div class="card">
                                             <div class="card-title"><?php esc_html_e('Dynamic Placeholders Cheat Sheet', 'mc-leads-engine'); ?></div>
                                             <p><?php esc_html_e('Use these tags in email subjects, bodies, or WhatsApp messages to embed client entries.', 'mc-leads-engine'); ?></p>
@@ -1343,7 +1341,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                     </div>
 
                                     <!-- Pricing Rules Tab -->
-                                    <div class="settings-section-pane" data-pane="pricing" id="panel-pricing">
+                                    <div class="settings-section-pane spane" data-pane="pricing" id="panel-pricing">
                                         <!-- Panel intro description & sample rule -->
                                         <div class="pricing-intro-card">
                                             <div class="pricing-intro-title">

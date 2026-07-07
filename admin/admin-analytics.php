@@ -192,8 +192,9 @@ function mc_leads_engine_render_analytics_page() {
                 '_wpnonce'         => wp_create_nonce('mc_leads_engine_export_analytics'),
             ), admin_url('admin.php'));
             ?>
-            <a class="view-link action-link" href="<?php echo esc_url($export_url); ?>">
-                <?php esc_html_e('Export to Excel', 'mc-leads-engine'); ?>
+            <a class="btn" href="<?php echo esc_url($export_url); ?>">
+                <span class="dashicons dashicons-media-spreadsheet" style="vertical-align:middle; font-size:16px; margin-right:4px;"></span>
+                <?php esc_html_e('Export', 'mc-leads-engine'); ?>
             </a>
         </div>
 
@@ -285,7 +286,7 @@ function mc_leads_engine_render_analytics_page() {
                 </select>
             </div>
 
-            <button class="view-link filter-submit" type="submit"><?php esc_html_e('Apply filters', 'mc-leads-engine'); ?></button>
+            <button class="btn primary" type="submit"><?php esc_html_e('Apply filters', 'mc-leads-engine'); ?></button>
         </form>
 
         <!-- Drop-off Funnel Chart -->
@@ -348,7 +349,7 @@ function mc_leads_engine_render_analytics_page() {
                 <div class="panel-sub"><?php esc_html_e('UTM parameter attribution metrics', 'mc-leads-engine'); ?></div>
             </div>
             <div class="table-wrap">
-                <table class="leads-table">
+                <table class="dtable">
                     <thead>
                         <tr>
                             <th><?php esc_html_e('Source', 'mc-leads-engine'); ?></th>
@@ -383,7 +384,7 @@ function mc_leads_engine_render_analytics_page() {
                                     <?php echo $flame_chars; ?><?php echo esc_html($avg_score); ?>
                                 </span>
                             </td>
-                            <td class="cell-price">KES <?php echo esc_html(number_format_i18n((float) $utm_row['avg_value'], 2)); ?></td>
+                            <td class="mono-val"><?php echo esc_html(number_format_i18n(round((float) $utm_row['avg_value']))); ?></td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
@@ -468,7 +469,7 @@ function mc_leads_engine_render_analytics_page() {
             </div>
 
             <div class="table-wrap">
-                <table class="leads-table submitted-data-table">
+                <table class="dtable">
                     <thead>
                         <tr>
                             <th><?php esc_html_e('Lead ID', 'mc-leads-engine'); ?></th>
@@ -511,7 +512,7 @@ function mc_leads_engine_render_analytics_page() {
                             $hidden_count = max(0, count($answer_items) - count($visible_answers));
                         ?>
                             <tr>
-                                <td><a class="lead-id" href="<?php echo esc_url($view_url); ?>">#<?php echo esc_html($lead['id']); ?></a></td>
+                                <td class="mono-id"><a href="<?php echo esc_url($view_url); ?>">#<?php echo esc_html($lead['id']); ?></a></td>
                                 <td class="cell-date">
                                     <?php if ($created_ts) : ?>
                                         <?php echo esc_html(date_i18n('Y-m-d', $created_ts)); ?><br>
@@ -527,7 +528,7 @@ function mc_leads_engine_render_analytics_page() {
                                         <div class="client-line"><?php echo esc_html($contact_line); ?></div>
                                     <?php endif; ?>
                                 </td>
-                                <td class="cell-survey"><?php echo esc_html($survey_title); ?></td>
+                                <td><?php echo esc_html($survey_title); ?></td>
                                 <td>
                                     <div class="answers-chips" title="<?php echo esc_attr($answer_title); ?>">
                                         <?php if (empty($answer_items)) : ?>
@@ -546,7 +547,7 @@ function mc_leads_engine_render_analytics_page() {
                                         <?php endif; ?>
                                     </div>
                                 </td>
-                                <td class="cell-price">KES <?php echo esc_html(number_format_i18n((float) $lead['total_price'], 2)); ?></td>
+                                <td class="mono-val"><?php echo esc_html(number_format_i18n(round((float) $lead['total_price']))); ?></td>
                                 <td><span class="score-badge score-<?php echo esc_attr($band); ?>"><?php echo esc_html($band_label); ?> &middot; <?php echo esc_html($l_score); ?></span></td>
                                 <td><a href="<?php echo esc_url($view_url); ?>" class="view-link"><?php esc_html_e('View', 'mc-leads-engine'); ?></a></td>
                             </tr>
@@ -645,7 +646,7 @@ function mc_leads_engine_render_analytics_page() {
             </div>
 
             <!-- Footer Pagination -->
-            <div class="panel-foot">
+            <div class="panel-foot" style="display:flex; justify-content:space-between; align-items:center;">
                 <div>
                     <?php 
                     $start_entry = $offset + 1;
@@ -660,11 +661,11 @@ function mc_leads_engine_render_analytics_page() {
                 <?php if ($total_pages > 1) : ?>
                 <div class="mc-pagination">
                     <?php if ($paged > 1) : ?>
-                        <a class="view-link pagination-link" href="<?php echo esc_url(add_query_arg('paged', $paged - 1)); ?>">&laquo; <?php esc_html_e('Prev', 'mc-leads-engine'); ?></a>
+                        <a class="btn" href="<?php echo esc_url(add_query_arg('paged', $paged - 1)); ?>">&laquo; <?php esc_html_e('Prev', 'mc-leads-engine'); ?></a>
                     <?php endif; ?>
-                    <span class="pagination-count"><?php echo esc_html(sprintf(__('Page %d of %d', 'mc-leads-engine'), $paged, $total_pages)); ?></span>
+                    <span class="pagination-count" style="font-weight: 600; font-size: 12px; color: var(--muted); margin: 0 10px;"><?php echo esc_html(sprintf(__('Page %d of %d', 'mc-leads-engine'), $paged, $total_pages)); ?></span>
                     <?php if ($paged < $total_pages) : ?>
-                        <a class="view-link pagination-link" href="<?php echo esc_url(add_query_arg('paged', $paged + 1)); ?>"><?php esc_html_e('Next', 'mc-leads-engine'); ?> &raquo;</a>
+                        <a class="btn" href="<?php echo esc_url(add_query_arg('paged', $paged + 1)); ?>"><?php esc_html_e('Next', 'mc-leads-engine'); ?> &raquo;</a>
                     <?php endif; ?>
                 </div>
                 <?php endif; ?>

@@ -246,32 +246,32 @@ function mc_leads_engine_render_settings_page() {
 
             <div class="settings-shell">
                 <!-- Left Sidebar Tabs -->
-                <div class="settings-tabs">
-                    <button type="button" class="settings-tab-btn active" data-tab="general">
+                <div class="stabs">
+                    <button type="button" class="settings-tab-btn stab active" data-tab="general">
                         <span class="ic">⚙</span> <?php esc_html_e('General', 'mc-leads-engine'); ?>
                     </button>
-                    <button type="button" class="settings-tab-btn" data-tab="user-email">
+                    <button type="button" class="settings-tab-btn stab" data-tab="user-email">
                         <span class="ic">✉</span> <?php esc_html_e('User email', 'mc-leads-engine'); ?>
                     </button>
-                    <button type="button" class="settings-tab-btn" data-tab="admin-email">
+                    <button type="button" class="settings-tab-btn stab" data-tab="admin-email">
                         <span class="ic">📩</span> <?php esc_html_e('Admin email', 'mc-leads-engine'); ?>
                     </button>
-                    <button type="button" class="settings-tab-btn" data-tab="whatsapp">
+                    <button type="button" class="settings-tab-btn stab" data-tab="whatsapp">
                         <span class="ic">💬</span> <?php esc_html_e('WhatsApp', 'mc-leads-engine'); ?>
                     </button>
-                    <button type="button" class="settings-tab-btn" data-tab="booking">
+                    <button type="button" class="settings-tab-btn stab" data-tab="booking">
                         <span class="ic">📅</span> <?php esc_html_e('Booking', 'mc-leads-engine'); ?>
                     </button>
-                    <button type="button" class="settings-tab-btn" data-tab="consent">
+                    <button type="button" class="settings-tab-btn stab" data-tab="consent">
                         <span class="ic">🛡</span> <?php esc_html_e('Consent & tracking', 'mc-leads-engine'); ?>
                     </button>
-                    <button type="button" class="settings-tab-btn" data-tab="placeholders">
+                    <button type="button" class="settings-tab-btn stab" data-tab="placeholders">
                         <span class="ic">{ }</span> <?php esc_html_e('Placeholders', 'mc-leads-engine'); ?>
                     </button>
-                    <button type="button" class="settings-tab-btn" data-tab="pricing">
+                    <button type="button" class="settings-tab-btn stab" data-tab="pricing">
                         <span class="ic">💰</span> <?php esc_html_e('Pricing rules', 'mc-leads-engine'); ?>
                     </button>
-                    <button type="button" class="settings-tab-btn" data-tab="purging">
+                    <button type="button" class="settings-tab-btn stab" data-tab="purging">
                         <span class="ic">🗑</span> <?php esc_html_e('Data maintenance', 'mc-leads-engine'); ?> <span class="danger-dot"></span>
                     </button>
                 </div>
@@ -280,7 +280,7 @@ function mc_leads_engine_render_settings_page() {
                 <div class="settings-content" id="panes">
                     
                     <!-- GENERAL PANE -->
-                    <div class="settings-section-pane active" data-pane="general">
+                    <div class="settings-section-pane spane active" data-pane="general">
                         <div class="card">
                             <div class="card-title"><?php esc_html_e('General settings', 'mc-leads-engine'); ?></div>
                             <div class="field">
@@ -336,7 +336,7 @@ function mc_leads_engine_render_settings_page() {
                     </div>
                     
                     <!-- USER EMAIL PANE -->
-                    <div class="settings-section-pane" data-pane="user-email">
+                    <div class="settings-section-pane spane" data-pane="user-email">
                         <div class="card">
                             <div class="card-title"><?php esc_html_e('User email — Survey submission', 'mc-leads-engine'); ?></div>
                             <div class="card-desc"><?php esc_html_e('Sent to the client automatically after they complete a survey.', 'mc-leads-engine'); ?></div>
@@ -379,7 +379,7 @@ function mc_leads_engine_render_settings_page() {
                     </div>
                     
                     <!-- ADMIN EMAIL PANE -->
-                    <div class="settings-section-pane" data-pane="admin-email">
+                    <div class="settings-section-pane spane" data-pane="admin-email">
                         <div class="card">
                             <div class="card-title"><?php esc_html_e('Admin email — New lead alert', 'mc-leads-engine'); ?></div>
                             <div class="card-desc"><?php esc_html_e('Sent to your notification address whenever a survey is submitted.', 'mc-leads-engine'); ?></div>
@@ -420,7 +420,7 @@ function mc_leads_engine_render_settings_page() {
                     </div>
                     
                     <!-- WHATSAPP PANE -->
-                    <div class="settings-section-pane" data-pane="whatsapp">
+                    <div class="settings-section-pane spane" data-pane="whatsapp">
                         <div class="card">
                             <div class="card-title"><?php esc_html_e('Gateway API settings', 'mc-leads-engine'); ?></div>
                             <div class="field">
@@ -482,7 +482,7 @@ function mc_leads_engine_render_settings_page() {
                     </div>
                     
                     <!-- BOOKING PANE -->
-                    <div class="settings-section-pane" data-pane="booking">
+                    <div class="settings-section-pane spane" data-pane="booking">
                         <div class="card">
                             <div class="card-title"><?php esc_html_e('Google Calendar integration', 'mc-leads-engine'); ?></div>
                             <div class="card-desc"><?php esc_html_e('Syncs availability in real time to prevent double booking.', 'mc-leads-engine'); ?></div>
@@ -635,7 +635,7 @@ function mc_leads_engine_render_settings_page() {
                     </div>
                     
                     <!-- CONSENT & TRACKING PANE -->
-                    <div class="settings-section-pane" data-pane="consent">
+                    <div class="settings-section-pane spane" data-pane="consent">
                         <div class="card">
                             <div class="card-title"><?php esc_html_e('Cookie consent banner', 'mc-leads-engine'); ?></div>
                             <div class="toggle-row" style="margin-bottom:14px;">
@@ -721,7 +721,7 @@ function mc_leads_engine_render_settings_page() {
                     </div>
                     
                     <!-- PLACEHOLDERS PANE -->
-                    <div class="settings-section-pane" data-pane="placeholders">
+                    <div class="settings-section-pane spane" data-pane="placeholders">
                         <div class="card">
                             <div class="card-title"><?php esc_html_e('Dynamic placeholders cheat sheet', 'mc-leads-engine'); ?></div>
                             <div class="card-desc"><?php esc_html_e('Use these tags in email subjects, bodies, or WhatsApp messages — they\'re replaced with real submission data.', 'mc-leads-engine'); ?></div>
@@ -779,7 +779,7 @@ function mc_leads_engine_render_settings_page() {
                     </div>
                     
                     <!-- PRICING RULES PANE -->
-                    <div class="settings-section-pane" data-pane="pricing" id="panel-pricing">
+                    <div class="settings-section-pane spane" data-pane="pricing" id="panel-pricing">
                         <div class="card">
                             <div class="card-title"><?php esc_html_e('How pricing rules work', 'mc-leads-engine'); ?></div>
                             <div class="card-desc"><?php esc_html_e('Rules calculate dynamic pricing and lead score from survey answers. The engine matches keywords against question text or selected option values.', 'mc-leads-engine'); ?></div>
@@ -869,7 +869,7 @@ function mc_leads_engine_render_settings_page() {
                     </div>
                     
                     <!-- DATA MAINTENANCE PANE -->
-                    <div class="settings-section-pane" data-pane="purging">
+                    <div class="settings-section-pane spane" data-pane="purging">
                         <div class="danger-zone">
                             <div class="card-title"><?php esc_html_e('Data maintenance & purging', 'mc-leads-engine'); ?></div>
                             <div class="card-desc" style="color:#8a3d3a;"><?php esc_html_e('Permanently delete lead submissions, bookings, answers, and tracking data. This cannot be undone.', 'mc-leads-engine'); ?></div>
