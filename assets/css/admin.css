@@ -2834,6 +2834,7 @@
   grid-template-columns: 1fr 1.35fr;
   gap: 16px;
   align-items: start;
+  margin-top: 50px;
 }
 .mc-leads-engine-admin .bars-row {
   display: flex;
