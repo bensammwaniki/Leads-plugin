@@ -16,24 +16,6 @@ $message = !empty($survey_settings['final_message']) ? $survey_settings['final_m
 $pricing = array(
     'total_price' => $lead ? $lead['total_price'] : 0,
     'lead_score'  => $lead ? $lead['lead_score'] : 0,
-<?php
-if (!defined('ABSPATH')) {
-    exit;
-}
-
-$lead_id = absint($lead_id ?? 0);
-$survey_id = absint($survey_id ?? 0);
-$lead = mc_leads_engine_leads_repository()->get_lead($lead_id);
-
-global $wpdb;
-$booking = $lead ? $wpdb->get_row($wpdb->prepare("SELECT * FROM " . mc_leads_engine_table('bookings') . " WHERE lead_id = %d", $lead_id), ARRAY_A) : null;
-$new_estimate_url = remove_query_arg(array('mc_leads_submitted', 'lead_id'));
-
-$survey_settings = mc_leads_engine_get_survey_settings($survey_id);
-$message = !empty($survey_settings['final_message']) ? $survey_settings['final_message'] : __('Your estimate request has been submitted successfully.', 'mc-leads-engine');
-$pricing = array(
-    'total_price' => $lead ? $lead['total_price'] : 0,
-    'lead_score'  => $lead ? $lead['lead_score'] : 0,
 );
 $message_formatted = mc_leads_engine_format_final_message($message, $pricing, $survey_id);
 if ($lead) {

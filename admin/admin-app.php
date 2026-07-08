@@ -623,22 +623,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                         </div>
 
                         <?php if (empty($selected_survey_id)) : ?>
-                            <div class="empty-panel">
-                                <div class="empty-icon-wrap">
-                                    <span class="dashicons dashicons-welcome-write-blog"></span>
-                                </div>
-                                <h2><?php esc_html_e('Select or create a survey to get started', 'mc-leads-engine'); ?></h2>
-                                <p><?php esc_html_e('Build multi-step surveys to capture lead info, calculate pricing, and segment customers.', 'mc-leads-engine'); ?></p>
-                                
-                                <div class="template-section">
-                                    <h3><?php esc_html_e('Or start with a template:', 'mc-leads-engine'); ?></h3>
-                                    <div class="template-chips">
-                                        <a href="<?php echo esc_url(admin_url('admin.php?page=mc-leads-engine-surveys&mc_panel=surveys&new_survey_title=' . urlencode('Web Project Estimate'))); ?>" class="t-chip">Web Project Estimate</a>
-                                        <a href="<?php echo esc_url(admin_url('admin.php?page=mc-leads-engine-surveys&mc_panel=surveys&new_survey_title=' . urlencode('Meeting Booking Intake'))); ?>" class="t-chip">Meeting Booking Intake</a>
-                                        <a href="<?php echo esc_url(admin_url('admin.php?page=mc-leads-engine-surveys&mc_panel=surveys&new_survey_title=' . urlencode('Design Brief'))); ?>" class="t-chip">Design Brief</a>
-                                    </div>
-                                </div>
-                            </div>
+                            <!-- Empty panel removed -->
                         <?php else : ?>
                             <div class="builder-grid">
 
@@ -1090,19 +1075,6 @@ $select_label = ($q_type === 'checkbox') ? __('multi-select', 'mc-leads-engine')
                                     </a>
                                     <a class="empty-secondary-link" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0), admin_url('admin.php'))); ?>">
                                         <?php esc_html_e('or duplicate an existing survey →', 'mc-leads-engine'); ?>
-                                    </a>
-                                </div>
-
-                                <div class="templates-label"><?php esc_html_e('Quick start from a template', 'mc-leads-engine'); ?></div>
-                                <div class="empty-templates">
-                                    <a class="template-chip" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0, 'prefill_title' => 'Web project estimate'), admin_url('admin.php'))); ?>">
-                                        <span class="ic">💻</span> <?php esc_html_e('Web project estimate', 'mc-leads-engine'); ?>
-                                    </a>
-                                    <a class="template-chip" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0, 'prefill_title' => 'Meeting booking intake'), admin_url('admin.php'))); ?>">
-                                        <span class="ic">📅</span> <?php esc_html_e('Meeting booking intake', 'mc-leads-engine'); ?>
-                                    </a>
-                                    <a class="template-chip" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0, 'prefill_title' => 'Design brief'), admin_url('admin.php'))); ?>">
-                                        <span class="ic">🎨</span> <?php esc_html_e('Design brief', 'mc-leads-engine'); ?>
                                     </a>
                                 </div>
                             </div>

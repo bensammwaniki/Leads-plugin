@@ -7,9 +7,8 @@ if (!defined('ABSPATH')) {
 $survey = $bundle['survey'];
 $sections = $bundle['sections'];
 $is_cf7 = !empty($cf7_id);
-// If it's a standard survey, the last section is the final step.
-// If it's CF7, we still need the extra step for the contact form.
-$total_steps = count($sections) + ($is_cf7 ? 1 : 0);
+// Both standard and CF7 modes will now submit directly from the last section.
+$total_steps = count($sections);
 $saved_answers = isset($saved_answers) && is_array($saved_answers) ? $saved_answers : array();
 ?>
 <div class="mc-leads-engine mc-leads-engine-<?php echo esc_attr($is_cf7 ? 'cf7' : 'standard'); ?>" data-survey-id="<?php echo esc_attr($survey_id); ?>" data-session-id="<?php echo esc_attr($session_id); ?>" data-mode="<?php echo esc_attr($is_cf7 ? 'cf7' : 'standard'); ?>" data-total-steps="<?php echo esc_attr($total_steps); ?>" data-current-step="<?php echo esc_attr(max(1, (int) ($current_step ?? 1))); ?>" data-clear-on-load="<?php echo empty($saved_answers) ? '1' : '0'; ?>">
@@ -60,13 +59,26 @@ $saved_answers = isset($saved_answers) && is_array($saved_answers) ? $saved_answ
                 <div class="mc-leads-engine-steps">
                     <?php foreach ($sections as $index => $section) : ?>
                         <div class="mc-leads-engine-step" data-step="<?php echo esc_attr($index + 1); ?>" <?php echo $index === 0 ? '' : 'hidden'; ?>>
-                            <?php echo $renderer->render_section($section, $survey, array('saved_answers' => $saved_answers)); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                            <?php 
+                            $is_last = ($index === count($sections) - 1);
+                            echo $renderer->render_section($section, $survey, array(
+                                'saved_answers' => $saved_answers,
+                                'is_last' => $is_last,
+                                'final_button_text' => $survey_settings['final_button_text'] ?? __('Get Your Estimate', 'mc-leads-engine')
+                            )); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
+                            ?>
                         </div>
                     <?php endforeach; ?>
-                    <div class="mc-leads-engine-step" data-step="<?php echo esc_attr($total_steps); ?>" hidden>
-                        <?php echo $renderer->render_final_step($survey, array('mode' => 'cf7', 'pricing' => $pricing, 'session_id' => $session_id, 'cf7_id' => $cf7_id)); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-                    </div>
                 </div>
+            </div>
+            
+            <div style="display: none;">
+                <?php 
+                $cf7_shortcode = trim((string) ($bundle['cf7_shortcode'] ?? ''));
+                if ($cf7_shortcode && shortcode_exists('contact-form-7')) {
+                    echo do_shortcode($cf7_shortcode);
+                }
+                ?>
             </div>
         <?php endif; ?>
     </div>
