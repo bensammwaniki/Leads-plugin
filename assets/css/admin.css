@@ -614,14 +614,14 @@
   border-color: #f6cfcd;
   color: #a3302f;
 }
-#panel-surveys .row-actions {
+#panel-surveys .sec-actions {
   display: flex;
   gap: 2px;
   opacity: 0.6;
   transition: opacity .12s;
 }
-#panel-surveys .section-item:hover .row-actions,
-#panel-surveys .section-item.active .row-actions {
+#panel-surveys .section-item:hover .sec-actions,
+#panel-surveys .section-item.active .sec-actions {
   opacity: 1;
 }
 #panel-surveys .section-item .section-title-form {

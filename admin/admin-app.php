@@ -467,7 +467,136 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
 
                     </section>
 
-                    <section class="panel<?php echo $panel === 'surveys' ? ' active' : ''; ?>" id="panel-surveys" data-panel="surveys">
+                                      <section class="panel<?php echo $panel === 'surveys' ? ' active' : ''; ?>" id="panel-surveys" data-panel="surveys">
+                        
+                        <!-- Inline Cache-Busting Overrides for Survey Builder -->
+                        <style>
+                            #panel-surveys .builder-grid {
+                                grid-template-columns: 250px 270px 1fr !important;
+                            }
+                            #panel-surveys .section-item {
+                                display: flex !important;
+                                align-items: center !important;
+                                justify-content: space-between !important;
+                                padding: 0 !important;
+                                border-radius: 8px !important;
+                                margin-bottom: 6px !important;
+                                cursor: pointer !important;
+                                border: 1px solid transparent !important;
+                                position: relative !important;
+                                background: transparent !important;
+                            }
+                            #panel-surveys .section-item:hover {
+                                background: var(--paper) !important;
+                            }
+                            #panel-surveys .section-item.active {
+                                background: var(--coral-tint) !important;
+                            }
+                            #panel-surveys .section-item.active::before {
+                                content: '' !important;
+                                position: absolute !important;
+                                left: 0 !important;
+                                top: 0 !important;
+                                bottom: 0 !important;
+                                width: 4px !important;
+                                border-top-left-radius: 8px !important;
+                                border-bottom-left-radius: 8px !important;
+                                background: var(--coral) !important;
+                            }
+                            #panel-surveys .section-item .section-link {
+                                flex: 1 !important;
+                                min-width: 0 !important;
+                                display: flex !important;
+                                align-items: center !important;
+                                justify-content: space-between !important;
+                                padding: 10px 12px !important;
+                                text-decoration: none !important;
+                            }
+                            #panel-surveys .section-item .stitle {
+                                font-size: 11px !important;
+                                font-weight: 700 !important;
+                                letter-spacing: .1px !important;
+                                color: var(--text) !important;
+                                white-space: nowrap !important;
+                                overflow: hidden !important;
+                                text-overflow: ellipsis !important;
+                                flex: 1 !important;
+                                min-width: 0 !important;
+                            }
+                            #panel-surveys .section-item.active .stitle {
+                                color: #a3302f !important;
+                            }
+                            #panel-surveys .section-item .qcount-badge {
+                                font-family: var(--mono) !important;
+                                font-size: 10.5px !important;
+                                font-weight: 600 !important;
+                                color: var(--muted) !important;
+                                background: #eef2f6 !important;
+                                border: 1px solid var(--line) !important;
+                                border-radius: 6px !important;
+                                padding: 2px 7px !important;
+                                flex: none !important;
+                                margin-right: 52px !important;
+                            }
+                            #panel-surveys .section-item.active .qcount-badge {
+                                background: #fff !important;
+                                border-color: #f6cfcd !important;
+                                color: #a3302f !important;
+                            }
+                            #panel-surveys .section-item .sright {
+                                position: absolute !important;
+                                right: 12px !important;
+                                top: 50% !important;
+                                transform: translateY(-50%) !important;
+                                display: flex !important;
+                                align-items: center !important;
+                                z-index: 2 !important;
+                                min-width: 0 !important;
+                            }
+                            #panel-surveys .sec-actions {
+                                display: flex !important;
+                                gap: 2px !important;
+                                opacity: 0.6 !important;
+                                transition: opacity .12s !important;
+                            }
+                            #panel-surveys .section-item:hover .sec-actions,
+                            #panel-surveys .section-item.active .sec-actions {
+                                opacity: 1 !important;
+                            }
+                            #panel-surveys .icon-btn {
+                                width: 22px !important;
+                                height: 22px !important;
+                                border: none !important;
+                                background: transparent !important;
+                                color: var(--muted-2) !important;
+                                border-radius: 5px !important;
+                                display: flex !important;
+                                align-items: center !important;
+                                justify-content: center !important;
+                                cursor: pointer !important;
+                                font-size: 11px !important;
+                                padding: 0 !important;
+                            }
+                            #panel-surveys .icon-btn:hover {
+                                background: #fff !important;
+                                color: var(--text) !important;
+                            }
+                            #panel-surveys .icon-btn.del:hover {
+                                color: #c0433f !important;
+                            }
+                            #panel-surveys .section-title-input {
+                                font-size: 10px !important;
+                            }
+                            #panel-surveys .add-input {
+                                font-size: 10.5px !important;
+                            }
+                            #panel-surveys .opt-description {
+                                grid-column: 1 / -1 !important;
+                                margin-top: 4px !important;
+                            }
+                        </style>
+
+                        <div class="sv-tab-pane active" data-sv-pane="builder">
 
                         <!-- ── Survey Top Bar ──────────────────────── -->
                         <div class="sv-toolbar">
@@ -483,45 +612,34 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                         data-shortcode="<?php echo esc_attr(mc_leads_engine_get_survey_shortcode($selected_survey_id)); ?>"
                                         title="<?php esc_attr_e('Click to copy shortcode', 'mc-leads-engine'); ?>">
                                         <code><?php echo esc_html(mc_leads_engine_get_survey_shortcode($selected_survey_id)); ?></code>
-                                        <span class="copy">⧉ <?php esc_html_e('Copy', 'mc-leads-engine'); ?></span>
                                     </button>
                                 <?php endif; ?>
                             </div>
-                            <div style="display:flex; gap:8px;">
-                                <a class="btn" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0), admin_url('admin.php'))); ?>">
-                                    ＋ <?php esc_html_e('New survey', 'mc-leads-engine'); ?>
-                                </a>
+                            <div class="sv-toolbar-right">
                                 <?php if ($selected_survey_id) : ?>
-                                    <form method="post" onsubmit="return confirm('<?php echo esc_js(__('Delete this survey? This cannot be undone.', 'mc-leads-engine')); ?>');" style="margin:0;">
-                                        <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
-                                        <input type="hidden" name="page" value="mc-leads-engine-surveys">
-                                        <input type="hidden" name="mc_panel" value="surveys">
-                                        <input type="hidden" name="mc_leads_engine_action" value="delete_survey">
-                                        <input type="hidden" name="survey_id" value="<?php echo esc_attr($selected_survey_id); ?>">
-                                        <button class="btn danger-text" type="submit">🗑 <?php esc_html_e('Delete', 'mc-leads-engine'); ?></button>
-                                    </form>
+                                    <button class="btn accent" type="button" data-survey-preview-trigger><?php esc_html_e('Preview Survey', 'mc-leads-engine'); ?></button>
                                 <?php endif; ?>
                             </div>
                         </div>
 
-                        <?php if (isset($_GET['survey_id'])) : ?>
-
-                        <!-- ── Tab pills ─────────────────────────── -->
-                        <div class="sv-tabs">
-                            <?php if ($selected_survey_id && $selected_survey) : ?>
-                                <button class="sv-tab active" data-sv-tab="builder">▦ <?php esc_html_e('Builder', 'mc-leads-engine'); ?></button>
-                            <?php endif; ?>
-                            <button class="sv-tab<?php echo (!$selected_survey_id || !$selected_survey) ? ' active' : ''; ?>" data-sv-tab="settings">
-                                ⚙ <?php echo ($selected_survey_id && $selected_survey) ? esc_html__('Survey settings', 'mc-leads-engine') : esc_html__('Create Survey', 'mc-leads-engine'); ?>
-                                <?php if ($selected_survey_id && $selected_survey) : ?>
-                                    <span class="status-dot" style="background:<?php echo $selected_survey['status'] === 'draft' ? '#f59e0b' : '#22c55e'; ?>;"></span>
-                                <?php endif; ?>
-                            </button>
-                        </div>
-
-                        <!-- ── BUILDER TAB ─────────────────────── -->
-                        <?php if ($selected_survey_id && $selected_survey) : ?>
-                        <div class="sv-tab-pane active" data-sv-pane="builder">
+                        <?php if (empty($selected_survey_id)) : ?>
+                            <div class="empty-panel">
+                                <div class="empty-icon-wrap">
+                                    <span class="dashicons dashicons-welcome-write-blog"></span>
+                                </div>
+                                <h2><?php esc_html_e('Select or create a survey to get started', 'mc-leads-engine'); ?></h2>
+                                <p><?php esc_html_e('Build multi-step surveys to capture lead info, calculate pricing, and segment customers.', 'mc-leads-engine'); ?></p>
+                                
+                                <div class="template-section">
+                                    <h3><?php esc_html_e('Or start with a template:', 'mc-leads-engine'); ?></h3>
+                                    <div class="template-chips">
+                                        <a href="<?php echo esc_url(admin_url('admin.php?page=mc-leads-engine-surveys&mc_panel=surveys&new_survey_title=' . urlencode('Web Project Estimate'))); ?>" class="t-chip">Web Project Estimate</a>
+                                        <a href="<?php echo esc_url(admin_url('admin.php?page=mc-leads-engine-surveys&mc_panel=surveys&new_survey_title=' . urlencode('Meeting Booking Intake'))); ?>" class="t-chip">Meeting Booking Intake</a>
+                                        <a href="<?php echo esc_url(admin_url('admin.php?page=mc-leads-engine-surveys&mc_panel=surveys&new_survey_title=' . urlencode('Design Brief'))); ?>" class="t-chip">Design Brief</a>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php else : ?>
                             <div class="builder-grid">
 
                                 <!-- Col 1: Sections -->
@@ -553,27 +671,23 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                             $sec_q_count = count($section['questions'] ?? []);
                                         ?>
                                             <div class="section-item<?php echo absint($section['id']) === $selected_section_id ? ' active' : ''; ?>" data-section-id="<?php echo absint($section['id']); ?>">
-                                                <div>
-                                                    <a class="section-link" href="<?php echo esc_url(mc_leads_engine_admin_selected_url('surveys', $selected_survey_id, $section['id'], 0)); ?>" style="text-decoration:none;">
-                                                        <div class="stitle section-title-text" title="<?php echo esc_attr($section['title']); ?>"><?php echo esc_html($section['title']); ?></div>
-                                                    </a>
-                                                    <form method="post" action="<?php echo esc_url(admin_url('admin.php')); ?>" class="section-title-form">
-                                                        <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
-                                                        <input type="hidden" name="page" value="mc-leads-engine-surveys">
-                                                        <input type="hidden" name="mc_panel" value="surveys">
-                                                        <input type="hidden" name="mc_leads_engine_action" value="save_section">
-                                                        <input type="hidden" name="survey_id" value="<?php echo esc_attr($selected_survey_id); ?>">
-                                                        <input type="hidden" name="section_id" value="<?php echo esc_attr($section['id']); ?>">
-                                                        <input type="hidden" name="redirect_to" value="<?php echo esc_attr(mc_leads_engine_admin_selected_url('surveys', $selected_survey_id, $selected_section_id, $selected_question_id)); ?>">
-                                                        <input class="field-input section-title-input" type="text" name="section_title" value="<?php echo esc_attr($section['title']); ?>" data-original-title="<?php echo esc_attr($section['title']); ?>" maxlength="20">
-                                                    </form>
-                                                </div>
-                                                <div class="sright">
+                                                <a class="section-link" href="<?php echo esc_url(mc_leads_engine_admin_selected_url('surveys', $selected_survey_id, $section['id'], 0)); ?>" style="text-decoration:none;">
+                                                    <div class="stitle section-title-text" title="<?php echo esc_attr($section['title']); ?>"><?php echo esc_html($section['title']); ?></div>
                                                     <span class="qcount-badge"><?php echo esc_html($sec_q_count); ?></span>
-                                                    <div class="row-actions">
-                                                        <button type="button" class="icon-btn section-edit-trigger" aria-label="<?php esc_attr_e('Rename', 'mc-leads-engine'); ?>">
-                                                            <?php echo mc_leads_get_svg_icon('edit'); ?>
-                                                        </button>
+                                                </a>
+                                                <form method="post" action="<?php echo esc_url(admin_url('admin.php')); ?>" class="section-title-form">
+                                                    <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
+                                                    <input type="hidden" name="page" value="mc-leads-engine-surveys">
+                                                    <input type="hidden" name="mc_panel" value="surveys">
+                                                    <input type="hidden" name="mc_leads_engine_action" value="save_section">
+                                                    <input type="hidden" name="survey_id" value="<?php echo esc_attr($selected_survey_id); ?>">
+                                                    <input type="hidden" name="section_id" value="<?php echo esc_attr($section['id']); ?>">
+                                                    <input type="hidden" name="redirect_to" value="<?php echo esc_attr(mc_leads_engine_admin_selected_url('surveys', $selected_survey_id, $selected_section_id, $selected_question_id)); ?>">
+                                                    <input class="field-input section-title-input" type="text" name="section_title" value="<?php echo esc_attr($section['title']); ?>" data-original-title="<?php echo esc_attr($section['title']); ?>" maxlength="20">
+                                                </form>
+                                                <div class="sright">
+                                                    <div class="sec-actions">
+                                                        <button type="button" class="icon-btn section-edit-trigger" aria-label="<?php esc_attr_e('Rename', 'mc-leads-engine'); ?>">✎</button>
                                                         <form method="post" action="<?php echo esc_url(admin_url('admin.php')); ?>" class="section-delete-form" style="display:contents">
                                                             <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
                                                             <input type="hidden" name="page" value="mc-leads-engine-surveys">
@@ -581,9 +695,7 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                                             <input type="hidden" name="mc_leads_engine_action" value="delete_section">
                                                             <input type="hidden" name="survey_id" value="<?php echo esc_attr($selected_survey_id); ?>">
                                                             <input type="hidden" name="section_id" value="<?php echo esc_attr($section['id']); ?>">
-                                                            <button type="submit" class="icon-btn del section-delete" aria-label="<?php esc_attr_e('Delete section', 'mc-leads-engine'); ?>">
-                                                                <?php echo mc_leads_get_svg_icon('delete'); ?>
-                                                            </button>
+                                                            <button type="submit" class="icon-btn del section-delete" aria-label="<?php esc_attr_e('Delete section', 'mc-leads-engine'); ?>">🗑</button>
                                                         </form>
                                                     </div>
                                                 </div>
@@ -883,8 +995,9 @@ $select_label = ($q_type === 'checkbox') ? __('multi-select', 'mc-leads-engine')
 
                         <!-- ── SETTINGS TAB ─────────────────────── -->
                         <div class="sv-tab-pane<?php echo (!$selected_survey_id || !$selected_survey) ? ' active' : ''; ?>" data-sv-pane="settings">
-                            <?php $survey_settings = mc_leads_engine_get_survey_settings($selected_survey_id); ?>
-                            <form method="post" class="sv-settings-form">
+                            <?php if ($selected_survey_id && $selected_survey) : ?>
+                                <?php $survey_settings = mc_leads_engine_get_survey_settings($selected_survey_id); ?>
+                                <form method="post" class="sv-settings-form">
                                 <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
                                 <input type="hidden" name="page" value="mc-leads-engine-surveys">
                                 <input type="hidden" name="mc_panel" value="surveys">
