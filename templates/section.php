@@ -24,6 +24,10 @@ $saved_answers = isset($context['saved_answers']) && is_array($context['saved_an
         <?php if ((int) $section['order_index'] > 0) : ?>
             <button type="button" class="button mc-step-prev" data-direction="prev"><?php esc_html_e('Previous', 'mc-leads-engine'); ?></button>
         <?php endif; ?>
-        <button type="button" class="button button-primary mc-step-next" data-direction="next"><?php esc_html_e('Next', 'mc-leads-engine'); ?></button>
+        <?php if (!empty($context['is_last'])) : ?>
+            <button type="submit" class="button button-primary mc-submit-survey"><?php echo esc_html($context['final_button_text'] ?? __('Get Your Estimate', 'mc-leads-engine')); ?></button>
+        <?php else : ?>
+            <button type="button" class="button button-primary mc-step-next" data-direction="next"><?php esc_html_e('Next', 'mc-leads-engine'); ?></button>
+        <?php endif; ?>
     </div>
 </section>

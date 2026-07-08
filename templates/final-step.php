@@ -40,9 +40,13 @@ $message_formatted = mc_leads_engine_format_final_message($message, $pricing, $s
     <?php if ($mode === 'cf7' && $cf7_shortcode && shortcode_exists('contact-form-7')) : ?>
         <div class="mc-final-cf7">
             <?php echo do_shortcode($cf7_shortcode); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-            <div class="mc-final-message description"><?php echo $message_formatted; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+            
+            <style>
+                .mc-leads-engine-final .wpcf7-submit { display: none !important; }
+            </style>
             <div class="mc-leads-engine-nav">
                 <button type="button" class="button mc-step-prev" data-direction="prev"><?php esc_html_e('Previous', 'mc-leads-engine'); ?></button>
+                <button type="submit" class="button button-primary mc-submit-survey"><?php echo esc_html($survey_settings['final_button_text']); ?></button>
             </div>
             <div class="mc-restart-container">
                 <a href="<?php echo esc_url(add_query_arg('mc_leads_restart', 1)); ?>" class="mc-restart-link"><?php esc_html_e('Start New Estimate', 'mc-leads-engine'); ?></a>
@@ -53,7 +57,7 @@ $message_formatted = mc_leads_engine_format_final_message($message, $pricing, $s
             <?php if ($mode === 'cf7' && ($cf7_shortcode || $cf7_id)) : ?>
                 <p><?php esc_html_e('The linked CF7 form is not available, so the survey will use the standard submit flow.', 'mc-leads-engine'); ?></p>
             <?php endif; ?>
-            <div class="mc-final-message"><?php echo $message_formatted; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+            
             <div class="mc-leads-engine-nav">
                 <button type="button" class="button mc-step-prev" data-direction="prev"><?php esc_html_e('Previous', 'mc-leads-engine'); ?></button>
                 <button type="submit" class="button button-primary mc-submit-survey"><?php echo esc_html($survey_settings['final_button_text']); ?></button>
