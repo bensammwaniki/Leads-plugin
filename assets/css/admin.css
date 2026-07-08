@@ -544,9 +544,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  padding: 9px 10px;
+  padding: 10px 12px;
   border-radius: 8px;
-  margin-bottom: 3px;
+  margin-bottom: 6px;
   cursor: pointer;
   border: 1px solid transparent;
   position: relative;
@@ -561,17 +561,18 @@
 #panel-surveys .section-item.active::before {
   content: '';
   position: absolute;
-  left: -1px;
-  top: 8px;
-  bottom: 8px;
-  width: 3px;
-  border-radius: 3px;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
   background: var(--coral);
 }
 #panel-surveys .section-item .stitle {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: .2px;
+  letter-spacing: .1px;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
@@ -591,14 +592,14 @@
   font-size: 10.5px;
   font-weight: 600;
   color: var(--muted);
-  background: var(--paper);
+  background: #eef2f6;
   border: 1px solid var(--line);
-  border-radius: 5px;
-  padding: 1px 6px;
+  border-radius: 6px;
+  padding: 2px 7px;
 }
 #panel-surveys .section-item.active .qcount-badge {
   background: #fff;
-  border-color: #f5c6c5;
+  border-color: #f6cfcd;
   color: #a3302f;
 }
 #panel-surveys .row-actions {
@@ -634,14 +635,14 @@
 }
 
 #panel-surveys .pipeline-note {
-  margin: 10px 4px 2px;
-  padding: 10px 11px;
+  margin: 18px 2px 2px;
+  padding: 14px 16px;
   border-radius: 8px;
-  background: var(--paper);
-  border: 1px solid var(--line-soft);
-  font-size: 11px;
+  background: #f4f5f7;
+  border: none;
+  font-size: 11.5px;
   color: var(--muted);
-  line-height: 1.5;
+  line-height: 1.55;
 }
 #panel-surveys .pipeline-note b {
   color: var(--text);
