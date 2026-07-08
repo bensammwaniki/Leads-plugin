@@ -121,7 +121,7 @@ class MC_Leads_Engine_Question {
                     'question_id'  => $question_id,
                     'label'        => $label ?: $value,
                     'value'        => $value ?: $label,
-                    'description'  => isset($option['description']) ? sanitize_text_field(wp_unslash($option['description'])) : '',
+                    'description'  => isset($option['description']) ? sanitize_textarea_field(wp_unslash($option['description'])) : '',
                     'price_impact' => isset($option['price_impact']) ? (float) wp_unslash($option['price_impact']) : 0,
                     'score_impact' => isset($option['score_impact']) ? (int) wp_unslash($option['score_impact']) : 0,
                     'order_index'  => isset($option['order_index']) ? absint(wp_unslash($option['order_index'])) : $order,

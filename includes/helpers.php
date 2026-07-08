@@ -141,3 +141,22 @@ function mc_leads_status_label($status) {
 function mc_leads_get_statuses() {
     return array('new', 'contacted', 'qualified', 'proposal_sent', 'won', 'lost');
 }
+
+/**
+ * Inlines an SVG file's contents from assets/svgs/ directory.
+ *
+ * @param string $filename Name of the file without extension
+ * @return string HTML/SVG content
+ */
+function mc_leads_get_svg_icon($filename) {
+    $path = MC_LEADS_ENGINE_PATH . 'assets/svgs/' . $filename . '.svg';
+    if (file_exists($path)) {
+        $content = file_get_contents($path);
+        // Remove XML declaration, DOCTYPE, and comments
+        $content = preg_replace('/<\?xml.*?\?>/is', '', $content);
+        $content = preg_replace('/<!DOCTYPE.*?>/is', '', $content);
+        $content = preg_replace('/<!--.*?-->/is', '', $content);
+        return trim($content);
+    }
+    return '';
+}

@@ -375,72 +375,7 @@ function mc_leads_engine_render_analytics_page() {
                 </div>
             </div>
 
-            <!-- Filter bar -->
-            <form method="get" class="filter-bar">
-                <input type="hidden" name="page" value="mc-leads-engine-analytics">
-                <input type="hidden" name="paged" value="1">
 
-                <?php if ($min_score) : ?>
-                    <input type="hidden" name="min_score" value="<?php echo esc_attr($min_score); ?>">
-                <?php endif; ?>
-
-                <div class="filter-field">
-                    <label><?php esc_html_e('Survey', 'mc-leads-engine'); ?></label>
-                    <select class="filter-select" name="survey_id">
-                        <option value="0"><?php esc_html_e('All surveys', 'mc-leads-engine'); ?></option>
-                        <?php
-                        $surveys = mc_leads_engine_survey_repository()->get_surveys(array('limit' => 100));
-                        foreach ($surveys as $survey) :
-                        ?>
-                            <option value="<?php echo esc_attr($survey['id']); ?>" <?php selected($survey_id, $survey['id']); ?>>
-                                <?php echo esc_html($survey['title']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <div class="filter-field">
-                    <label><?php esc_html_e('Status', 'mc-leads-engine'); ?></label>
-                    <select class="filter-select" name="status">
-                        <option value="all" <?php selected($status, 'all'); ?>><?php esc_html_e('All statuses', 'mc-leads-engine'); ?></option>
-                        <option value="new" <?php selected($status, 'new'); ?>><?php esc_html_e('New', 'mc-leads-engine'); ?></option>
-                        <option value="contacted" <?php selected($status, 'contacted'); ?>><?php esc_html_e('Contacted', 'mc-leads-engine'); ?></option>
-                        <option value="qualified" <?php selected($status, 'qualified'); ?>><?php esc_html_e('Qualified', 'mc-leads-engine'); ?></option>
-                        <option value="proposal_sent" <?php selected($status, 'proposal_sent'); ?>><?php esc_html_e('Proposal Sent', 'mc-leads-engine'); ?></option>
-                        <option value="won" <?php selected($status, 'won'); ?>><?php esc_html_e('Won', 'mc-leads-engine'); ?></option>
-                        <option value="lost" <?php selected($status, 'lost'); ?>><?php esc_html_e('Lost', 'mc-leads-engine'); ?></option>
-                    </select>
-                </div>
-
-                <div class="filter-field">
-                    <label><?php esc_html_e('Sort by', 'mc-leads-engine'); ?></label>
-                    <select class="filter-select" name="orderby">
-                        <option value="created_at" <?php selected($orderby, 'created_at'); ?>><?php esc_html_e('Date Created', 'mc-leads-engine'); ?></option>
-                        <option value="total_price" <?php selected($orderby, 'total_price'); ?>><?php esc_html_e('Estimated Price', 'mc-leads-engine'); ?></option>
-                        <option value="lead_score" <?php selected($orderby, 'lead_score'); ?>><?php esc_html_e('Lead Score', 'mc-leads-engine'); ?></option>
-                        <option value="id" <?php selected($orderby, 'id'); ?>><?php esc_html_e('Lead ID', 'mc-leads-engine'); ?></option>
-                    </select>
-                </div>
-
-                <div class="filter-field">
-                    <label><?php esc_html_e('Order', 'mc-leads-engine'); ?></label>
-                    <select class="filter-select" name="order">
-                        <option value="DESC" <?php selected($order, 'DESC'); ?>><?php esc_html_e('Descending', 'mc-leads-engine'); ?></option>
-                        <option value="ASC"  <?php selected($order, 'ASC');  ?>><?php esc_html_e('Ascending', 'mc-leads-engine'); ?></option>
-                    </select>
-                </div>
-
-                <div class="filter-field">
-                    <label><?php esc_html_e('Date range', 'mc-leads-engine'); ?></label>
-                    <select class="filter-select" name="days">
-                        <?php foreach (array(7 => 'Last 7 days', 14 => 'Last 14 days', 30 => 'Last 30 days', 90 => 'Last 90 days') as $d => $label) : ?>
-                            <option value="<?php echo esc_attr($d); ?>" <?php selected($days, $d); ?>><?php echo esc_html($label); ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <button class="btn primary" type="submit"><?php esc_html_e('Apply filters', 'mc-leads-engine'); ?></button>
-            </form>
 
             <?php if ($is_showing_demo) : ?>
                 <div style="background:#eff6ff; border:1px solid #bfdbfe; color:#1e3a8a; padding:12px 16px; margin-bottom:20px; border-radius:var(--radius); font-size:12.5px; display:flex; align-items:center; gap:8px;">
@@ -600,9 +535,72 @@ function mc_leads_engine_render_analytics_page() {
 
             <!-- All Submitted Data Panel -->
             <div class="panel">
-                <div class="panel-header" style="padding-bottom:14px;">
-                    <h3 class="panel-title"><?php esc_html_e('All submitted data', 'mc-leads-engine'); ?></h3>
-                    <div class="panel-sub"><?php echo esc_html(sprintf(_n('%d lead', '%d leads', $total_leads, 'mc-leads-engine'), $total_leads)); ?></div>
+                <div class="panel-header" style="padding-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+                    <div>
+                        <h3 class="panel-title"><?php esc_html_e('All submitted data', 'mc-leads-engine'); ?></h3>
+                        <div class="panel-sub"><?php echo esc_html(sprintf(_n('%d lead', '%d leads', $total_leads, 'mc-leads-engine'), $total_leads)); ?></div>
+                    </div>
+
+                    <form method="get" class="filter-bar" style="margin:0; padding:0; background:transparent; border:none; box-shadow:none; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                        <input type="hidden" name="page" value="mc-leads-engine-analytics">
+                        <input type="hidden" name="paged" value="1">
+
+                        <?php if ($min_score) : ?>
+                            <input type="hidden" name="min_score" value="<?php echo esc_attr($min_score); ?>">
+                        <?php endif; ?>
+
+                        <div class="filter-field">
+                            <select class="filter-select" name="survey_id" style="height:32px; min-width:120px; font-size:12px;">
+                                <option value="0"><?php esc_html_e('All surveys', 'mc-leads-engine'); ?></option>
+                                <?php
+                                $surveys = mc_leads_engine_survey_repository()->get_surveys(array('limit' => 100));
+                                foreach ($surveys as $survey) :
+                                ?>
+                                    <option value="<?php echo esc_attr($survey['id']); ?>" <?php selected($survey_id, $survey['id']); ?>>
+                                        <?php echo esc_html($survey['title']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="filter-field">
+                            <select class="filter-select" name="status" style="height:32px; min-width:110px; font-size:12px;">
+                                <option value="all" <?php selected($status, 'all'); ?>><?php esc_html_e('All statuses', 'mc-leads-engine'); ?></option>
+                                <option value="new" <?php selected($status, 'new'); ?>><?php esc_html_e('New', 'mc-leads-engine'); ?></option>
+                                <option value="contacted" <?php selected($status, 'contacted'); ?>><?php esc_html_e('Contacted', 'mc-leads-engine'); ?></option>
+                                <option value="qualified" <?php selected($status, 'qualified'); ?>><?php esc_html_e('Qualified', 'mc-leads-engine'); ?></option>
+                                <option value="proposal_sent" <?php selected($status, 'proposal_sent'); ?>><?php esc_html_e('Proposal Sent', 'mc-leads-engine'); ?></option>
+                                <option value="won" <?php selected($status, 'won'); ?>><?php esc_html_e('Won', 'mc-leads-engine'); ?></option>
+                                <option value="lost" <?php selected($status, 'lost'); ?>><?php esc_html_e('Lost', 'mc-leads-engine'); ?></option>
+                            </select>
+                        </div>
+
+                        <div class="filter-field">
+                            <select class="filter-select" name="orderby" style="height:32px; min-width:110px; font-size:12px;">
+                                <option value="created_at" <?php selected($orderby, 'created_at'); ?>><?php esc_html_e('Date Created', 'mc-leads-engine'); ?></option>
+                                <option value="total_price" <?php selected($orderby, 'total_price'); ?>><?php esc_html_e('Estimated Price', 'mc-leads-engine'); ?></option>
+                                <option value="lead_score" <?php selected($orderby, 'lead_score'); ?>><?php esc_html_e('Lead Score', 'mc-leads-engine'); ?></option>
+                                <option value="id" <?php selected($orderby, 'id'); ?>><?php esc_html_e('Lead ID', 'mc-leads-engine'); ?></option>
+                            </select>
+                        </div>
+
+                        <div class="filter-field">
+                            <select class="filter-select" name="order" style="height:32px; min-width:100px; font-size:12px;">
+                                <option value="DESC" <?php selected($order, 'DESC'); ?>><?php esc_html_e('Descending', 'mc-leads-engine'); ?></option>
+                                <option value="ASC"  <?php selected($order, 'ASC');  ?>><?php esc_html_e('Ascending', 'mc-leads-engine'); ?></option>
+                            </select>
+                        </div>
+
+                        <div class="filter-field">
+                            <select class="filter-select" name="days" style="height:32px; min-width:110px; font-size:12px;">
+                                <?php foreach (array(7 => 'Last 7 days', 14 => 'Last 14 days', 30 => 'Last 30 days', 90 => 'Last 90 days') as $d => $label) : ?>
+                                    <option value="<?php echo esc_attr($d); ?>" <?php selected($days, $d); ?>><?php echo esc_html($label); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <button class="btn primary" type="submit" style="height:32px; line-height:30px; font-size:12px; padding:0 12px;"><?php esc_html_e('Apply filters', 'mc-leads-engine'); ?></button>
+                    </form>
                 </div>
 
                 <?php

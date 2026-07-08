@@ -71,20 +71,116 @@ document.addEventListener('DOMContentLoaded', () => {
     const addRow = () => {
       const markup = template.innerHTML.replace(/__INDEX__/g, String(nextIndex++));
       list.insertAdjacentHTML('beforeend', markup);
+      const newRow = list.lastElementChild;
+      if (newRow) {
+        newRow.classList.add('is-editing');
+        newRow.querySelector('.opt-label')?.focus();
+      }
     };
 
     addButton.addEventListener('click', addRow);
 
     builder.addEventListener('click', (event) => {
-      const removeButton = event.target.closest('[data-remove-option-row]');
-      if (!removeButton) {
+      const editBtn = event.target.closest('[data-edit-option-row]');
+      if (editBtn) {
+        const row = editBtn.closest('[data-option-row]');
+        if (row) {
+          row.classList.add('is-editing');
+          row.querySelector('.opt-label')?.focus();
+        }
         return;
       }
 
-      const row = removeButton.closest('[data-option-row]');
-      if (row) {
-        row.remove();
+      const doneBtn = event.target.closest('[data-done-option-row]');
+      if (doneBtn) {
+        const row = doneBtn.closest('[data-option-row]');
+        if (row) {
+          row.classList.remove('is-editing');
+          syncOptionRowView(row);
+        }
+        return;
       }
+
+      const removeButton = event.target.closest('[data-remove-option-row]');
+      if (removeButton) {
+        removeButton.closest('[data-option-row]')?.remove();
+      }
+    });
+
+    function syncOptionRowView(row) {
+      if (!row) return;
+      const label = row.querySelector('.opt-label')?.value || 'Untitled option';
+      const desc  = row.querySelector('.opt-description')?.value || '';
+      const price = row.querySelector('.opt-input.price')?.value || 0;
+      const score = row.querySelector('.opt-input.score')?.value || 0;
+      const value = row.querySelector('input[name*="[value]"]')?.value || '';
+
+      row.querySelector('.opt-view-label').textContent = label;
+      const descEl = row.querySelector('.opt-view-desc');
+      if (descEl) {
+        descEl.innerHTML = desc ? '' : '<em>No description</em>';
+        if (desc) descEl.textContent = desc;
+      }
+      const priceEl = row.querySelector('.opt-chip.price');
+      if (priceEl) {
+        priceEl.textContent = '+' + Number(price).toLocaleString();
+      }
+      const scoreEl = row.querySelector('.opt-chip.score');
+      if (scoreEl) {
+        scoreEl.textContent = '+' + score;
+      }
+      const valueEl = row.querySelector('.opt-chip.mono');
+      if (valueEl) {
+        valueEl.textContent = value;
+      }
+    }
+  });
+
+  // Resizable columns logic
+  document.querySelectorAll('.opt-table').forEach((table) => {
+    const STORAGE_KEY = 'mc_opt_col_widths';
+    const cols = ['col-0', 'col-1', 'col-2', 'col-3', 'col-4'];
+
+    // Restore saved widths on load
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      cols.forEach((c) => {
+        if (saved[c]) {
+          table.style.setProperty('--' + c, saved[c]);
+        }
+      });
+    } catch (e) {}
+
+    table.querySelectorAll('.col-resize-handle').forEach((handle) => {
+      handle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        const colIndex = handle.dataset.colIndex;
+        const cell = handle.closest('.opt-col-label');
+        const startX = e.clientX;
+        const startWidth = cell.getBoundingClientRect().width;
+        handle.classList.add('is-dragging');
+
+        const onMove = (moveEvent) => {
+          const delta = moveEvent.clientX - startX;
+          const newWidth = Math.max(40, Math.round(startWidth + delta));
+          table.style.setProperty('--col-' + colIndex, newWidth + 'px');
+        };
+
+        const onUp = () => {
+          handle.classList.remove('is-dragging');
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+          // Persist
+          try {
+            const current = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+            current['col-' + colIndex] = table.style.getPropertyValue('--col-' + colIndex);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+          } catch (err) {}
+        };
+
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+      });
     });
   });
 

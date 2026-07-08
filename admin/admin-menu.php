@@ -9,8 +9,8 @@ function mc_leads_engine_admin_assets($hook) {
         return;
     }
 
-    wp_enqueue_style('mc-leads-engine-admin', MC_LEADS_ENGINE_URL . 'assets/css/admin.css', array(), MC_LEADS_ENGINE_VERSION);
-    wp_enqueue_script('mc-leads-engine-admin', MC_LEADS_ENGINE_URL . 'assets/js/admin.js', array(), MC_LEADS_ENGINE_VERSION, true);
+    wp_enqueue_style('mc-leads-engine-admin', MC_LEADS_ENGINE_URL . 'assets/css/admin.css', array(), MC_LEADS_ENGINE_VERSION . '-' . time());
+    wp_enqueue_script('mc-leads-engine-admin', MC_LEADS_ENGINE_URL . 'assets/js/admin.js', array(), MC_LEADS_ENGINE_VERSION . '-' . time(), true);
     wp_localize_script('mc-leads-engine-admin', 'mcLeadsEngine', array(
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce'   => wp_create_nonce('mc_leads_engine_nonce'),

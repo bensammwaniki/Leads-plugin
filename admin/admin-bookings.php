@@ -258,7 +258,6 @@ function mc_leads_engine_render_bookings_page() {
             <input type="hidden" name="order" value="<?php echo esc_attr($order); ?>">
 
             <div class="filter-field">
-                <label><?php esc_html_e('Meeting format', 'mc-leads-engine'); ?></label>
                 <select class="filter-select" name="meeting_type">
                     <option value="all" <?php selected($filter_type, 'all'); ?>><?php esc_html_e('All Formats', 'mc-leads-engine'); ?></option>
                     <option value="online" <?php selected($filter_type, 'online'); ?>><?php esc_html_e('Online Call', 'mc-leads-engine'); ?></option>
@@ -269,7 +268,6 @@ function mc_leads_engine_render_bookings_page() {
             </div>
 
             <div class="filter-field">
-                <label><?php esc_html_e('Date / status', 'mc-leads-engine'); ?></label>
                 <select class="filter-select" name="status">
                     <option value="all" <?php selected($filter_status, 'all'); ?>><?php esc_html_e('All Bookings', 'mc-leads-engine'); ?></option>
                     <option value="upcoming" <?php selected($filter_status, 'upcoming'); ?>><?php esc_html_e('Upcoming Meetings', 'mc-leads-engine'); ?></option>
