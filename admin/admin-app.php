@@ -1093,7 +1093,7 @@ $select_label = ($q_type === 'checkbox') ? __('multi-select', 'mc-leads-engine')
                                                 <?php 
                                                 wp_editor(
                                                     $survey_settings['final_message'] ?? '', 
-                                                    'final_message', 
+                                                    'finalmessage', 
                                                     array(
                                                         'textarea_name' => 'final_message',
                                                         'textarea_rows' => 8,
