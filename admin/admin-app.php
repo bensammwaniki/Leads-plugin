@@ -637,7 +637,61 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                             </div>
                         </div>
 
-                        <?php if ($selected_survey_id && $selected_survey) : ?>
+                        <?php if (!$selected_survey_id && !$is_creating_new) : ?>
+                            <!-- ── NO SURVEY SELECTED: Home page ── -->
+                            <div class="empty-panel">
+                                <div class="empty-inner">
+                                    <div class="empty-icon">📋</div>
+                                    <h3 class="empty-title"><?php esc_html_e('No survey selected', 'mc-leads-engine'); ?></h3>
+                                    <p class="empty-sub"><?php esc_html_e('Choose an existing survey from the dropdown above, or create a new one — surveys turn visitor answers into priced, scored leads automatically.', 'mc-leads-engine'); ?></p>
+                                    <div class="empty-actions">
+                                        <a class="btn primary" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0, 'create_new' => 1), admin_url('admin.php'))); ?>">
+                                            ＋ <?php esc_html_e('Create your first survey', 'mc-leads-engine'); ?>
+                                        </a>
+                                        <a class="empty-secondary-link" href="#">
+                                            <?php esc_html_e('or duplicate an existing survey →', 'mc-leads-engine'); ?>
+                                        </a>
+                                    </div>
+                                    <div class="templates-label"><?php esc_html_e('QUICK START FROM A TEMPLATE', 'mc-leads-engine'); ?></div>
+                                    <div class="empty-templates">
+                                        <a class="template-chip" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0, 'create_new' => 1, 'prefill_title' => 'Web project estimate'), admin_url('admin.php'))); ?>">
+                                            <span class="ic">💻</span> <?php esc_html_e('Web project estimate', 'mc-leads-engine'); ?>
+                                        </a>
+                                        <a class="template-chip" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0, 'create_new' => 1, 'prefill_title' => 'Meeting booking intake'), admin_url('admin.php'))); ?>">
+                                            <span class="ic">📅</span> <?php esc_html_e('Meeting booking intake', 'mc-leads-engine'); ?>
+                                        </a>
+                                        <a class="template-chip" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0, 'create_new' => 1, 'prefill_title' => 'Design brief'), admin_url('admin.php'))); ?>">
+                                            <span class="ic">🎨</span> <?php esc_html_e('Design brief', 'mc-leads-engine'); ?>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                        <?php elseif ($is_creating_new) : ?>
+                            <!-- ── CREATE NEW SURVEY: Simple name form ── -->
+                            <div class="empty-panel">
+                                <div class="empty-inner" style="max-width:460px;">
+                                    <div class="empty-icon">📋</div>
+                                    <h3 class="empty-title"><?php esc_html_e('Create a new survey', 'mc-leads-engine'); ?></h3>
+                                    <p class="empty-sub"><?php esc_html_e('Enter a name for your survey to get started. You can add sections, questions, and settings once it is created.', 'mc-leads-engine'); ?></p>
+                                    <form method="post" action="<?php echo esc_url(admin_url('admin.php')); ?>" style="width:100%;display:flex;flex-direction:column;gap:14px;margin-top:10px;">
+                                        <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
+                                        <input type="hidden" name="page" value="mc-leads-engine-surveys">
+                                        <input type="hidden" name="mc_panel" value="surveys">
+                                        <input type="hidden" name="mc_leads_engine_action" value="save_survey">
+                                        <input type="hidden" name="survey_id" value="0">
+                                        <input type="hidden" name="status" value="draft">
+                                        <input class="field-input" type="text" name="title" placeholder="<?php esc_attr_e('e.g. Web Project Estimate', 'mc-leads-engine'); ?>" required autofocus value="<?php echo esc_attr(sanitize_text_field($_GET['prefill_title'] ?? '')); ?>" style="height:44px;font-size:14px;border-radius:8px;border:1px solid var(--mc-border,#e2e4e8);padding:0 14px;background:#fff;width:100%;">
+                                        <div style="display:flex;gap:10px;justify-content:center;">
+                                            <button class="btn primary" type="submit" style="height:40px;padding:0 24px;"><?php esc_html_e('Create Survey', 'mc-leads-engine'); ?></button>
+                                            <a class="btn ghost" href="<?php echo esc_url(admin_url('admin.php?page=mc-leads-engine-surveys&mc_panel=surveys')); ?>" style="height:40px;"><?php esc_html_e('Cancel', 'mc-leads-engine'); ?></a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                        <?php elseif ($selected_survey_id && $selected_survey) : ?>
+                            <!-- ── SURVEY SELECTED: Show tabs ── -->
                             <div class="sv-tabs">
                                 <button class="sv-tab active" data-sv-tab="builder" type="button">
                                     <span class="dashicons dashicons-grid-view"></span>
@@ -649,12 +703,10 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                                     <span class="status-dot" style="background:<?php echo (($selected_survey['status'] ?? 'draft') === 'published') ? '#10b981' : '#f59e0b'; ?>"></span>
                                 </button>
                             </div>
-                        <?php endif; ?>
 
-                        <div class="sv-tab-pane<?php echo ($selected_survey_id && !$is_creating_new) ? ' active' : ''; ?>" data-sv-pane="builder">
+                        <div class="sv-tab-pane active" data-sv-pane="builder">
 
-                        <?php if (empty($selected_survey_id)) : ?>
-                            <!-- Empty panel removed -->
+                        <?php if (false) : ?> <!-- placeholder -->
                         <?php else : ?>
                             <div class="builder-grid">
 
@@ -1010,7 +1062,7 @@ $select_label = ($q_type === 'checkbox') ? __('multi-select', 'mc-leads-engine')
                         <?php endif; ?>
 
                         <!-- ── SETTINGS TAB ─────────────────────── -->
-                        <div class="sv-tab-pane<?php echo (!$selected_survey_id || !$selected_survey || $is_creating_new) ? ' active' : ''; ?>" data-sv-pane="settings">
+                        <div class="sv-tab-pane" data-sv-pane="settings">
                             <?php if ($selected_survey_id && $selected_survey) : ?>
                                 <?php $survey_settings = mc_leads_engine_get_survey_settings($selected_survey_id); ?>
                                 <form method="post" class="sv-settings-form">
@@ -1117,62 +1169,10 @@ $select_label = ($q_type === 'checkbox') ? __('multi-select', 'mc-leads-engine')
                                     <?php endif; ?>
                                 </div>
                             </form>
-                        <?php else : ?>
-                        <div class="empty-panel">
-                            <?php if ($is_creating_new) : ?>
-                                <div class="empty-inner" style="max-width: 460px;">
-                                    <div class="empty-icon">📋</div>
-                                    <h3 class="empty-title"><?php esc_html_e('Create a new survey', 'mc-leads-engine'); ?></h3>
-                                    <p class="empty-sub"><?php esc_html_e('Enter a name for your survey to get started. You can configure sections, questions, and settings once it is created.', 'mc-leads-engine'); ?></p>
-                                    
-                                    <form method="post" action="<?php echo esc_url(admin_url('admin.php')); ?>" style="width: 100%; display: flex; flex-direction: column; gap: 14px; align-items: stretch; margin-top: 10px;">
-                                        <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
-                                        <input type="hidden" name="page" value="mc-leads-engine-surveys">
-                                        <input type="hidden" name="mc_panel" value="surveys">
-                                        <input type="hidden" name="mc_leads_engine_action" value="save_survey">
-                                        <input type="hidden" name="survey_id" value="0">
-                                        <input type="hidden" name="status" value="draft">
-                                        
-                                        <div style="text-align: left;">
-                                            <input class="field-input" type="text" name="title" placeholder="<?php esc_attr_e('Survey Name (e.g. Web Project Estimate)', 'mc-leads-engine'); ?>" required style="width: 100%; height: 42px; border-radius: 8px; border: 1px solid var(--mc-border); padding: 0 12px; font-size: 13.5px; background: #fff;" value="<?php echo esc_attr(sanitize_text_field($_GET['prefill_title'] ?? '')); ?>" autofocus>
-                                        </div>
-                                        
-                                        <div style="display: flex; gap: 10px; align-items: center; justify-content: center; margin-top: 6px;">
-                                            <button class="btn primary" type="submit" style="height: 40px; padding: 0 20px; font-size: 13px; font-weight: 700;"><?php esc_html_e('Create Survey', 'mc-leads-engine'); ?></button>
-                                            <a class="btn ghost" href="<?php echo esc_url(admin_url('admin.php?page=mc-leads-engine-surveys&mc_panel=surveys')); ?>" style="height: 40px; font-size: 13px;"><?php esc_html_e('Cancel', 'mc-leads-engine'); ?></a>
-                                        </div>
-                                    </form>
-                                </div>
-                            <?php else : ?>
-                                <div class="empty-inner">
-                                    <div class="empty-icon">📋</div>
-                                    <h3 class="empty-title"><?php esc_html_e('No survey selected', 'mc-leads-engine'); ?></h3>
-                                    <p class="empty-sub"><?php esc_html_e('Choose an existing survey from the dropdown above, or create a new one — surveys turn visitor answers into priced, scored leads automatically.', 'mc-leads-engine'); ?></p>
-                                    <div class="empty-actions">
-                                        <a class="btn primary" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0, 'create_new' => 1), admin_url('admin.php'))); ?>">
-                                            ＋ <?php esc_html_e('Create your first survey', 'mc-leads-engine'); ?>
-                                        </a>
-                                        <a class="empty-secondary-link" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0), admin_url('admin.php'))); ?>">
-                                            <?php esc_html_e('or duplicate an existing survey →', 'mc-leads-engine'); ?>
-                                        </a>
-                                    </div>
-                                    <div class="templates-label"><?php esc_html_e('QUICK START FROM A TEMPLATE', 'mc-leads-engine'); ?></div>
-                                    <div class="empty-templates">
-                                        <a class="template-chip" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0, 'create_new' => 1, 'prefill_title' => 'Web project estimate'), admin_url('admin.php'))); ?>">
-                                            <span class="ic">💻</span> <?php esc_html_e('Web project estimate', 'mc-leads-engine'); ?>
-                                        </a>
-                                        <a class="template-chip" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0, 'create_new' => 1, 'prefill_title' => 'Meeting booking intake'), admin_url('admin.php'))); ?>">
-                                            <span class="ic">📅</span> <?php esc_html_e('Meeting booking intake', 'mc-leads-engine'); ?>
-                                        </a>
-                                        <a class="template-chip" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0, 'create_new' => 1, 'prefill_title' => 'Design brief'), admin_url('admin.php'))); ?>">
-                                            <span class="ic">🎨</span> <?php esc_html_e('Design brief', 'mc-leads-engine'); ?>
-                                        </a>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
-                        </div>
                         <?php endif; ?>
                         </div><!-- /.sv-tab-pane[settings] -->
+
+                        <?php endif; ?><!-- end: elseif ($selected_survey_id && $selected_survey) -->
 
                     </section>
 
