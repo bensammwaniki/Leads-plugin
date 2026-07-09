@@ -150,6 +150,8 @@ function mc_leads_engine_get_survey_settings($survey_id) {
         'final_step_title'  => __('Final step', 'mc-leads-engine'),
         'show_final_price'  => 1,
         'show_final_score'  => 1,
+        'show_title'        => 1,
+        'show_description'  => 1,
         'final_button_text' => __('Submit Survey', 'mc-leads-engine'),
         'final_message'     => __('Review your answers and submit the survey to create a lead.', 'mc-leads-engine'),
     );
@@ -171,6 +173,8 @@ function mc_leads_engine_update_survey_settings($survey_id, $settings) {
         'final_step_title'  => sanitize_text_field($settings['final_step_title'] ?? ''),
         'show_final_price'  => isset($settings['show_final_price']) ? (int) $settings['show_final_price'] : 0,
         'show_final_score'  => isset($settings['show_final_score']) ? (int) $settings['show_final_score'] : 0,
+        'show_title'        => isset($settings['show_title']) ? (int) $settings['show_title'] : 0,
+        'show_description'  => isset($settings['show_description']) ? (int) $settings['show_description'] : 0,
         'final_button_text' => sanitize_text_field($settings['final_button_text'] ?? ''),
         'final_message'     => wp_kses_post($settings['final_message'] ?? ''),
     );

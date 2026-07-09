@@ -55,7 +55,7 @@
     if (consent) return; // Consent already given/refused
 
     const banner = document.getElementById('mc-cookie-banner');
-    const modal = document.getElementById('mc-cookie-modal');
+    const panel = document.getElementById('mc-customize-panel');
     if (!banner) return;
 
     // Show banner with slide animation
@@ -78,25 +78,17 @@
       });
     }
 
-    // 3. Customize button -> Open preferences Modal
+    // 3. Customize button -> Toggle customize panel
     const btnSettings = document.getElementById('mc-btn-settings-cookies');
-    if (btnSettings && modal) {
+    if (btnSettings && panel) {
       btnSettings.addEventListener('click', () => {
-        modal.style.display = 'flex';
-      });
-    }
-
-    // Close Customize Modal
-    const modalClose = document.getElementById('mc-cookie-modal-close');
-    if (modalClose && modal) {
-      modalClose.addEventListener('click', () => {
-        modal.style.display = 'none';
+        panel.classList.toggle('open');
       });
     }
 
     // Save Preference Toggles
     const btnSavePrefs = document.getElementById('mc-btn-save-cookie-preferences');
-    if (btnSavePrefs && modal) {
+    if (btnSavePrefs) {
       btnSavePrefs.addEventListener('click', () => {
         const gaToggle = document.getElementById('mc-toggle-analytics');
         const pixelToggle = document.getElementById('mc-toggle-marketing');
@@ -105,7 +97,6 @@
           analytics: !!(gaToggle && gaToggle.checked),
           marketing: !!(pixelToggle && pixelToggle.checked)
         });
-        modal.style.display = 'none';
       });
     }
 

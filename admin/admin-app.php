@@ -135,6 +135,8 @@ function mc_leads_engine_handle_admin_survey_actions() {
                     'final_step_title'  => $_POST['final_step_title'] ?? '',
                     'show_final_price'  => isset($_POST['show_final_price']) ? 1 : 0,
                     'show_final_score'  => isset($_POST['show_final_score']) ? 1 : 0,
+                    'show_title'        => isset($_POST['show_title']) ? 1 : 0,
+                    'show_description'  => isset($_POST['show_description']) ? 1 : 0,
                     'final_button_text' => $_POST['final_button_text'] ?? '',
                     'final_message'     => $_POST['final_message'] ?? '',
                 ));
@@ -1046,7 +1048,7 @@ $select_label = ($q_type === 'checkbox') ? __('multi-select', 'mc-leads-engine')
                                                 </div>
                                                 <div class="field-hint" style="margin-left:44px; margin-top:0;"><?php esc_html_e('If enabled, the computed price estimate will be shown to the user.', 'mc-leads-engine'); ?></div>
                                             </div>
-                                            <div class="sv-toggle-group" style="display:flex; flex-direction:column; align-items:flex-start; gap:4px;">
+                                            <div class="sv-toggle-group" style="display:flex; flex-direction:column; align-items:flex-start; gap:4px; margin-bottom:12px;">
                                                 <div style="display:flex; align-items:center; gap:10px;">
                                                     <label class="switch">
                                                         <input type="checkbox" id="svs-show-score" name="show_final_score" value="1" <?php checked(!empty($survey_settings['show_final_score'])); ?>>
@@ -1055,6 +1057,26 @@ $select_label = ($q_type === 'checkbox') ? __('multi-select', 'mc-leads-engine')
                                                     <label for="svs-show-score" class="sv-toggle-text" style="font-weight:600;"><?php esc_html_e('Show lead score on final step', 'mc-leads-engine'); ?></label>
                                                 </div>
                                                 <div class="field-hint" style="margin-left:44px; margin-top:0;"><?php esc_html_e('If enabled, the total lead score will be shown to the user.', 'mc-leads-engine'); ?></div>
+                                            </div>
+                                            <div class="sv-toggle-group" style="display:flex; flex-direction:column; align-items:flex-start; gap:4px; margin-bottom:12px;">
+                                                <div style="display:flex; align-items:center; gap:10px;">
+                                                    <label class="switch">
+                                                        <input type="checkbox" id="svs-show-title" name="show_title" value="1" <?php checked(!empty($survey_settings['show_title'])); ?>>
+                                                        <span class="track"></span>
+                                                    </label>
+                                                    <label for="svs-show-title" class="sv-toggle-text" style="font-weight:600;"><?php esc_html_e('Show survey title', 'mc-leads-engine'); ?></label>
+                                                </div>
+                                                <div class="field-hint" style="margin-left:44px; margin-top:0;"><?php esc_html_e('If enabled, the survey title will be shown at the top of the survey.', 'mc-leads-engine'); ?></div>
+                                            </div>
+                                            <div class="sv-toggle-group" style="display:flex; flex-direction:column; align-items:flex-start; gap:4px;">
+                                                <div style="display:flex; align-items:center; gap:10px;">
+                                                    <label class="switch">
+                                                        <input type="checkbox" id="svs-show-description" name="show_description" value="1" <?php checked(!empty($survey_settings['show_description'])); ?>>
+                                                        <span class="track"></span>
+                                                    </label>
+                                                    <label for="svs-show-description" class="sv-toggle-text" style="font-weight:600;"><?php esc_html_e('Show survey description', 'mc-leads-engine'); ?></label>
+                                                </div>
+                                                <div class="field-hint" style="margin-left:44px; margin-top:0;"><?php esc_html_e('If enabled, the survey description will be shown below the title.', 'mc-leads-engine'); ?></div>
                                             </div>
                                         </div>
                                     </div>
