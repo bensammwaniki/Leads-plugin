@@ -407,7 +407,15 @@ function initSurvey(container) {
       credentials: 'same-origin',
       body: data
     })
-    .then(r => r.json())
+    .then(async r => {
+      const text = await r.text();
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        console.error('Invalid JSON response from survey submission:', text);
+        throw new Error('Response is not valid JSON');
+      }
+    })
     .then(response => {
       if (response.success && response.data.html) {
         container.innerHTML = response.data.html;
@@ -416,7 +424,8 @@ function initSurvey(container) {
         alert(response.data?.message || 'Error submitting the survey. Please try again.');
       }
     })
-    .catch(() => {
+    .catch((e) => {
+      console.error(e);
       hideLoadingOverlay();
       alert('A network error occurred. Please try again.');
     });
@@ -535,6 +544,7 @@ function initSurvey(container) {
       data.append('nonce', MCLeadsEngine.nonce);
       data.append('survey_id', surveyId);
       data.append('lead_id', leadId);
+      data.append('session_id', MCLeadsEngine.sessionId);
       data.append('base_url', window.location.href);
 
       fetch(MCLeadsEngine.ajaxUrl, {
@@ -542,7 +552,15 @@ function initSurvey(container) {
         credentials: 'same-origin',
         body: data
       })
-      .then(r => r.json())
+      .then(async r => {
+        const text = await r.text();
+        try {
+          return JSON.parse(text);
+        } catch (err) {
+          console.error('Invalid JSON response from get thank you request:', text);
+          throw new Error('Response is not valid JSON');
+        }
+      })
       .then(response => {
         if (response.success && response.data.html) {
           container.innerHTML = response.data.html;

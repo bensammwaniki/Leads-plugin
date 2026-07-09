@@ -238,10 +238,23 @@ class MC_Leads_Engine_Shortcodes {
     }
 
     public function ajax_get_thank_you() {
-        check_ajax_referer('mc_leads_engine_frontend', 'nonce');
+        $nonce_valid = wp_verify_nonce($_POST['nonce'] ?? '', 'mc_leads_engine_frontend');
         $survey_id = absint($_POST['survey_id'] ?? 0);
         $lead_id = absint($_POST['lead_id'] ?? 0);
+        $session_id = sanitize_text_field($_POST['session_id'] ?? '');
         $base_url = esc_url_raw($_POST['base_url'] ?? '');
+        
+        $authorized = $nonce_valid;
+        if (!$authorized && $lead_id && $session_id) {
+            $lead = mc_leads_engine_leads_repository()->get_lead($lead_id);
+            if ($lead && $lead['session_id'] === $session_id) {
+                $authorized = true;
+            }
+        }
+        
+        if (!$authorized) {
+            wp_send_json_error(array('message' => esc_html__('Unauthorized access.', 'mc-leads-engine')), 403);
+        }
         
         $html = mc_leads_engine_render_template('thank-you.php', array(
             'survey_id' => $survey_id,
@@ -253,9 +266,21 @@ class MC_Leads_Engine_Shortcodes {
     }
 
     public function ajax_submit_survey() {
-        check_ajax_referer('mc_leads_engine_frontend', 'nonce');
-
+        $nonce_valid = wp_verify_nonce($_POST['nonce'] ?? '', 'mc_leads_engine_frontend');
         $session_id = sanitize_text_field($_POST['session_id'] ?? '');
+        
+        $authorized = $nonce_valid;
+        if (!$authorized && $session_id) {
+            $session = mc_leads_engine_session();
+            if ($session->get_session_id() === $session_id) {
+                $authorized = true;
+            }
+        }
+        
+        if (!$authorized) {
+            wp_send_json_error(array('message' => esc_html__('Unauthorized access.', 'mc-leads-engine')), 403);
+        }
+
         $survey_id = absint($_POST['survey_id'] ?? 0);
         $answers = isset($_POST['answers']) ? json_decode(wp_unslash($_POST['answers']), true) : array();
         $answers = mc_leads_engine_sanitize_recursive(is_array($answers) ? $answers : array());

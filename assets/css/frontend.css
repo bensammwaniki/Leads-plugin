@@ -34,20 +34,24 @@
 
 .mc-back-btn {
   position: absolute !important;
-  top: 5px !important;
-  left: 5px !important;
+  top: 0px !important;
+  left: 0px !important;
   background: transparent !important;
   border: 1px solid #e5e7eb !important;
   border-radius: 50% !important;
-  width: 36px !important;
-  height: 36px !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   padding: 0 !important;
+  margin: 0 !important;
   cursor: pointer !important;
   color: #4b5563 !important;
   transition: all 0.2s ease !important;
+  box-sizing: border-box !important;
 }
 
 .mc-back-btn:hover {
@@ -59,7 +63,9 @@
 .mc-back-btn svg {
   width: 20px !important;
   height: 20px !important;
-  fill: currentColor !important;
+  stroke: currentColor !important;
+  stroke-width: 2 !important;
+  fill: none !important;
 }
 
 .mc-leads-engine-header h2 {

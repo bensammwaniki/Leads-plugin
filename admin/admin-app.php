@@ -100,13 +100,13 @@ function mc_leads_engine_admin_selected_url($panel, $survey_id = 0, $section_id 
 }
 
 function mc_leads_engine_handle_admin_survey_actions() {
-    if (!current_user_can('manage_options')) {
-        wp_die(esc_html__('You do not have permission to access this page.', 'mc-leads-engine'));
-    }
-
     $action = sanitize_key($_POST['mc_leads_engine_action'] ?? '');
     if (!$action) {
         return;
+    }
+
+    if (!current_user_can('manage_options')) {
+        wp_die(esc_html__('You do not have permission to access this page.', 'mc-leads-engine'));
     }
 
     check_admin_referer('mc_leads_engine_admin_action', 'mc_leads_engine_nonce');
@@ -596,6 +596,20 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                             }
                         </style>
 
+                        <?php if ($selected_survey_id && $selected_survey) : ?>
+                            <div class="sv-tabs">
+                                <button class="sv-tab active" data-sv-tab="builder" type="button">
+                                    <span class="dashicons dashicons-grid-view"></span>
+                                    <?php esc_html_e('Builder', 'mc-leads-engine'); ?>
+                                </button>
+                                <button class="sv-tab" data-sv-tab="settings" type="button">
+                                    <span class="dashicons dashicons-admin-generic"></span>
+                                    <?php esc_html_e('Survey settings', 'mc-leads-engine'); ?>
+                                    <span class="status-dot" style="background:<?php echo (($selected_survey['status'] ?? 'draft') === 'published') ? '#10b981' : '#f59e0b'; ?>"></span>
+                                </button>
+                            </div>
+                        <?php endif; ?>
+
                         <div class="sv-tab-pane active" data-sv-pane="builder">
 
                         <!-- ── Survey Top Bar ──────────────────────── -->
@@ -1052,8 +1066,22 @@ $select_label = ($q_type === 'checkbox') ? __('multi-select', 'mc-leads-engine')
                                         </div>
                                         <div class="field-group">
                                             <label class="field-label"><?php esc_html_e('Final step message', 'mc-leads-engine'); ?></label>
-                                            <div class="field-hint" style="margin-top:0; margin-bottom:6px;"><?php esc_html_e('HTML and text shown to users on completion. Supports shortcodes.', 'mc-leads-engine'); ?></div>
-                                            <textarea class="field-input" rows="6" name="final_message" style="min-height:120px;resize:vertical;" placeholder="<?php esc_attr_e('e.g. Thanks! Review your answers below.', 'mc-leads-engine'); ?>"><?php echo esc_textarea($survey_settings['final_message'] ?? ''); ?></textarea>
+                                            <div class="field-hint" style="margin-top:0; margin-bottom:6px;"><?php esc_html_e('HTML and text shown to users on completion. Supports [estimate] and other placeholders.', 'mc-leads-engine'); ?></div>
+                                            <div class="mc-wp-editor-wrap" style="background:#fff; border:1px solid var(--mc-border); border-radius:6px; padding:2px;">
+                                                <?php 
+                                                wp_editor(
+                                                    $survey_settings['final_message'] ?? '', 
+                                                    'final_message', 
+                                                    array(
+                                                        'textarea_name' => 'final_message',
+                                                        'textarea_rows' => 8,
+                                                        'media_buttons' => false,
+                                                        'tinymce'       => true,
+                                                        'quicktags'     => true,
+                                                    )
+                                                ); 
+                                                ?>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1473,6 +1501,10 @@ $select_label = ($q_type === 'checkbox') ? __('multi-select', 'mc-leads-engine')
                                                     <tr>
                                                         <td><code class="mc-code-badge">[total_price]</code></td>
                                                         <td><?php esc_html_e('Calculated project pricing total.', 'mc-leads-engine'); ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><code class="mc-code-badge">[estimate]</code></td>
+                                                        <td><?php esc_html_e('Formatted pricing total with currency (e.g. KES 2,500.00).', 'mc-leads-engine'); ?></td>
                                                     </tr>
                                                     <tr>
                                                         <td><code class="mc-code-badge">[lead_score]</code></td>

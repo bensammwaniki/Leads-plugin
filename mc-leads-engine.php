@@ -179,7 +179,11 @@ function mc_leads_engine_update_survey_settings($survey_id, $settings) {
 }
 
 function mc_leads_engine_format_final_message($message, $pricing, $survey_id = 0) {
+    $settings = mc_leads_engine_get_settings();
+    $currency = $settings['currency_symbol'] ?? 'KES';
+    
     $total_price = number_format_i18n((float) ($pricing['total_price'] ?? 0), 2);
+    $formatted_price = $currency . ' ' . $total_price;
     $lead_score = (int) ($pricing['lead_score'] ?? 0);
     
     $survey_title = '';
@@ -191,6 +195,7 @@ function mc_leads_engine_format_final_message($message, $pricing, $survey_id = 0
     }
     
     $message = str_replace('[total_price]', $total_price, $message);
+    $message = str_replace('[estimate]', $formatted_price, $message);
     $message = str_replace('[lead_score]', $lead_score, $message);
     $message = str_replace('[survey_title]', $survey_title, $message);
     

@@ -5,12 +5,12 @@ if (!defined('ABSPATH')) {
 }
 
 function mc_leads_engine_handle_settings_save() {
-    if (!current_user_can('manage_options')) {
-        wp_die(esc_html__('You do not have permission to access this page.', 'mc-leads-engine'));
-    }
-
     if (empty($_POST['mc_leads_engine_action']) || $_POST['mc_leads_engine_action'] !== 'save_settings') {
         return;
+    }
+
+    if (!current_user_can('manage_options')) {
+        wp_die(esc_html__('You do not have permission to access this page.', 'mc-leads-engine'));
     }
 
     check_admin_referer('mc_leads_engine_admin_action', 'mc_leads_engine_nonce');

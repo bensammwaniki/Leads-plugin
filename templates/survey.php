@@ -12,9 +12,9 @@ $total_steps = count($sections);
 $saved_answers = isset($saved_answers) && is_array($saved_answers) ? $saved_answers : array();
 ?>
 <div class="mc-leads-engine mc-leads-engine-<?php echo esc_attr($is_cf7 ? 'cf7' : 'standard'); ?>" data-survey-id="<?php echo esc_attr($survey_id); ?>" data-session-id="<?php echo esc_attr($session_id); ?>" data-mode="<?php echo esc_attr($is_cf7 ? 'cf7' : 'standard'); ?>" data-total-steps="<?php echo esc_attr($total_steps); ?>" data-current-step="<?php echo esc_attr(max(1, (int) ($current_step ?? 1))); ?>" data-clear-on-load="<?php echo empty($saved_answers) ? '1' : '0'; ?>">
-    <button type="button" class="mc-step-prev mc-back-btn" aria-label="<?php esc_attr_e('Previous Step', 'mc-leads-engine'); ?>" style="display: none;">
-        <?php echo mc_leads_get_svg_icon('arrow-left'); ?>
-    </button>
+    <div role="button" tabindex="0" class="mc-step-prev mc-back-btn" aria-label="<?php esc_attr_e('Previous Step', 'mc-leads-engine'); ?>" style="display: none;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </div>
     <div class="mc-leads-engine-card">
         <header class="mc-leads-engine-header">
             <h2><?php echo esc_html($survey['title']); ?></h2>
