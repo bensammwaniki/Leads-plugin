@@ -161,7 +161,22 @@ function mc_leads_engine_get_survey_settings($survey_id) {
     }
 
     $settings = get_option("mc_leads_engine_survey_settings_{$survey_id}", array());
-    return wp_parse_args(is_array($settings) ? $settings : array(), $defaults);
+    $settings = is_array($settings) ? $settings : array();
+
+    $clean = array();
+    foreach ($defaults as $key => $default_val) {
+        if (!isset($settings[$key])) {
+            $clean[$key] = $default_val;
+        } else {
+            if (is_int($default_val) || is_bool($default_val)) {
+                $clean[$key] = (int) $settings[$key];
+            } else {
+                $clean[$key] = (string) $settings[$key];
+            }
+        }
+    }
+
+    return $clean;
 }
 
 function mc_leads_engine_update_survey_settings($survey_id, $settings) {

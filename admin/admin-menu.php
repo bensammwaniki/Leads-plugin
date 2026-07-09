@@ -9,6 +9,8 @@ function mc_leads_engine_admin_assets($hook) {
         return;
     }
 
+    wp_enqueue_editor();
+
     wp_enqueue_style('mc-leads-engine-admin', MC_LEADS_ENGINE_URL . 'assets/css/admin.css', array(), MC_LEADS_ENGINE_VERSION . '-' . time());
     wp_enqueue_script('mc-leads-engine-admin', MC_LEADS_ENGINE_URL . 'assets/js/admin.js', array(), MC_LEADS_ENGINE_VERSION . '-' . time(), true);
     wp_localize_script('mc-leads-engine-admin', 'mcLeadsEngine', array(

@@ -588,12 +588,43 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ── Survey Builder Tab Switching ─────────────────────────── */
   const svTabs = document.querySelectorAll('.sv-tab');
   const svPanes = document.querySelectorAll('.sv-tab-pane');
+
+  const initRichEditor = () => {
+    if (window.wp && wp.editor && document.getElementById('finalmessage') && !window.tinyMCE?.get('finalmessage')) {
+      wp.editor.initialize('finalmessage', {
+        tinymce: {
+          wpautop: true,
+          plugins: 'charmap colorpicker hr lists paste tabfocus textcolor wpemoji wplink wpview',
+          toolbar1: 'formatselect bold italic | bullist numlist blockquote | alignleft aligncenter alignright | link unlink',
+        },
+        quicktags: true
+      });
+    }
+  };
+
   svTabs.forEach((tab) => {
     tab.addEventListener('click', () => {
       const target = tab.dataset.svTab;
       svTabs.forEach((t) => t.classList.toggle('active', t === tab));
       svPanes.forEach((p) => p.classList.toggle('active', p.dataset.svPane === target));
+      if (target === 'settings') {
+        setTimeout(initRichEditor, 100);
+      }
     });
+  });
+
+  const activePane = document.querySelector('.sv-tab-pane.active[data-sv-pane="settings"]');
+  if (activePane) {
+    setTimeout(initRichEditor, 100);
+  }
+
+  // Ensure TinyMCE is synced back to textarea on form submit
+  document.addEventListener('submit', (e) => {
+    if (e.target && e.target.classList.contains('sv-settings-form')) {
+      if (window.tinyMCE) {
+        tinyMCE.triggerSave();
+      }
+    }
   });
 
   /* ── Shortcode chip copy ────────────────────────────────────  */

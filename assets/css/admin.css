@@ -399,20 +399,10 @@
 
 /* ============ TAB PANES ============ */
 #panel-surveys .sv-tab-pane {
-  position: absolute !important;
-  left: -9999px !important;
-  top: -9999px !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  height: 0 !important;
-  overflow: hidden !important;
+  display: none;
 }
 #panel-surveys .sv-tab-pane.active {
-  position: static !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  height: auto !important;
-  overflow: visible !important;
+  display: block;
 }
 
 /* ============ BUILDER GRID ============ */
