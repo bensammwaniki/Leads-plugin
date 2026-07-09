@@ -1,6 +1,7 @@
 <?php
 if (!defined('ABSPATH')) {
     exit;
+
 }
 
 $lead_id = absint($lead_id ?? 0);
@@ -9,7 +10,8 @@ $lead = mc_leads_engine_leads_repository()->get_lead($lead_id);
 
 global $wpdb;
 $booking = $lead ? $wpdb->get_row($wpdb->prepare("SELECT * FROM " . mc_leads_engine_table('bookings') . " WHERE lead_id = %d", $lead_id), ARRAY_A) : null;
-$new_estimate_url = remove_query_arg(array('mc_leads_submitted', 'lead_id'));
+$base_url = !empty($base_url) ? esc_url_raw($base_url) : '';
+$new_estimate_url = remove_query_arg(array('mc_leads_submitted', 'lead_id'), $base_url);
 
 $survey_settings = mc_leads_engine_get_survey_settings($survey_id);
 $message = !empty($survey_settings['final_message']) ? $survey_settings['final_message'] : __('Your estimate request has been submitted successfully.', 'mc-leads-engine');

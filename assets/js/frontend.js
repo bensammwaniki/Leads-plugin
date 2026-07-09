@@ -81,6 +81,11 @@ function initSurvey(container) {
     injectCf7Fields();
     checkStepValidation();
 
+    const backBtn = container.querySelector('.mc-back-btn');
+    if (backBtn) {
+      backBtn.style.display = currentStep > 1 ? 'inline-flex' : 'none';
+    }
+
     // Dispatch step completed custom event
     document.dispatchEvent(new CustomEvent('mc_leads_survey_step', {
       detail: { surveyId: surveyId, step: currentStep }
@@ -384,19 +389,37 @@ function initSurvey(container) {
       }
     }));
 
-    const tempForm = document.createElement('form');
-    tempForm.method = 'POST';
-    tempForm.action = form.dataset.action || '';
-    tempForm.style.display = 'none';
+    showLoadingOverlay('Saving your estimate...');
 
-    // Copy all hidden inputs from the container (includes mc_answers_json)
+    const data = new URLSearchParams();
+    data.append('action', 'mc_leads_engine_submit_survey_ajax');
+    data.append('nonce', MCLeadsEngine.nonce);
+    
+    // Copy all hidden inputs from the container to data
     form.querySelectorAll('input[type="hidden"]').forEach((input) => {
-      const clone = input.cloneNode(true);
-      tempForm.appendChild(clone);
+      data.append(input.name, input.value);
     });
 
-    document.body.appendChild(tempForm);
-    tempForm.submit();
+    data.append('base_url', window.location.href);
+
+    fetch(MCLeadsEngine.ajaxUrl, {
+      method: 'POST',
+      credentials: 'same-origin',
+      body: data
+    })
+    .then(r => r.json())
+    .then(response => {
+      if (response.success && response.data.html) {
+        container.innerHTML = response.data.html;
+      } else {
+        hideLoadingOverlay();
+        alert(response.data?.message || 'Error submitting the survey. Please try again.');
+      }
+    })
+    .catch(() => {
+      hideLoadingOverlay();
+      alert('A network error occurred. Please try again.');
+    });
   }
 
   function wireStandardSubmit() {
@@ -421,32 +444,7 @@ function initSurvey(container) {
               // Click the hidden CF7 submit button programmatically
               cf7Submit.click();
               
-              // Set up one-time event listeners on the form to check results
-              const handleMailSent = () => {
-                cleanupListeners();
-                // CF7 submitted successfully, now submit the main survey!
-                submitFormPayload();
-              };
-              
-              const handleInvalid = () => {
-                cleanupListeners();
-                // CF7 validation failed, flip back to the step containing the form
-                const parentStep = cf7Form.closest('.mc-leads-engine-step');
-                if (parentStep) {
-                  const stepVal = parseInt(parentStep.dataset.step, 10);
-                  if (!isNaN(stepVal)) {
-                    setVisibleStep(stepVal);
-                  }
-                }
-              };
-              
-              const cleanupListeners = () => {
-                cf7Form.removeEventListener('wpcf7mailsent', handleMailSent);
-                cf7Form.removeEventListener('wpcf7invalid', handleInvalid);
-              };
-              
-              cf7Form.addEventListener('wpcf7mailsent', handleMailSent);
-              cf7Form.addEventListener('wpcf7invalid', handleInvalid);
+              // Global listeners will handle wpcf7mailsent and wpcf7invalid
             } else {
               submitFormPayload();
             }
@@ -484,6 +482,21 @@ function initSurvey(container) {
     }
   }
 
+  function hideParentScrollbars() {
+    let el = container.parentElement;
+    let limit = 10;
+    while (el && el !== document.body && limit > 0) {
+      const style = window.getComputedStyle(el);
+      if (style.overflowY === 'auto' || style.overflowY === 'scroll') {
+        el.style.setProperty('scrollbar-width', 'none', 'important');
+        el.style.setProperty('-ms-overflow-style', 'none', 'important');
+        el.classList.add('mc-hide-scrollbars');
+      }
+      el = el.parentElement;
+      limit--;
+    }
+  }
+
   function hideLoadingOverlay() {
     const overlay = container.querySelector('.mc-leads-engine-loading-overlay');
     if (overlay) {
@@ -501,21 +514,48 @@ function initSurvey(container) {
   document.addEventListener('wpcf7mailsent', (event) => {
     const cf7Wrapper = container.querySelector('.wpcf7');
     if (cf7Wrapper && (event.target === cf7Wrapper || cf7Wrapper.contains(event.target))) {
-      showLoadingOverlay('Estimate confirmed! Redirecting...');
+      showLoadingOverlay('Estimate confirmed! Loading your summary...');
       
-      // Dispatch survey submit custom event on successful CF7 submission
+      const priceVal = priceDisplay ? parseFloat(priceDisplay.textContent.replace(/[^0-9.]/g, '')) : 0;
+      const scoreVal = scoreDisplay ? parseInt(scoreDisplay.textContent, 10) : 0;
+      
       document.dispatchEvent(new CustomEvent('mc_leads_survey_submit', {
         detail: {
           surveyId: surveyId,
-          price: priceDisplay ? parseFloat(priceDisplay.textContent.replace(/[^0-9.]/g, '')) : 0,
-          score: scoreDisplay ? parseInt(scoreDisplay.textContent, 10) : 0
+          price: priceVal,
+          score: scoreVal
         }
       }));
 
       const responseLeadId = event.detail.apiResponse?.mc_lead_id;
       const leadId = responseLeadId ? responseLeadId : 'active';
-      const thankYouUrl = window.location.origin + window.location.pathname + `?mc_leads_submitted=1&lead_id=${leadId}`;
-      window.location.href = thankYouUrl;
+      
+      const data = new URLSearchParams();
+      data.append('action', 'mc_leads_engine_get_thank_you');
+      data.append('nonce', MCLeadsEngine.nonce);
+      data.append('survey_id', surveyId);
+      data.append('lead_id', leadId);
+      data.append('base_url', window.location.href);
+
+      fetch(MCLeadsEngine.ajaxUrl, {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: data
+      })
+      .then(r => r.json())
+      .then(response => {
+        if (response.success && response.data.html) {
+          container.innerHTML = response.data.html;
+        } else {
+          hideLoadingOverlay();
+          alert('Successfully submitted, but could not load the thank you screen.');
+        }
+      })
+      .catch((e) => {
+        console.error('Fetch error:', e);
+        hideLoadingOverlay();
+        alert('An error occurred loading the thank you screen.');
+      });
     }
   }, false);
 
@@ -523,6 +563,7 @@ function initSurvey(container) {
     const cf7Wrapper = container.querySelector('.wpcf7');
     if (cf7Wrapper && (event.target === cf7Wrapper || cf7Wrapper.contains(event.target))) {
       hideLoadingOverlay();
+      alert('The contact form could not be submitted. Please check your answers and try again.');
     }
   }, false);
 
@@ -548,8 +589,9 @@ function initSurvey(container) {
     updateOptionStates();
     syncHiddenAnswerPayload(collectAnswers());
     saveProgress();
-    injectCf7Fields();
+    updateOptionStates();
     setVisibleStep(getVisibleStep());
+    hideParentScrollbars();
     checkStepValidation();
   }
 

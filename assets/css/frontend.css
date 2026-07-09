@@ -4,6 +4,8 @@
   margin: 0 !important;
   font-family: inherit;
   box-sizing: border-box;
+  position: relative !important;
+  padding-top: 50px !important; /* space for the back button */
 }
 
 .mc-leads-engine * {
@@ -23,18 +25,57 @@
 }
 
 /* Header Section */
+.mc-leads-engine-header {
+  display: flex !important;
+  align-items: flex-start !important;
+  flex-direction: column !important;
+  margin-bottom: 16px !important;
+}
+
+.mc-back-btn {
+  position: absolute !important;
+  top: 5px !important;
+  left: 5px !important;
+  background: transparent !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+  color: #4b5563 !important;
+  transition: all 0.2s ease !important;
+}
+
+.mc-back-btn:hover {
+  background: #f3f4f6 !important;
+  color: #111827 !important;
+  border-color: #d1d5db !important;
+}
+
+.mc-back-btn svg {
+  width: 20px !important;
+  height: 20px !important;
+  fill: currentColor !important;
+}
+
 .mc-leads-engine-header h2 {
   font-size: 24px !important;
   font-weight: 700 !important;
   color: #1f2937 !important;
-  margin: 0 0 8px 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
 }
 
 .mc-leads-engine-description {
-  margin: 0 0 16px 0 !important;
+  margin: 12px 0 0 0 !important;
   color: #4b5563 !important;
   font-size: 14px !important;
   line-height: 1.5 !important;
+  flex-basis: 100% !important;
 }
 
 /* Progress Tracker */
@@ -537,6 +578,25 @@
     padding: 10px !important;
     margin-bottom: 10px !important;
   }
+} /* Closing brace for @media query */
+
+/* Hide scrollbars on common modal/popup wrappers containing the survey */
+.dialog-widget-content:has(.mc-leads-engine),
+.elementor-popup-modal:has(.mc-leads-engine),
+.pum-container:has(.mc-leads-engine),
+.modal-content:has(.mc-leads-engine),
+.sg-popup-content:has(.mc-leads-engine) {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.dialog-widget-content:has(.mc-leads-engine)::-webkit-scrollbar,
+.elementor-popup-modal:has(.mc-leads-engine)::-webkit-scrollbar,
+.pum-container:has(.mc-leads-engine)::-webkit-scrollbar,
+.modal-content:has(.mc-leads-engine)::-webkit-scrollbar,
+.sg-popup-content:has(.mc-leads-engine)::-webkit-scrollbar,
+.mc-hide-scrollbars::-webkit-scrollbar {
+    display: none !important;
 }
 
 /* Hide Section Headers & Lead Metadata from Client */

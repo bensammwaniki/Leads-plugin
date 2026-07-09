@@ -12,6 +12,12 @@ class MC_Leads_Engine_Shortcodes {
         add_action('wp_ajax_nopriv_mc_leads_engine_save_progress', array($this, 'ajax_save_progress'));
         add_action('admin_post_mc_leads_engine_submit_survey', array($this, 'handle_submit_survey'));
         add_action('admin_post_nopriv_mc_leads_engine_submit_survey', array($this, 'handle_submit_survey'));
+
+        add_action('wp_ajax_mc_leads_engine_get_thank_you', array($this, 'ajax_get_thank_you'));
+        add_action('wp_ajax_nopriv_mc_leads_engine_get_thank_you', array($this, 'ajax_get_thank_you'));
+        
+        add_action('wp_ajax_mc_leads_engine_submit_survey_ajax', array($this, 'ajax_submit_survey'));
+        add_action('wp_ajax_nopriv_mc_leads_engine_submit_survey_ajax', array($this, 'ajax_submit_survey'));
         add_action('init', array($this, 'maybe_handle_frontend_submit'));
     }
 
@@ -229,5 +235,54 @@ class MC_Leads_Engine_Shortcodes {
 
         wp_safe_redirect($redirect);
         exit;
+    }
+
+    public function ajax_get_thank_you() {
+        check_ajax_referer('mc_leads_engine_frontend', 'nonce');
+        $survey_id = absint($_POST['survey_id'] ?? 0);
+        $lead_id = absint($_POST['lead_id'] ?? 0);
+        $base_url = esc_url_raw($_POST['base_url'] ?? '');
+        
+        $html = mc_leads_engine_render_template('thank-you.php', array(
+            'survey_id' => $survey_id,
+            'lead_id'   => $lead_id,
+            'base_url'  => $base_url,
+        ));
+        
+        wp_send_json_success(array('html' => $html));
+    }
+
+    public function ajax_submit_survey() {
+        check_ajax_referer('mc_leads_engine_frontend', 'nonce');
+
+        $session_id = sanitize_text_field($_POST['session_id'] ?? '');
+        $survey_id = absint($_POST['survey_id'] ?? 0);
+        $answers = isset($_POST['answers']) ? json_decode(wp_unslash($_POST['answers']), true) : array();
+        $answers = mc_leads_engine_sanitize_recursive(is_array($answers) ? $answers : array());
+
+        if (!$survey_id) {
+            wp_send_json_error(array('message' => esc_html__('Unable to submit this survey.', 'mc-leads-engine')));
+        }
+        
+        $pricing = mc_leads_engine_pricing_engine()->calculate_survey_price($answers, $survey_id);
+        $lead_id = mc_leads_engine_leads_repository()->create_lead($survey_id, $session_id, $answers, $pricing);
+        
+        $session = mc_leads_engine_session();
+        if ($session_id) {
+            $session->set_session_id($session_id);
+        } else {
+            $session->maybe_start_session();
+        }
+        $session->set_lead_id($lead_id);
+        $session->clear_session(); // clear session on successful submit
+        
+        $base_url = esc_url_raw($_POST['base_url'] ?? '');
+        $html = mc_leads_engine_render_template('thank-you.php', array(
+            'survey_id' => $survey_id,
+            'lead_id'   => $lead_id,
+            'base_url'  => $base_url,
+        ));
+        
+        wp_send_json_success(array('html' => $html));
     }
 }

@@ -12,6 +12,9 @@ $total_steps = count($sections);
 $saved_answers = isset($saved_answers) && is_array($saved_answers) ? $saved_answers : array();
 ?>
 <div class="mc-leads-engine mc-leads-engine-<?php echo esc_attr($is_cf7 ? 'cf7' : 'standard'); ?>" data-survey-id="<?php echo esc_attr($survey_id); ?>" data-session-id="<?php echo esc_attr($session_id); ?>" data-mode="<?php echo esc_attr($is_cf7 ? 'cf7' : 'standard'); ?>" data-total-steps="<?php echo esc_attr($total_steps); ?>" data-current-step="<?php echo esc_attr(max(1, (int) ($current_step ?? 1))); ?>" data-clear-on-load="<?php echo empty($saved_answers) ? '1' : '0'; ?>">
+    <button type="button" class="mc-step-prev mc-back-btn" aria-label="<?php esc_attr_e('Previous Step', 'mc-leads-engine'); ?>" style="display: none;">
+        <?php echo mc_leads_get_svg_icon('arrow-left'); ?>
+    </button>
     <div class="mc-leads-engine-card">
         <header class="mc-leads-engine-header">
             <h2><?php echo esc_html($survey['title']); ?></h2>
@@ -25,8 +28,6 @@ $saved_answers = isset($saved_answers) && is_array($saved_answers) ? $saved_answ
                 <div class="mc-progress-track"><span class="mc-progress-fill" style="width: <?php echo esc_attr((1 / max(1, $total_steps)) * 100); ?>%"></span></div>
                 <div class="mc-progress-text">
                     <span class="mc-progress-step"><?php echo esc_html(sprintf(__('Step %d of %d', 'mc-leads-engine'), 1, $total_steps)); ?></span>
-                    <span class="mc-progress-price"><?php esc_html_e('Estimated price:', 'mc-leads-engine'); ?> <strong class="mc-live-price"><?php echo esc_html(number_format_i18n((float) ($pricing['total_price'] ?? 0), 2)); ?></strong></span>
-                    <span class="mc-progress-score"><?php esc_html_e('Lead score:', 'mc-leads-engine'); ?> <strong class="mc-live-score"><?php echo esc_html((int) ($pricing['lead_score'] ?? 0)); ?></strong></span>
                 </div>
             </div>
         </div>
