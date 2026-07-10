@@ -630,6 +630,19 @@ function mc_leads_engine_render_admin_app($forced_panel = null) {
                             <div class="sv-toolbar-right" style="display:flex; gap:10px; align-items:center;">
                                 <?php if ($selected_survey_id) : ?>
                                     <button class="btn accent" type="button" data-survey-preview-trigger><?php esc_html_e('Preview Survey', 'mc-leads-engine'); ?></button>
+                                    <form method="post" action="<?php echo esc_url(admin_url('admin.php')); ?>" id="delete-survey-form" style="margin:0;">
+                                        <?php wp_nonce_field('mc_leads_engine_admin_action', 'mc_leads_engine_nonce'); ?>
+                                        <input type="hidden" name="page" value="mc-leads-engine-surveys">
+                                        <input type="hidden" name="mc_panel" value="surveys">
+                                        <input type="hidden" name="mc_leads_engine_action" value="delete_survey">
+                                        <input type="hidden" name="survey_id" value="<?php echo esc_attr($selected_survey_id); ?>">
+                                        <button type="button" class="btn btn-danger-ghost" id="delete-survey-btn"
+                                            data-survey-title="<?php echo esc_attr($selected_survey['title'] ?? 'this survey'); ?>"
+                                            style="color:#c0433f;border-color:#f8d4d4;background:#fff8f8;gap:6px;">
+                                            <span class="dashicons dashicons-trash" style="font-size:14px;width:14px;height:14px;"></span>
+                                            <?php esc_html_e('Delete', 'mc-leads-engine'); ?>
+                                        </button>
+                                    </form>
                                 <?php endif; ?>
                                 <a class="btn primary" href="<?php echo esc_url(add_query_arg(array('page' => 'mc-leads-engine-surveys', 'mc_panel' => 'surveys', 'survey_id' => 0, 'create_new' => 1), admin_url('admin.php'))); ?>">
                                     ＋ <?php esc_html_e('Create New Survey', 'mc-leads-engine'); ?>
@@ -1046,7 +1059,8 @@ $select_label = ($q_type === 'checkbox') ? __('multi-select', 'mc-leads-engine')
                                                             <?php endif; ?>
                                                         </div>
                                                     </div>
-                                                <?php endif; ?>
+                                                </div><!-- /.options-section -->
+                                            <?php endif; ?>
 
                                                 <div class="editor-actions">
                                                     <a class="btn ghost" href="<?php echo esc_url(mc_leads_engine_admin_selected_url('surveys', $selected_survey_id, $selected_section_id, 0)); ?>"><?php esc_html_e('Cancel', 'mc-leads-engine'); ?></a>

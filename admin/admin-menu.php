@@ -49,8 +49,9 @@ function mc_leads_engine_register_admin_menu() {
         'mc_leads_engine_render_surveys_page'
     );
 
+    // Leads page is registered but hidden from the menu (accessible via View lead links)
     add_submenu_page(
-        'mc-leads-engine',
+        null,
         __('Leads', 'mc-leads-engine'),
         __('Leads', 'mc-leads-engine'),
         'manage_options',

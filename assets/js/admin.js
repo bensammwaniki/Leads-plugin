@@ -585,6 +585,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /* ── Delete Survey Confirmation ─────────────────────────── */
+  const deleteSurveyBtn = document.getElementById('delete-survey-btn');
+  if (deleteSurveyBtn) {
+    deleteSurveyBtn.addEventListener('click', () => {
+      const title = deleteSurveyBtn.dataset.surveyTitle || 'this survey';
+      const confirmed = window.confirm(
+        `⚠️ Delete "${title}"?\n\nThis will permanently remove the survey, all its sections, questions, and collected leads. This cannot be undone.`
+      );
+      if (confirmed) {
+        document.getElementById('delete-survey-form').submit();
+      }
+    });
+  }
+
   /* ── Survey Builder Tab Switching ─────────────────────────── */
   const svTabs = document.querySelectorAll('.sv-tab');
   const svPanes = document.querySelectorAll('.sv-tab-pane');
